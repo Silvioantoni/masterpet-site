@@ -1,1 +1,175 @@
 
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MasterPET • Produção</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#07100b;color:#fff;font-family:Arial,Helvetica,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px}.brand{font-size:31px;font-weight:900}.brand span{color:#58ff00}.sub{color:#9ca8a1;margin:4px 0 24px}
+.card{background:#101916;border:1px solid #293932;border-radius:18px;padding:20px;box-shadow:0 18px 45px rgba(0,0,0,.22);margin-bottom:18px}
+h1{margin:0 0 8px;font-size:29px}.muted{color:#9ca8a1}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:150px}.field.small{max-width:160px}label{display:block;color:#b8c2bd;font-size:13px;margin-bottom:6px}
+input{width:100%;padding:12px 13px;border-radius:10px;border:1px solid #354840;background:#07100d;color:#fff;font-size:15px}
+button{border:0;border-radius:10px;padding:12px 16px;background:#58ff00;color:#041006;font-weight:900;cursor:pointer}
+button.dark{background:#1c2622;color:#fff;border:1px solid #3b4b44}button:disabled{opacity:.45;cursor:not-allowed}
+.msg{padding:12px 14px;border-radius:10px;margin:0 0 15px;display:none}.ok{display:block;background:#123315;border:1px solid #4de24d;color:#baffba}.err{display:block;background:#35151a;border:1px solid #ff5265;color:#ffd1d6}
+.hidden{display:none!important}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#0b1210;border:1px solid #26372f;border-radius:13px;padding:14px}.stat b{font-size:26px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px 10px;border-bottom:1px solid #26352f;font-size:13px}th{color:#9faaA4}.tag{font-weight:900}.status{font-size:12px;color:#58ff00}.code{font-family:monospace;letter-spacing:.5px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}.modal.show{display:flex}.modalbox{background:#101916;border:1px solid #36463e;border-radius:18px;padding:20px;max-width:420px;width:100%}.qrbox{background:#fff;padding:12px;display:inline-block;border-radius:8px;margin:10px 0}.close{float:right;background:#1c2622;color:#fff}
+@media(max-width:700px){.stats{grid-template-columns:1fr}.field,.field.small{max-width:none;width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">MASTER<span>PET</span></div>
+  <div class="sub">Painel interno • Produção de tags</div>
+
+  <section id="loginCard" class="card">
+    <h1>Acesso à produção</h1>
+    <p class="muted">Área interna para gerar lotes e preparar as tags.</p>
+    <div id="loginMsg" class="msg"></div>
+    <div class="row">
+      <div class="field"><label>Senha administrativa</label><input id="adminPass" type="password" autocomplete="current-password"></div>
+      <button id="loginBtn">ENTRAR</button>
+    </div>
+  </section>
+
+  <section id="app" class="hidden">
+    <div class="card">
+      <h1>🏭 Produção de tags</h1>
+      <p class="muted">Gere IDs, códigos de ativação e URLs antes de gravar as peças.</p>
+      <div id="appMsg" class="msg"></div>
+      <div class="row">
+        <div class="field small"><label>Prefixo</label><input id="prefix" value="MP"></div>
+        <div class="field small"><label>Quantidade</label><input id="qty" type="number" min="1" max="500" value="10"></div>
+        <button id="lotBtn">GERAR LOTE</button>
+        <button class="dark" id="refreshBtn">ATUALIZAR</button>
+        <button class="dark" id="zipBtn">BAIXAR QR DO LOTE</button>
+        <button class="dark" id="logoutBtn">SAIR</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="muted">Total de tags</div><b id="total">0</b></div>
+      <div class="stat"><div class="muted">Disponíveis</div><b id="available">0</b></div>
+      <div class="stat"><div class="muted">Ativas</div><b id="active">0</b></div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>TAG</th><th>STATUS</th><th>CÓDIGO</th><th>URL</th><th>QR</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modalbox">
+    <button class="close" onclick="closeModal()">FECHAR</button>
+    <h2 id="modalTitle">QR</h2>
+    <div class="qrbox"><div id="qrcode"></div></div>
+    <p class="muted">URL</p><div id="modalUrl" class="code"></div>
+    <p class="muted">ID</p><div id="modalId" class="code"></div>
+  </div>
+</div>
+
+<iframe name="mpAdminFrame" id="mpAdminFrame" style="display:none"></iframe>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
+let adminToken=localStorage.getItem('masterpet_admin_token')||'';
+let tags=[];
+
+function $(id){return document.getElementById(id)}
+function show(el,type,text){el.className='msg '+type;el.textContent=text;el.style.display='block'}
+function hide(el){el.style.display='none'}
+function postToFrame(fields){
+  const f=document.createElement('form');f.method='POST';f.action=API;f.target='mpAdminFrame';
+  fields.forEach(([n,v])=>{const i=document.createElement('input');i.type='hidden';i.name=n;i.value=v;f.appendChild(i)});
+  document.body.appendChild(f);f.submit();setTimeout(()=>f.remove(),3000);
+}
+window.addEventListener('message',e=>{
+  if(e.origin!=='https://script.google.com'&&e.origin!=='https://script.googleusercontent.com')return;
+  const d=e.data||{};
+  if(d.token){adminToken=d.token;localStorage.setItem('masterpet_admin_token',adminToken);showApp();loadTags();return}
+  if(d.created){show($('appMsg'),'ok',d.total+' tags criadas com sucesso.');loadTags();return}
+  if(d.error){show($('loginMsg').style.display==='block'?$('loginMsg'):$('appMsg'),'err',friendly(d.error))}
+});
+function friendly(e){
+ return ({ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada no Apps Script.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
+}
+function showApp(){$('loginCard').classList.add('hidden');$('app').classList.remove('hidden')}
+function logout(){localStorage.removeItem('masterpet_admin_token');adminToken='';location.reload()}
+$('loginBtn').onclick=()=>postToFrame([['action','adminlogin'],['password',$('adminPass').value]]);
+$('logoutBtn').onclick=logout;
+$('refreshBtn').onclick=loadTags;
+$('lotBtn').onclick=()=>{
+ const q=Math.max(1,Math.min(500,Number($('qty').value)||0));
+ postToFrame([['action','admincreatelot'],['adminToken',adminToken],['quantidade',q],['prefix',$('prefix').value.trim()||'MP']]);
+ show($('appMsg'),'ok','Gerando lote...');
+};
+function jsonp(url){
+ return new Promise((resolve,reject)=>{
+   const cb='mpjson_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+   window[cb]=d=>{try{resolve(d)}finally{delete window[cb];s.remove()}};
+   const s=document.createElement('script');s.src=url+'&callback='+cb;document.body.appendChild(s);
+   setTimeout(()=>{delete window[cb];s.remove();reject(new Error('timeout'))},8000);
+ });
+}
+async function loadTags(){
+ try{
+   const d=await jsonp(API+'?action=adminlisttags&adminToken='+encodeURIComponent(adminToken));
+   if(!d.ok){logout();return}
+   tags=d.tags||[];
+   $('total').textContent=tags.length;
+   $('available').textContent=tags.filter(t=>String(t.status).toUpperCase()==='DISPONIVEL').length;
+   $('active').textContent=tags.filter(t=>String(t.status).toUpperCase()==='ATIVA').length;
+   render();
+ }catch(e){show($('appMsg'),'err','Não foi possível carregar as tags.')}
+}
+function render(){
+ const tb=$('tbody');tb.innerHTML='';
+ tags.slice().reverse().forEach(t=>{
+   const tr=document.createElement('tr');
+   const status=String(t.status||'');
+   tr.innerHTML='<td class="tag"></td><td class="status"></td><td class="code"></td><td></td><td></td>';
+   tr.children[0].textContent=t.idTag;
+   tr.children[1].textContent=status;
+   tr.children[2].textContent=t.codigo||'—';
+   const a=document.createElement('a');a.href=t.qrUrl;a.target='_blank';a.textContent=t.qrUrl.replace('https://masterpet.tec.br/p/','');
+   tr.children[3].appendChild(a);
+   const b=document.createElement('button');b.className='dark';b.textContent='VER QR';b.onclick=()=>openQr(t);tr.children[4].appendChild(b);
+   tb.appendChild(tr);
+ });
+}
+function openQr(t){
+ $('qrcode').innerHTML='';new QRCode($('qrcode'),{text:t.qrUrl,width:240,height:240,correctLevel:QRCode.CorrectLevel.H});
+ $('modalTitle').textContent=t.idTag;$('modalUrl').textContent=t.qrUrl;$('modalId').textContent=t.idTag;$('modal').classList.add('show');
+}
+function closeModal(){$('modal').classList.remove('show')}
+$('zipBtn').onclick=async()=>{
+ if(!tags.length){show($('appMsg'),'err','Nenhuma tag disponível.');return}
+ show($('appMsg'),'ok','Preparando QR Codes...');
+ const zip=new JSZip(), files=[];
+ for(const t of tags){
+   if(String(t.status).toUpperCase()!=='DISPONIVEL')continue;
+   const holder=document.createElement('div');holder.style.position='fixed';holder.style.left='-10000px';document.body.appendChild(holder);
+   new QRCode(holder,{text:t.qrUrl,width:900,height:900,correctLevel:QRCode.CorrectLevel.H});
+   await new Promise(r=>setTimeout(r,20));
+   const canvas=holder.querySelector('canvas');
+   if(canvas) zip.file(t.idTag+'_QR.png',await new Promise(r=>canvas.toBlob(r,'image/png')));
+   document.body.removeChild(holder);
+ }
+ const blob=await zip.generateAsync({type:'blob'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MasterPET_QR_DISPONIVEIS.zip';a.click();
+ show($('appMsg'),'ok','ZIP de QR Codes gerado.');
+};
+if(adminToken){showApp();loadTags()}
+</script>
+</body>
+</html>
