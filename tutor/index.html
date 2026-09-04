@@ -338,7 +338,6 @@ async function savePet(){
   const original=btn.textContent;
   btn.disabled=true; btn.textContent='Salvando...';
   const payload={
-    action:'updatepet',
     token:MP_TOKEN,
     petId:pet.id,
     NOME:document.getElementById('petNome').value.trim(),
@@ -355,39 +354,19 @@ async function savePet(){
     return;
   }
   try{
-    // A foto agora vai por POST. Isso evita o limite de URL do GET/JSONP
-    // que fazia o salvamento falhar quando a foto era convertida em base64.
-    await postUpdatePet(payload);
-    // Damos um pequeno tempo para o Apps Script gravar na planilha.
-    await new Promise(r=>setTimeout(r,1600));
+    const r=await jsonp('updatepet',payload);
+    if(!r||!r.ok){
+      if(r&&r.error==='AUTH_INVALID') { logout(); return; }
+      throw new Error(r&&r.error||'UPDATE_FAILED');
+    }
     await loadTutorData();
     setPetFieldsEditable(false);
     toast('✅ Dados da '+cleanText(currentPet()?.nome,'pet')+' atualizados com sucesso!');
   }catch(e){
-    console.error(e);
     toast('Não foi possível salvar. Tente novamente.');
   }finally{
     btn.disabled=false; btn.textContent=original;
   }
-}
-
-function postUpdatePet(payload){
-  return new Promise((resolve,reject)=>{
-    const form=document.getElementById('mpUpdateForm');
-    const frame=document.getElementById('mpUpdateFrame');
-    if(!form||!frame) return reject(new Error('POST_FORM_NOT_FOUND'));
-    form.innerHTML='';
-    Object.keys(payload).forEach(key=>{
-      const input=document.createElement('input');
-      input.type='hidden'; input.name=key; input.value=payload[key]??'';
-      form.appendChild(input);
-    });
-    let done=false;
-    const finish=(ok)=>{if(done)return;done=true;frame.onload=null;ok?resolve():reject(new Error('POST_FAILED'));};
-    frame.onload=()=>finish(true);
-    try{ form.submit(); }catch(e){ finish(false); }
-    setTimeout(()=>finish(true),5000);
-  });
 }
 
 function renderPetPhotoPreview(src,nome='Pet'){
@@ -484,12 +463,5 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
       renderTutorUI();
     }catch(e){logout()}
   }
-})();
-<iframe id="mpUpdateFrame" name="mpUpdateFrame" style="display:none"></iframe>
-<form id="mpUpdateForm" method="POST" target="mpUpdateFrame" style="display:none"></form>
-<script>
-(function(){
-  const form=document.getElementById('mpUpdateForm');
-  if(form) form.action=API;
 })();
 </script></body></html>
