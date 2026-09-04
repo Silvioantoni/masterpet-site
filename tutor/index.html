@@ -46,8 +46,8 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
 <div id="app" class="app hidden">
 <aside class="sidebar"><div class="brand">MASTER<span>PET</span></div><div class="sub">TECNOLOGIA PARA O SEU PET</div><nav class="nav">
 <button class="active" onclick="page('inicio',this)">🏠 Início</button><button onclick="page('pet',this)">🐾 Meu Pet</button><button onclick="page('perdido',this)">🚨 Pet Perdido</button><button onclick="page('acessos',this)">📱 Acessos</button><button onclick="page('tag',this)">🏷️ Minha Tag</button><button id="themeBtn" onclick="toggleTheme()">☀️ Modo claro</button>
-</nav><div class="bottom"><div class="userbox">Logado como<br><b style="color:#fff">tutor@masterpet.tec.br</b></div><button class="nav" style="color:#89938f" onclick="logout()">↪ Sair</button></div></aside>
-<main class="main"><header class="top"><div class="hello"><h1 id="heading">Olá, Pablo 👋</h1><p>Gerencie a segurança da Flora.</p></div><div class="avatar">PA</div></header>
+</nav><div class="bottom"><div class="userbox">Logado como<br><b style="color:#fff" id="tutorEmail">—</b></div><button class="nav" style="color:#89938f" onclick="logout()">↪ Sair</button></div></aside>
+<main class="main"><header class="top"><div class="hello"><h1 id="heading">Olá, <span id="tutorName">Tutor</span> 👋</h1><p>Gerencie a segurança do <span id="tutorPetName">seu pet</span>.</p></div><div class="avatar" id="tutorAvatar">T</div></header>
 <section id="inicio" class="page active">
 <div class="card" style="margin-bottom:15px;border-color:#3a5200;background:linear-gradient(135deg,#151b0b,#111616)">
   <div class="row"><div><b style="color:var(--g)">● Área do Tutor conectada ao sistema</b><div class="muted" style="margin-top:6px">Dados carregados diretamente do MasterPET.</div></div><span class="badge">V9 REAL</span></div>
@@ -67,6 +67,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
 <section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div></div></section>
 </main></div><div id="toast" class="toast hidden"></div>
 <script>
+loadTheme();
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
 let MP_TOKEN='';
 
@@ -85,6 +86,62 @@ function jsonp(action, params={}){
     script.src=url;
     document.body.appendChild(script);
   });
+}
+
+
+function getTutor(){
+  try { return JSON.parse(localStorage.getItem('masterpet_tutor') || '{}'); }
+  catch(e){ return {}; }
+}
+function initials(name){
+  const parts=String(name||'Tutor').trim().split(/\s+/).filter(Boolean);
+  if(!parts.length) return 'T';
+  return (parts.length===1 ? parts[0][0] : parts[0][0]+parts[parts.length-1][0]).toUpperCase();
+}
+function renderTutorUI(){
+  const tutor=getTutor();
+  const pet=currentPet();
+  const name=cleanText(tutor.nome,'Tutor');
+  const email=cleanText(tutor.email,'—');
+  document.getElementById('tutorName').textContent=name;
+  document.getElementById('tutorEmail').textContent=email;
+  document.getElementById('tutorAvatar').textContent=initials(name);
+  document.getElementById('tutorPetName').textContent=pet ? cleanText(pet.nome,'seu pet') : 'seu pet';
+}
+function page(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById(id);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderTutorUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  const light=document.body.classList.contains('light');
+  localStorage.setItem('masterpet_theme',light?'light':'dark');
+  const b=document.getElementById('themeBtn');
+  if(b) b.textContent=light?'🌙 Modo escuro':'☀️ Modo claro';
+}
+function loadTheme(){
+  const light=localStorage.getItem('masterpet_theme')==='light';
+  document.body.classList.toggle('light',light);
+  const b=document.getElementById('themeBtn');
+  if(b) b.textContent=light?'🌙 Modo escuro':'☀️ Modo claro';
+}
+function toggleLost(){
+  const on=document.getElementById('switch').classList.contains('on');
+  renderLost(!on);
+  toast(!on?'Modo perdido ativado (visual)':'Modo perdido desativado (visual)');
+}
+function logout(){
+  MP_TOKEN='';
+  localStorage.removeItem('masterpet_token');
+  localStorage.removeItem('masterpet_tutor');
+  window.MP_DATA=null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
 }
 
 async function testAPI(){
@@ -223,7 +280,6 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
     try{
       document.getElementById('login').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden');
-      renderTutorUI();
       await loadTutorData();
       renderTutorUI();
     }catch(e){logout()}
