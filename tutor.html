@@ -54,18 +54,18 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
 <div id="app" class="app hidden">
 <aside class="sidebar"><div class="brand">MASTER<span>PET</span></div><div class="sub">TECNOLOGIA PARA O SEU PET</div><nav class="nav">
 <button class="active" onclick="page('inicio',this)">🏠 Início</button><button onclick="page('pet',this)">🐾 Meu Pet</button><button onclick="page('perdido',this)">🚨 Pet Perdido</button><button onclick="page('acessos',this)">📱 Acessos</button><button onclick="page('tag',this)">🏷️ Minha Tag</button><button id="themeBtn" onclick="toggleTheme()">☀️ Modo claro</button>
-</nav><div class="bottom"><div class="userbox">Logado como<br><b style="color:#fff">tutor@masterpet.tec.br</b></div><button class="nav" style="color:#89938f" onclick="logout()">↪ Sair</button></div></aside>
-<main class="main"><header class="top"><div class="hello"><h1 id="heading">Olá, Pablo 👋</h1><p>Gerencie a segurança da Flora.</p></div><div class="avatar">PA</div></header>
+</nav><div class="bottom"><div class="userbox">Logado como<br><b id="loggedEmail" style="color:#fff">—</b></div><button class="nav" style="color:#89938f" onclick="logout()">↪ Sair</button></div></aside>
+<main class="main"><header class="top"><div class="hello"><h1 id="heading">Olá 👋</h1><p id="helloSub">Gerencie a segurança do seu pet.</p></div><div class="avatar" id="avatar">MP</div></header>
 <section id="inicio" class="page active">
 <div class="card" style="margin-bottom:15px;border-color:#3a5200;background:linear-gradient(135deg,#151b0b,#111616)">
-  <div class="row"><div><b style="color:var(--g)">● Área do Tutor preparada para integração</b><div class="muted" style="margin-top:6px">Autenticação conectada ao sistema MasterPET.</div></div><span class="badge">V7</span></div>
-</div><div class="grid"><div class="card stat"><div class="label">Pet</div><div class="value">🐶 Flora</div><div class="ok">● Ativa</div></div><div class="card stat"><div class="label">Acessos ao QR</div><div class="value">12</div><div class="ok">+3 este mês</div></div><div class="card stat"><div class="label">Modo perdido</div><div class="value" id="homeLost">Desativado</div><div class="ok">Tudo certo</div></div><div class="card stat"><div class="label">Tag</div><div class="value">MP-0001</div><div class="ok">● Ativa</div></div></div>
-<h2 class="title" style="margin-top:30px">Minha MasterPET</h2><div class="card hero"><div class="photo">🐕</div><div style="flex:1"><div class="petname" data-pet-name>Flora</div><div class="muted">Yorkshire Terrier • Fêmea • MP-0001</div><span class="badge">● TAG ATIVA</span></div><button class="btn" onclick="page('pet')">Editar pet</button></div>
+  <div class="row"><div><b style="color:var(--g)">● Área do Tutor preparada para integração</b><div class="muted" style="margin-top:6px">Autenticação conectada ao sistema MasterPET.</div></div><span class="badge">REAL</span></div>
+</div><div class="grid"><div class="card stat"><div class="label">Pet</div><div class="value" id="statPet">—</div><div class="ok" id="statPetStatus">—</div></div><div class="card stat"><div class="label">Acessos ao QR</div><div class="value" id="statAccess">0</div><div class="ok" id="statAccessMonth">—</div></div><div class="card stat"><div class="label">Modo perdido</div><div class="value" id="homeLost">—</div><div class="ok" id="homeLostHint">Status do pet</div></div><div class="card stat"><div class="label">Tag</div><div class="value" id="statTag">—</div><div class="ok" id="statTagStatus">—</div></div></div>
+<h2 class="title" style="margin-top:30px">Minha MasterPET</h2><div class="card hero"><div class="photo">🐕</div><div style="flex:1"><div class="petname" data-pet-name>—</div><div class="muted" id="petSummary">—</div><span class="badge" id="petTagBadge">● TAG —</span></div><button class="btn" onclick="page('pet')">Editar pet</button></div>
 <h2 class="title" style="margin-top:30px">Ações rápidas</h2><div class="actions"><button class="action" onclick="page('pet')"><strong>🐾 Editar informações</strong><span>Atualize os dados e contatos da Flora.</span></button><button class="action" onclick="page('perdido')"><strong>🚨 Ativar modo perdido</strong><span>Deixe o perfil preparado para um possível desaparecimento.</span></button><button class="action" onclick="page('acessos')"><strong>📱 Ver acessos ao QR</strong><span>Confira quando a tag foi escaneada.</span></button><button class="action" onclick="page('tag')"><strong>🏷️ Minha Tag</strong><span>Consulte o ID e abra o perfil público.</span></button></div></section>
-<section id="pet" class="page"><div class="card"><h2 class="title">🐾 Meu Pet</h2><p class="muted">Dados da Flora.</p><div class="form"><div><label>Nome</label><input value="Flora"></div><div><label>Espécie</label><select><option>Cachorro</option><option>Gato</option></select></div><div><label>Raça</label><input value="Yorkshire Terrier"></div><div><label>Sexo</label><select><option>Fêmea</option><option>Macho</option></select></div><div><label>Data de nascimento</label><input value="15/08/2024"></div><div><label>Foto</label><input type="file" accept="image/*"></div><div class="full"><label>Informações importantes</label><textarea>Pet dócil. Favor entrar em contato com a família da Flora caso seja encontrada.</textarea></div></div><h3>📞 Contatos</h3><div class="form"><div><label>WhatsApp principal</label><input value="(45) 99190-0045"></div><div><label>WhatsApp secundário</label><input value="(45) 99190-0045"></div></div><button class="btn" style="margin-top:20px" onclick="toast('✓ Alterações salvas na simulação.')">Salvar alterações</button></div></section>
+<section id="pet" class="page"><div class="card"><h2 class="title">🐾 Meu Pet</h2><p class="muted" id="petPageSub">Dados do seu pet.</p><div class="form"><div><label>Nome</label><input id="petNome"></div><div><label>Espécie</label><select id="petEspecie"><option value="Cachorro">Cachorro</option><option value="Gato">Gato</option></select></div><div><label>Raça</label><input id="petRaca"></div><div><label>Sexo</label><select id="petSexo"><option value="Fêmea">Fêmea</option><option value="Macho">Macho</option></select></div><div><label>Data de nascimento</label><input id="petNascimento"></div><div><label>Foto</label><input type="file" accept="image/*"></div><div class="full"><label>Informações importantes</label><textarea id="petObs"></textarea></div></div><h3>📞 Contatos</h3><div class="form"><div><label>WhatsApp principal</label><input id="contactPrimary"></div><div><label>WhatsApp secundário</label><input id="contactSecondary"></div></div><button class="btn" style="margin-top:20px" onclick="toast('✓ Alterações salvas na simulação.')">Salvar alterações</button></div></section>
 <section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">Ao ativar, o perfil público da Flora poderá ficar em destaque para facilitar o contato.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">desativado</b>.</p></div><div id="switch" class="switch" onclick="toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px">Por favor, entre em contato com a família da Flora. Obrigado por ajudar! ❤️</textarea><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()">Ativar modo perdido</button></div></section>
-<section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted">Histórico da tag MP-0001.</p><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody><tr><td>04/09/2026</td><td>09:42</td><td>QR escaneado</td><td>Não informada</td></tr><tr><td>03/09/2026</td><td>18:21</td><td>QR escaneado</td><td>Não informada</td></tr><tr><td>01/09/2026</td><td>14:08</td><td>QR escaneado</td><td>Não informada</td></tr><tr><td>29/08/2026</td><td>11:35</td><td>QR escaneado</td><td>Não informada</td></tr></tbody></table></div></div></section>
-<section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">MasterPET vinculada à Flora.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" data-pet-tag>MP-0001</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px">Flora</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px">Ativa</div></div><div class="card"><div class="muted">Ativação</div><div class="petname" style="font-size:22px">04/09/2026</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted">https://masterpet.tec.br/p/MP-0001</p><button class="btn" onclick="window.open('https://masterpet.tec.br/p/MP-0001','_blank')">Abrir perfil</button></div></div></section>
+<section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted" id="accessSub">Histórico da tag.</p><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody id="accessBody"><tr><td colspan="4">Carregando acessos...</td></tr></tbody></table></div></div></section>
+<section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted" id="tagSub">MasterPET vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" data-pet-tag>MP-0001</div></div><div class="card"><div class="muted">Pet</div><div class="petname" id="tagPetValue" style="font-size:22px">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" id="tagStatusValue" style="font-size:22px">—</div></div><div class="card"><div class="muted">Ativação</div><div class="petname" id="tagActivationValue" style="font-size:22px">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="publicProfileUrl">—</p><button class="btn" id="openProfileBtn">Abrir perfil</button></div></div></section>
 </main></div><div id="toast" class="toast hidden"></div>
 <script>
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
@@ -151,6 +151,73 @@ async function loadTutorData(){
     document.querySelectorAll('[data-pet-tag]').forEach(x=>x.textContent=pet.tag||'—');
   }
   window.MP_DATA={pets:pets.pets||[],accesses:accesses&&accesses.ok?accesses.accesses||[]:[]};
+  hydrateTutorUI();
+}
+
+function fmtDate(v){
+  if(!v) return '—';
+  const s=String(v);
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+    const d=s.slice(0,10).split('-'); return d[2]+'/'+d[1]+'/'+d[0];
+  }
+  return s;
+}
+function normalizePhone(v){
+  let n=String(v||'').replace(/\D/g,'');
+  if(!n) return '';
+  if(n.length===10||n.length===11) n='55'+n;
+  return n;
+}
+function hydrateTutorUI(){
+  const tutor=JSON.parse(localStorage.getItem('masterpet_tutor')||'{}');
+  const pets=(window.MP_DATA&&window.MP_DATA.pets)||[];
+  const accesses=(window.MP_DATA&&window.MP_DATA.accesses)||[];
+  const pet=pets[0];
+  if(!pet) return;
+  const nome=pet.nome||'Pet', tag=pet.tag||'—';
+  const initials=(tutor.nome||'MP').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  document.getElementById('loggedEmail').textContent=tutor.email||'—';
+  document.getElementById('heading').textContent='Olá, '+(tutor.nome||'Tutor')+' 👋';
+  document.getElementById('helloSub').textContent='Gerencie a segurança da '+nome+'.';
+  document.getElementById('avatar').textContent=initials||'MP';
+  document.getElementById('statPet').textContent='🐶 '+nome;
+  document.getElementById('statPetStatus').textContent='● '+(pet.status||'Ativo');
+  document.getElementById('statAccess').textContent=String(accesses.length);
+  const month=new Date().getMonth()+1, year=new Date().getFullYear();
+  const monthCount=accesses.filter(a=>{const d=String(a.dataHora||'').slice(0,10); return d===year+'-'+String(month).padStart(2,'0') || (d && d.slice(0,7)===year+'-'+String(month).padStart(2,'0'));}).length;
+  document.getElementById('statAccessMonth').textContent='+'+monthCount+' este mês';
+  document.getElementById('statTag').textContent=tag;
+  document.getElementById('statTagStatus').textContent='● '+(pet.tagStatus||'Ativa');
+  document.querySelectorAll('[data-pet-name]').forEach(x=>x.textContent=nome);
+  document.getElementById('petSummary').textContent=[pet.raca||pet.especie||'',pet.sexo||'',tag].filter(Boolean).join(' • ');
+  document.getElementById('petTagBadge').textContent='● TAG '+(pet.tagStatus||'ATIVA');
+  document.getElementById('petPageSub').textContent='Dados de '+nome+'.';
+  document.getElementById('petNome').value=pet.nome||'';
+  document.getElementById('petEspecie').value=pet.especie||'Cachorro';
+  document.getElementById('petRaca').value=pet.raca||'';
+  document.getElementById('petSexo').value=pet.sexo||'Fêmea';
+  document.getElementById('petNascimento').value=fmtDate(pet.dataNascimento);
+  document.getElementById('petObs').value=pet.observacoes||'';
+  const cs=pet.contatos||[];
+  const vals=cs.map(c=>c.valor).filter(Boolean);
+  document.getElementById('contactPrimary').value=vals[0]||'';
+  document.getElementById('contactSecondary').value=vals[1]||'';
+  document.getElementById('accessSub').textContent='Histórico da tag '+tag+'.';
+  document.getElementById('tagSub').textContent='MasterPET vinculada à '+nome+'.';
+  document.getElementById('tagIdValue').textContent=tag;
+  document.getElementById('tagPetValue').textContent=nome;
+  document.getElementById('tagStatusValue').textContent=pet.tagStatus||'Ativa';
+  document.getElementById('tagActivationValue').textContent='—';
+  const url='https://masterpet.tec.br/p/'+encodeURIComponent(tag);
+  document.getElementById('publicProfileUrl').textContent=url;
+  document.getElementById('openProfileBtn').onclick=()=>window.open(url,'_blank');
+  const body=document.getElementById('accessBody');
+  if(!accesses.length){body.innerHTML='<tr><td colspan="4">Nenhum acesso registrado.</td></tr>';}
+  else body.innerHTML=accesses.slice(0,100).map(a=>{
+    const raw=String(a.dataHora||''); const date=fmtDate(raw); const time=raw.length>=16?raw.slice(11,16):'—';
+    const loc=(a.latitude&&a.longitude)?(a.latitude+', '+a.longitude):'Não informada';
+    return '<tr><td>'+date+'</td><td>'+time+'</td><td>'+String(a.acao||'QR escaneado')+'</td><td>'+loc+'</td></tr>';
+  }).join('');
 }
 
 function logout(){
