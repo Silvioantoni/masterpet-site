@@ -61,7 +61,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
 <h2 class="title" style="margin-top:30px">Minha MasterPET</h2>
 <div class="card hero"><div class="photo" id="homePhoto">🐕</div><div style="flex:1"><div class="petname" id="homePetName2">—</div><div class="muted" id="homePetMeta">—</div><span class="badge" id="homeTagBadge">● TAG —</span></div><button class="btn" onclick="page('pet')">Editar pet</button></div>
 <h2 class="title" style="margin-top:30px">Ações rápidas</h2><div class="actions"><button class="action" onclick="page('pet')"><strong>🐾 Editar informações</strong><span>Consulte os dados e contatos do seu pet.</span></button><button class="action" onclick="page('perdido')"><strong>🚨 Ativar modo perdido</strong><span>Gerencie o alerta de pet perdido.</span></button><button class="action" onclick="page('acessos')"><strong>📱 Ver acessos ao QR</strong><span>Confira quando a tag foi escaneada.</span></button><button class="action" onclick="page('tag')"><strong>🏷️ Minha Tag</strong><span>Consulte o ID e abra o perfil público.</span></button></div></section>
-<section id="pet" class="page"><div class="card"><div class="row"><div><h2 class="title">🐾 Meu Pet</h2><p class="muted">Edite os dados cadastrados no sistema MasterPET.</p></div><button id="editPetBtn" class="btn" onclick="togglePetEdit()">✏️ Editar</button></div><div id="petEmpty" class="warning hidden">Nenhum pet está vinculado a este tutor.</div><div id="petForm" class="form"><div><label>Nome</label><input id="petNome" readonly></div><div><label>Espécie</label><input id="petEspecie" readonly></div><div><label>Raça</label><input id="petRaca" readonly></div><div><label>Sexo</label><input id="petSexo" readonly></div><div><label>Data de nascimento</label><input id="petNascimento" type="date" readonly></div><div><label>ID do pet</label><input id="petId" readonly></div><div class="full"><label>Foto (URL)</label><input id="petFoto" readonly placeholder="https://..."></div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><button class="btn" id="savePetBtn" onclick="savePet()">💾 Salvar alterações</button></div><h3>📞 Contatos cadastrados</h3><div id="petContacts" class="actions"></div></div></section>
+<section id="pet" class="page"><div class="card"><div class="row"><div><h2 class="title">🐾 Meu Pet</h2><p class="muted">Edite os dados cadastrados no sistema MasterPET.</p></div><button id="editPetBtn" class="btn" onclick="togglePetEdit()">✏️ Editar</button></div><div id="petEmpty" class="warning hidden">Nenhum pet está vinculado a este tutor.</div><div id="petForm" class="form"><div><label>Nome</label><input id="petNome" readonly></div><div><label>Espécie</label><input id="petEspecie" readonly></div><div><label>Raça</label><input id="petRaca" readonly></div><div><label>Sexo</label><input id="petSexo" readonly></div><div><label>Data de nascimento</label><input id="petNascimento" type="date" readonly></div><div><label>ID do pet</label><input id="petId" readonly></div><div class="full"><label>Foto (URL)</label><input id="petFoto" readonly placeholder="https://..."></div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos cadastrados</h3><div id="petContacts" class="actions"></div></div></section>
 <section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">desativado</b>.</p></div><div id="switch" class="switch" onclick="toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" readonly></textarea><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()">Ativar modo perdido</button><div class="muted" style="margin-top:12px">Por enquanto, o botão é apenas visual. A gravação real no sistema será a próxima integração.</div></div></section>
 <section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted" id="accessSubtitle">Histórico real das tags vinculadas ao tutor.</p><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody id="accessRows"><tr><td colspan="4" class="muted">Carregando...</td></tr></tbody></table></div></div></section>
 <section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div></div></section>
@@ -70,6 +70,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
 loadTheme();
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
 let MP_TOKEN='';
+let MP_TUTOR={};
 
 function jsonp(action, params={}){
   return new Promise((resolve,reject)=>{
@@ -99,7 +100,7 @@ function initials(name){
   return (parts.length===1 ? parts[0][0] : parts[0][0]+parts[parts.length-1][0]).toUpperCase();
 }
 function renderTutorUI(){
-  const tutor=getTutor();
+  const tutor=(MP_TUTOR && MP_TUTOR.nome) ? MP_TUTOR : getTutor();
   const pet=currentPet();
   const name=cleanText(tutor.nome,'Tutor');
   const email=cleanText(tutor.email,'—');
@@ -182,7 +183,8 @@ async function login(){
     }
     MP_TOKEN=r.token;
     localStorage.setItem('masterpet_token',MP_TOKEN);
-    localStorage.setItem('masterpet_tutor',JSON.stringify(r.tutor||{}));
+    MP_TUTOR=r.tutor||{};
+    localStorage.setItem('masterpet_tutor',JSON.stringify(MP_TUTOR));
     document.getElementById('login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     renderTutorUI();
@@ -205,7 +207,7 @@ async function loadTutorData(){
   if(!pets || !pets.ok){ logout(); throw new Error('AUTH_INVALID'); }
   if(accesses && !accesses.ok && accesses.error==='AUTH_INVALID'){ logout(); throw new Error('AUTH_INVALID'); }
   window.MP_DATA={pets:pets.pets||[],accesses:accesses&&accesses.ok?accesses.accesses||[]:[]};
-  if(pets.tutor){ localStorage.setItem('masterpet_tutor',JSON.stringify(pets.tutor)); }
+  if(pets.tutor){ MP_TUTOR=pets.tutor; localStorage.setItem('masterpet_tutor',JSON.stringify(MP_TUTOR)); }
   renderAllData();
   setPetFieldsEditable(false);
 }
@@ -252,7 +254,16 @@ function renderAllData(){
   document.getElementById('petFoto').value=cleanText(pet.foto,'');
   document.getElementById('petObs').value=cleanText(pet.observacoes,'');
   const contacts=document.getElementById('petContacts'); contacts.innerHTML='';
-  (pet.contatos||[]).forEach(c=>{const b=document.createElement('div');b.className='action';b.innerHTML='<strong>📞 '+cleanText(c.tipo,'Contato')+'</strong><span>'+cleanText(c.valor)+'</span>';contacts.appendChild(b);});
+  const seen=new Set();
+  (pet.contatos||[]).forEach(c=>{
+    const tipo=cleanText(c.tipo,'Contato'), valor=cleanText(c.valor,'');
+    const key=(tipo+'|'+valor).toLowerCase().replace(/\s+/g,'');
+    if(!valor || seen.has(key)) return;
+    seen.add(key);
+    const b=document.createElement('div'); b.className='action';
+    b.innerHTML='<strong>📞 '+tipo+'</strong><span>'+valor+'</span>';
+    contacts.appendChild(b);
+  });
   if(!contacts.children.length) contacts.innerHTML='<div class="muted">Nenhum contato cadastrado.</div>';
   document.getElementById('tagId').textContent=tag;
   document.getElementById('tagPet').textContent=nome;
@@ -281,12 +292,15 @@ function setPetFieldsEditable(editing){
   document.getElementById('petSaveActions').classList.toggle('hidden',!editing);
   document.getElementById('editPetBtn').textContent=editing?'✖ Cancelar':'✏️ Editar';
 }
+function cancelPetEdit(){
+  renderAllData();
+  setPetFieldsEditable(false);
+  toast('Alterações canceladas.');
+}
 function togglePetEdit(){
   const editing=!document.getElementById('petSaveActions').classList.contains('hidden');
   if(editing){
-    renderAllData();
-    setPetFieldsEditable(false);
-    toast('Alterações canceladas.');
+    cancelPetEdit();
   }else{
     setPetFieldsEditable(true);
     document.getElementById('petNome').focus();
@@ -347,6 +361,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
   const token=localStorage.getItem('masterpet_token');
   if(token){
     MP_TOKEN=token;
+    MP_TUTOR=getTutor();
     try{
       document.getElementById('login').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden');
