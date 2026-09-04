@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MasterPET</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f4f5;font-family:Arial,Helvetica,sans-serif;color:#111}
+.app{width:100%;max-width:470px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 25px #0001}
+.hero{background:linear-gradient(145deg,#090b0c,#171a1b);color:#fff;text-align:center;padding:28px 22px 30px}
+.logo{font-size:25px;font-weight:900;letter-spacing:-1px}.logo span{color:#39ff00}
+.slogan{font-size:10px;letter-spacing:2px;color:#bfc6c8;margin-top:5px}
+.petpic{width:120px;height:120px;border-radius:50%;margin:20px auto 12px;background:#f3f5f6;border:4px solid #39ff00;display:flex;align-items:center;justify-content:center;font-size:46px}
+.petname{font-size:29px;font-weight:800;margin:0}.breed{color:#bdc4c7;margin-top:6px;font-size:14px}
+.content{padding:18px}
+.status{border:1px solid #9bef8b;background:#edffe9;border-radius:14px;padding:15px;margin-bottom:12px}
+.status strong{display:block;font-size:16px}.dot{display:inline-block;width:13px;height:13px;border-radius:50%;background:#19bd35;margin-right:8px}
+.btn{display:flex;width:100%;min-height:52px;align-items:center;justify-content:center;border:0;border-radius:12px;margin:10px 0;font-size:16px;font-weight:700;text-decoration:none;cursor:pointer}
+.whats{background:#39ff00;color:#071000}.phone{background:#171a1b;color:#fff}.found{background:#fff;color:#111;border:1px solid #dfe4e6}
+.card{border:1px solid #e0e4e6;border-radius:14px;padding:15px;margin-top:12px}.card h2{font-size:17px;margin:0 0 12px}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #edf0f1;font-size:14px}.row:last-child{border-bottom:0}.label{color:#6e777b}.value{font-weight:700;text-align:right}
+.note{font-size:14px;line-height:1.5;color:#444}.footer{text-align:center;color:#92999c;font-size:11px;padding:25px}
+.loading{text-align:center;padding:50px 20px;color:#555}.error{padding:18px;border:1px solid #f0caca;background:#fff5f5;border-radius:14px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="hero">
+  <div class="logo">MASTER<span>PET</span></div>
+  <div class="slogan">A IDENTIDADE INTELIGENTE DO SEU PET</div>
+  <div class="petpic" id="petpic">🐾</div>
+  <h1 class="petname" id="petname">Carregando...</h1>
+  <div class="breed" id="breed">Perfil MasterPET</div>
+</header>
+
+<main class="content" id="content">
+  <div class="loading" id="loading">Buscando o perfil do pet...</div>
+</main>
+<div class="footer">MASTERPET<br>Uma solução da MasterTech</div>
+</div>
+
+<script>
+(function(){
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (path.toLowerCase() === '/tutor') {
+    window.location.replace('/tutor.html');
+    return;
+  }
+})();
+</script>
+<script>
+// MASTERPET: roteador das URLs /p/ID_TAG no GitHub Pages.
+const API = "https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec";
+
+// IMPORTANTE: se abrir sem ?tagId=..., usamos esta tag como padrão para o teste.
+// Depois, no QR de cada animal, o identificador será o da própria tag.
+const DEFAULT_TAG = "MP-0001";
+
+function getTagId(){
+  // Produção: /p/MP-0001
+  const path = window.location.pathname.replace(/\/+$/, "");
+  const m = path.match(/\/p\/([^/]+)/i);
+  if (m && m[1]) return decodeURIComponent(m[1]);
+
+  // Compatibilidade com os testes antigos: ?tagId=MP-0001
+  const p = new URLSearchParams(window.location.search);
+  const q = (p.get("tagId") || p.get("tag") || "").trim();
+  return q || DEFAULT_TAG;
+}
+
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+function normalizePhone(v){
+  let n = String(v||"").replace(/\D/g,"");
+
+  // WhatsApp Brasil: se vier apenas com DDD + número, adiciona +55.
+  if(n.length === 10 || n.length === 11){
+    n = "55" + n;
+  }
+
+  return n;
+}
+
+function render(data, tagId){
+  if(!data || !data.pet){
+    throw new Error("Tag não encontrada: "+tagId);
+  }
+  const p=data.pet;
+  const contacts=Array.isArray(data.contatos)?data.contatos:[];
+  const wa=contacts.find(x=>String(x.tipo).toUpperCase()==="WHATSAPP" && String(x.valor||"").trim());
+  const phone=contacts.find(x=>String(x.tipo).toUpperCase()==="TELEFONE" && String(x.valor||"").trim()) || wa;
+  const wnum=normalizePhone(wa?.valor);
+  const pnum=normalizePhone(phone?.valor);
+  const name=p.nome || "Pet";
+  const status=String(p.status||"ATIVO").toUpperCase();
+
+  document.title = "MasterPET — "+name;
+  document.getElementById("petname").textContent=name;
+  document.getElementById("breed").textContent=(p.raca||p.especie||"Pet")+" • Perfil MasterPET";
+  if(p.foto){
+    document.getElementById("petpic").innerHTML='<img src="'+esc(p.foto)+'" alt="'+esc(name)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  }
+
+  const content=document.getElementById("content");
+  let buttons="";
+  if(wnum) buttons += '<a class="btn whats" target="_blank" href="https://wa.me/'+wnum+'?text='+encodeURIComponent("Olá! Encontrei a "+name+". Estou entrando em contato pela MasterPET.")+'">💬 Falar com a família</a>';
+  if(pnum) buttons += '<a class="btn phone" href="tel:+'+pnum+'">📞 Ligar para a família</a>';
+  buttons += '<button class="btn found" onclick="foundPet()">🐶 Encontrei a '+esc(name)+'</button>';
+
+  content.innerHTML =
+    '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está identificado</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>'+
+    buttons+
+    '<section class="card"><h2>🐾 Sobre o pet</h2>'+
+      '<div class="row"><span class="label">Nome</span><span class="value">'+esc(p.nome)+'</span></div>'+
+      '<div class="row"><span class="label">Raça</span><span class="value">'+esc(p.raca||"-")+'</span></div>'+
+      '<div class="row"><span class="label">Espécie</span><span class="value">'+esc(p.especie||"-")+'</span></div>'+
+      '<div class="row"><span class="label">Sexo</span><span class="value">'+esc(p.sexo||"-")+'</span></div>'+
+      '<div class="row"><span class="label">ID da tag</span><span class="value">'+esc(p.tag||tagId)+'</span></div>'+
+    '</section>'+
+    '<section class="card"><h2>❤️ Ajude a família</h2><p class="note">Se você encontrou este pet, entre em contato pelos canais disponíveis acima. A MasterPET protege os dados privados da família.</p></section>';
+}
+
+function load(){
+  const tagId=getTagId();
+
+  // JSONP é usado primeiro para funcionar de forma consistente no Safari/iPhone,
+  // onde chamadas cross-origin ao Apps Script podem ficar presas no carregamento.
+  const callbackName = "masterPetCallback_" + Date.now();
+  const script = document.createElement("script");
+  const timeout = setTimeout(() => {
+    script.remove();
+    delete window[callbackName];
+    showLoadError("Tempo esgotado ao carregar o perfil.");
+  }, 12000);
+
+  window[callbackName] = function(data){
+    clearTimeout(timeout);
+    script.remove();
+    delete window[callbackName];
+    try {
+      if(!data || !data.ok) throw new Error(data?.error || "Não foi possível carregar a tag.");
+      render(data,tagId);
+    } catch(e) {
+      showLoadError(e.message);
+    }
+  };
+
+  script.onerror = function(){
+    clearTimeout(timeout);
+    script.remove();
+    delete window[callbackName];
+    showLoadError("Não foi possível conectar ao servidor.");
+  };
+
+  script.src = API + "?action=publicPet&tagId=" + encodeURIComponent(tagId) + "&callback=" + encodeURIComponent(callbackName) + "&_=" + Date.now();
+  document.head.appendChild(script);
+}
+
+function showLoadError(message){
+  const tagId=getTagId();
+  document.getElementById("petname").textContent="MasterPET";
+  document.getElementById("breed").textContent="Perfil não encontrado";
+  document.getElementById("content").innerHTML='<div class="error"><strong>Não conseguimos carregar esta tag.</strong><p style="margin-bottom:0">Tag consultada: <b>'+esc(tagId)+'</b><br><br>'+esc(message)+'</p></div>';
+}
+
+async function foundPet(){
+  const tagId=getTagId();
+  const content=document.getElementById("content");
+  content.innerHTML='<div class="card"><h2>📍 Avisar a família</h2><p class="note">Para o próximo passo, vamos registrar que alguém encontrou este pet. O sistema poderá futuramente solicitar a localização com autorização.</p><button class="btn whats" onclick="location.reload()">Voltar ao perfil</button></div>';
+  try{
+    await fetch(API,{method:"POST",body:JSON.stringify({action:"recordScan",tagId:tagId,acao:"ENCONTREI_PET"})});
+  }catch(e){}
+}
+
+load();
+</script>
+</body>
+</html>
