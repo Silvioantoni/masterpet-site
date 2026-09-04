@@ -40,15 +40,6 @@
 </div>
 
 <script>
-(function(){
-  const path = window.location.pathname.replace(/\/+$/, '') || '/';
-  if (path.toLowerCase() === '/tutor') {
-    window.location.replace('/tutor.html');
-    return;
-  }
-})();
-</script>
-<script>
 // MASTERPET: roteador das URLs /p/ID_TAG no GitHub Pages.
 const API = "https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec";
 
@@ -109,8 +100,13 @@ function render(data, tagId){
   if(pnum) buttons += '<a class="btn phone" href="tel:+'+pnum+'">📞 Ligar para a família</a>';
   buttons += '<button class="btn found" onclick="foundPet()">🐶 Encontrei a '+esc(name)+'</button>';
 
+  const isLost = status === "PERDIDO" || status === "PET PERDIDO" || status === "LOST";
+  const statusHtml = isLost
+    ? '<div class="status" style="border-color:#ff5364;background:#fff0f2"><span class="dot" style="background:#ff3048"></span><strong style="color:#c9142c">🚨 '+esc(name)+' está PERDIDO</strong><div style="margin-top:6px;color:#8a3a43;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você encontrou, ajude a família a recuperá-lo.</div></div>'
+    : '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está identificado</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>';
+
   content.innerHTML =
-    '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está identificado</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>'+
+    statusHtml+
     buttons+
     '<section class="card"><h2>🐾 Sobre o pet</h2>'+
       '<div class="row"><span class="label">Nome</span><span class="value">'+esc(p.nome)+'</span></div>'+
