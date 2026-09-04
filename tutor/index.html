@@ -78,7 +78,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
   </div>
 </div>
 </div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos cadastrados</h3><div id="petContacts" class="actions"></div></div></section>
-<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">desativado</b>.</p></div><div id="switch" class="switch" onclick="toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" readonly></textarea><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()">Ativar modo perdido</button><div class="muted" style="margin-top:12px">Por enquanto, o botão é apenas visual. A gravação real no sistema será a próxima integração.</div></div></section>
+<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">desativado</b>.</p></div><div id="switch" class="switch" onclick="toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" readonly></textarea><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()">Ativar modo perdido</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div></section>
 <section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted" id="accessSubtitle">Histórico real das tags vinculadas ao tutor.</p><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody id="accessRows"><tr><td colspan="4" class="muted">Carregando...</td></tr></tbody></table></div></div></section>
 <section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div></div></section>
 </main></div><div id="toast" class="toast hidden"></div>
@@ -147,10 +147,29 @@ function loadTheme(){
   const b=document.getElementById('themeBtn');
   if(b) b.textContent=light?'🌙 Modo escuro':'☀️ Modo claro';
 }
-function toggleLost(){
+async function toggleLost(){
+  const pet=currentPet();
+  if(!pet||!pet.id){toast('Nenhum pet disponível.');return;}
   const on=document.getElementById('switch').classList.contains('on');
-  renderLost(!on);
-  toast(!on?'Modo perdido ativado (visual)':'Modo perdido desativado (visual)');
+  const newStatus=on?'ATIVO':'PERDIDO';
+  const btn=document.getElementById('lostBtn');
+  const original=btn.textContent;
+  btn.disabled=true;
+  btn.textContent='Atualizando...';
+  try{
+    const r=await jsonp('setpetstatus',{token:MP_TOKEN,petId:pet.id,status:newStatus,mensagem:document.getElementById('lostMessage')?.value||''});
+    if(!r||!r.ok) throw new Error(r?.error||'STATUS_UPDATE_FAILED');
+    await new Promise(res=>setTimeout(res,700));
+    await loadTutorData();
+    toast(newStatus==='PERDIDO'?'🚨 Modo perdido ativado!':'✅ Modo perdido desativado.');
+  }catch(e){
+    console.error(e);
+    toast('Não foi possível atualizar o modo perdido.');
+    renderLost(on);
+  }finally{
+    btn.disabled=false;
+    btn.textContent=original;
+  }
 }
 function logout(){
   MP_TOKEN='';
