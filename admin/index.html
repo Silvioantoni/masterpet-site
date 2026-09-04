@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -89,30 +88,44 @@ let tags=[];
 function $(id){return document.getElementById(id)}
 function show(el,type,text){el.className='msg '+type;el.textContent=text;el.style.display='block'}
 function hide(el){el.style.display='none'}
-function postToFrame(fields){
-  const f=document.createElement('form');f.method='POST';f.action=API;f.target='mpAdminFrame';
-  fields.forEach(([n,v])=>{const i=document.createElement('input');i.type='hidden';i.name=n;i.value=v;f.appendChild(i)});
-  document.body.appendChild(f);f.submit();setTimeout(()=>f.remove(),3000);
+async function apiJsonp(params){
+  return new Promise((resolve,reject)=>{
+    const cb='mpjsonp_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+    window[cb]=d=>{try{resolve(d)}finally{delete window[cb];if(s.parentNode)s.remove()}};
+    const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
+    const s=document.createElement('script');
+    s.src=API+'?'+qs+'&callback='+cb;
+    document.body.appendChild(s);
+    setTimeout(()=>{delete window[cb];if(s.parentNode)s.remove();reject(new Error('timeout'))},10000);
+  });
 }
-window.addEventListener('message',e=>{
-  if(e.origin!=='https://script.google.com'&&e.origin!=='https://script.googleusercontent.com')return;
-  const d=e.data||{};
-  if(d.token){adminToken=d.token;localStorage.setItem('masterpet_admin_token',adminToken);showApp();loadTags();return}
-  if(d.created){show($('appMsg'),'ok',d.total+' tags criadas com sucesso.');loadTags();return}
-  if(d.error){show($('loginMsg').style.display==='block'?$('loginMsg'):$('appMsg'),'err',friendly(d.error))}
-});
 function friendly(e){
  return ({ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada no Apps Script.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
 }
 function showApp(){$('loginCard').classList.add('hidden');$('app').classList.remove('hidden')}
 function logout(){localStorage.removeItem('masterpet_admin_token');adminToken='';location.reload()}
-$('loginBtn').onclick=()=>postToFrame([['action','adminlogin'],['password',$('adminPass').value]]);
+$('loginBtn').onclick=async()=>{
+ const btn=$('loginBtn'); const pass=$('adminPass').value;
+ if(!pass){show($('loginMsg'),'err','Informe a senha.');return}
+ btn.disabled=true;btn.textContent='ENTRANDO...';
+ try{
+   const d=await apiJsonp({action:'adminlogin',password:pass});
+   if(d.ok){adminToken=d.token;localStorage.setItem('masterpet_admin_token',adminToken);showApp();loadTags();}
+   else show($('loginMsg'),'err',friendly(d.error));
+ }catch(e){show($('loginMsg'),'err','Não foi possível conectar ao servidor.')}
+ finally{btn.disabled=false;btn.textContent='ENTRAR'}
+};
 $('logoutBtn').onclick=logout;
 $('refreshBtn').onclick=loadTags;
-$('lotBtn').onclick=()=>{
+$('lotBtn').onclick=async()=>{
  const q=Math.max(1,Math.min(500,Number($('qty').value)||0));
- postToFrame([['action','admincreatelot'],['adminToken',adminToken],['quantidade',q],['prefix',$('prefix').value.trim()||'MP']]);
- show($('appMsg'),'ok','Gerando lote...');
+ $('lotBtn').disabled=true;show($('appMsg'),'ok','Gerando lote...');
+ try{
+   const d=await apiJsonp({action:'admincreatelot',adminToken:adminToken,quantidade:q,prefix:$('prefix').value.trim()||'MP'});
+   if(d.ok){show($('appMsg'),'ok',d.total+' tags criadas com sucesso.');loadTags();}
+   else show($('appMsg'),'err',friendly(d.error));
+ }catch(e){show($('appMsg'),'err','Não foi possível gerar o lote.')}
+ finally{$('lotBtn').disabled=false}
 };
 function jsonp(url){
  return new Promise((resolve,reject)=>{
