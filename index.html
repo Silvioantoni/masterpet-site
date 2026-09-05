@@ -1,166 +1,131 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MasterPET</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MasterPET — A identidade inteligente do seu pet</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f2f4f5;font-family:Arial,Helvetica,sans-serif;color:#111}
-.app{width:100%;max-width:470px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 25px #0001}
-.hero{background:linear-gradient(145deg,#090b0c,#171a1b);color:#fff;text-align:center;padding:28px 22px 30px}
-.logo{font-size:25px;font-weight:900;letter-spacing:-1px}.logo span{color:#39ff00}
-.slogan{font-size:10px;letter-spacing:2px;color:#bfc6c8;margin-top:5px}
-.petpic{width:120px;height:120px;border-radius:50%;margin:20px auto 12px;background:#f3f5f6;border:4px solid #39ff00;display:flex;align-items:center;justify-content:center;font-size:46px}
-.petname{font-size:29px;font-weight:800;margin:0}.breed{color:#bdc4c7;margin-top:6px;font-size:14px}
-.content{padding:18px}
-.status{border:1px solid #9bef8b;background:#edffe9;border-radius:14px;padding:15px;margin-bottom:12px}
-.status strong{display:block;font-size:16px}.dot{display:inline-block;width:13px;height:13px;border-radius:50%;background:#19bd35;margin-right:8px}
-.btn{display:flex;width:100%;min-height:52px;align-items:center;justify-content:center;border:0;border-radius:12px;margin:10px 0;font-size:16px;font-weight:700;text-decoration:none;cursor:pointer}
-.whats{background:#39ff00;color:#071000}.phone{background:#171a1b;color:#fff}.found{background:#fff;color:#111;border:1px solid #dfe4e6}
-.card{border:1px solid #e0e4e6;border-radius:14px;padding:15px;margin-top:12px}.card h2{font-size:17px;margin:0 0 12px}
-.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #edf0f1;font-size:14px}.row:last-child{border-bottom:0}.label{color:#6e777b}.value{font-weight:700;text-align:right}
-.note{font-size:14px;line-height:1.5;color:#444}.footer{text-align:center;color:#92999c;font-size:11px;padding:25px}
-.loading{text-align:center;padding:50px 20px;color:#555}.error{padding:18px;border:1px solid #f0caca;background:#fff5f5;border-radius:14px}
-</style>
-</head>
-<body>
-<div class="app">
-<header class="hero">
-  <div class="logo">MASTER<span>PET</span></div>
-  <div class="slogan">A IDENTIDADE INTELIGENTE DO SEU PET</div>
-  <div class="petpic" id="petpic">🐾</div>
-  <h1 class="petname" id="petname">Carregando...</h1>
-  <div class="breed" id="breed">Perfil MasterPET</div>
-</header>
-
-<main class="content" id="content">
-  <div class="loading" id="loading">Buscando o perfil do pet...</div>
-</main>
-<div class="footer">MASTERPET<br>Uma solução da MasterTech</div>
-</div>
-
-<script>
-const API = "https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec";
-
-// IMPORTANTE: se abrir sem ?tagId=..., usamos esta tag como padrão para o teste.
-// Depois, no QR de cada animal, o identificador será o da própria tag.
-const DEFAULT_TAG = "MP-0001";
-
-function getTagId(){
-  const p = new URLSearchParams(window.location.search);
-  const q = (p.get("tagId") || p.get("tag") || "").trim();
-  return q || DEFAULT_TAG;
-}
-
-function esc(v){
-  return String(v ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-}
-
-function normalizePhone(v){
-  let n = String(v||"").replace(/\D/g,"");
-
-  // WhatsApp Brasil: se vier apenas com DDD + número, adiciona +55.
-  if(n.length === 10 || n.length === 11){
-    n = "55" + n;
-  }
-
-  return n;
-}
-
-function render(data, tagId){
-  if(!data || !data.pet){
-    throw new Error("Tag não encontrada: "+tagId);
-  }
-  const p=data.pet;
-  const contacts=Array.isArray(data.contatos)?data.contatos:[];
-  const wa=contacts.find(x=>String(x.tipo).toUpperCase()==="WHATSAPP" && String(x.valor||"").trim());
-  const phone=contacts.find(x=>String(x.tipo).toUpperCase()==="TELEFONE" && String(x.valor||"").trim()) || wa;
-  const wnum=normalizePhone(wa?.valor);
-  const pnum=normalizePhone(phone?.valor);
-  const name=p.nome || "Pet";
-  const status=String(p.status||"ATIVO").toUpperCase();
-
-  document.title = "MasterPET — "+name;
-  document.getElementById("petname").textContent=name;
-  document.getElementById("breed").textContent=(p.raca||p.especie||"Pet")+" • Perfil MasterPET";
-  if(p.foto){
-    document.getElementById("petpic").innerHTML='<img src="'+esc(p.foto)+'" alt="'+esc(name)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-  }
-
-  const content=document.getElementById("content");
-  let buttons="";
-  if(wnum) buttons += '<a class="btn whats" target="_blank" href="https://wa.me/'+wnum+'?text='+encodeURIComponent("Olá! Encontrei a "+name+". Estou entrando em contato pela MasterPET.")+'">💬 Falar com a família</a>';
-  if(pnum) buttons += '<a class="btn phone" href="tel:+'+pnum+'">📞 Ligar para a família</a>';
-  buttons += '<button class="btn found" onclick="foundPet()">🐶 Encontrei a '+esc(name)+'</button>';
-
-  content.innerHTML =
-    (status === 'PERDIDO' ?
-      '<div class="status" style="border-color:#ff8a8a;background:#fff0f0"><span class="dot" style="background:#e11"></span><strong>🚨 '+esc(name)+' está PERDIDO</strong><div style="margin-top:6px;color:#8a3030;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você encontrou, ajude a família a recuperá-lo.</div></div>' :
-      '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está identificado</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>'
-    )+buttons+
-    '<section class="card"><h2>🐾 Sobre o pet</h2>'+
-      '<div class="row"><span class="label">Nome</span><span class="value">'+esc(p.nome)+'</span></div>'+
-      '<div class="row"><span class="label">Raça</span><span class="value">'+esc(p.raca||"-")+'</span></div>'+
-      '<div class="row"><span class="label">Espécie</span><span class="value">'+esc(p.especie||"-")+'</span></div>'+
-      '<div class="row"><span class="label">Sexo</span><span class="value">'+esc(p.sexo||"-")+'</span></div>'+
-      '<div class="row"><span class="label">ID da tag</span><span class="value">'+esc(p.tag||tagId)+'</span></div>'+
-    '</section>'+
-    '<section class="card"><h2>❤️ Ajude a família</h2><p class="note">Se você encontrou este pet, entre em contato pelos canais disponíveis acima. A MasterPET protege os dados privados da família.</p></section>';
-}
-
-function load(){
-  const tagId=getTagId();
-
-  // JSONP é usado primeiro para funcionar de forma consistente no Safari/iPhone,
-  // onde chamadas cross-origin ao Apps Script podem ficar presas no carregamento.
-  const callbackName = "masterPetCallback_" + Date.now();
-  const script = document.createElement("script");
-  const timeout = setTimeout(() => {
-    script.remove();
-    delete window[callbackName];
-    showLoadError("Tempo esgotado ao carregar o perfil.");
-  }, 12000);
-
-  window[callbackName] = function(data){
-    clearTimeout(timeout);
-    script.remove();
-    delete window[callbackName];
-    try {
-      if(!data || !data.ok) throw new Error(data?.error || "Não foi possível carregar a tag.");
-      render(data,tagId);
-    } catch(e) {
-      showLoadError(e.message);
-    }
-  };
-
-  script.onerror = function(){
-    clearTimeout(timeout);
-    script.remove();
-    delete window[callbackName];
-    showLoadError("Não foi possível conectar ao servidor.");
-  };
-
-  script.src = API + "?action=publicPet&tagId=" + encodeURIComponent(tagId) + "&callback=" + encodeURIComponent(callbackName) + "&_=" + Date.now();
-  document.head.appendChild(script);
-}
-
-function showLoadError(message){
-  const tagId=getTagId();
-  document.getElementById("petname").textContent="MasterPET";
-  document.getElementById("breed").textContent="Perfil não encontrado";
-  document.getElementById("content").innerHTML='<div class="error"><strong>Não conseguimos carregar esta tag.</strong><p style="margin-bottom:0">Tag consultada: <b>'+esc(tagId)+'</b><br><br>'+esc(message)+'</p></div>';
-}
-
-async function foundPet(){
-  const tagId=getTagId();
-  const content=document.getElementById("content");
-  content.innerHTML='<div class="card"><h2>📍 Avisar a família</h2><p class="note">Para o próximo passo, vamos registrar que alguém encontrou este pet. O sistema poderá futuramente solicitar a localização com autorização.</p><button class="btn whats" onclick="location.reload()">Voltar ao perfil</button></div>';
-  try{
-    await fetch(API,{method:"POST",body:JSON.stringify({action:"recordScan",tagId:tagId,acao:"ENCONTREI_PET"})});
-  }catch(e){}
-}
-
-load();
-</script>
-</body>
-</html>
+*{box-sizing:border-box}
+:root{--bg:#070908;--panel:#0f1411;--line:#242b26;--muted:#a5afa7;--green:#b7ff00;--white:#f5f7f5}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:#fff;font-family:Arial,Helvetica,sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:0 24px}
+header{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;background:rgba(7,9,8,.96);position:sticky;top:0;z-index:10}
+.head{width:100%;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.logo{font-size:25px;font-weight:900;letter-spacing:-1px}.logo b,.green{color:var(--green)}
+nav{display:flex;gap:26px;color:#b7bdb8;font-size:14px}
+a{text-decoration:none;color:inherit}
+.btn{display:inline-block;background:var(--green);color:#091007;padding:14px 19px;border-radius:10px;font-weight:900;border:1px solid var(--green);transition:.18s}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+.dark{background:transparent;color:#fff}
+.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:65px;align-items:center;padding:88px 24px 82px}
+.badge{display:inline-flex;color:var(--green);border:1px solid #3b4a31;border-radius:999px;padding:8px 13px;font-size:11px;font-weight:900;letter-spacing:.3px}
+.hero h1{font-size:clamp(46px,6vw,78px);line-height:.93;letter-spacing:-4px;margin:20px 0}
+.hero p,.sub{color:var(--muted);line-height:1.65;font-size:17px;max-width:640px}
+.actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:28px}
+.visual{min-height:475px;border:1px solid var(--line);border-radius:30px;background:radial-gradient(circle at 50% 44%,#22301e,#111512 48%,#080a09 76%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.visual:after{content:"";position:absolute;inset:auto 15% 10%;height:28px;background:#000;filter:blur(22px);opacity:.65;border-radius:50%}
+.tag{width:285px;height:285px;border-radius:50%;background:linear-gradient(145deg,#eef1ee,#b9beb9 48%,#7f8681);color:#0b0d0c;text-align:center;padding:25px 25px 20px;position:relative;z-index:2;box-shadow:0 28px 70px rgba(0,0,0,.58),inset 0 0 0 1px rgba(255,255,255,.7);transform:rotate(2deg)}
+.tag .hole{width:34px;height:34px;border-radius:50%;margin:0 auto 8px;background:#0e1110;box-shadow:inset 0 0 0 3px #d5d9d6}
+.tag-title{font-size:17px;font-weight:900;letter-spacing:.3px}
+.tag-title span{color:#1d9e00}
+.qr-wrap{width:138px;height:138px;margin:11px auto 10px;background:#fff;padding:7px;border-radius:6px;box-shadow:0 5px 15px rgba(0,0,0,.12)}
+.qr-wrap img{display:block;width:100%;height:100%}
+.tag-id{font-weight:900;font-size:15px;letter-spacing:1px}
+.tag-note{position:absolute;left:0;right:0;bottom:-54px;color:#9da69f;font-size:13px;text-align:center}
+section{padding:78px 0;border-top:1px solid var(--line)}
+.center{text-align:center}.center .sub{margin:0 auto}
+h2{font-size:clamp(34px,4vw,48px);letter-spacing:-2.3px;margin:10px 0 15px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:38px}
+.card{background:linear-gradient(180deg,#111713,#0f1411);border:1px solid var(--line);border-radius:18px;padding:25px}
+.card p,.step p{color:var(--muted);line-height:1.58}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px}
+.step{background:#0d120f;border:1px solid var(--line);border-radius:20px;padding:18px 18px 21px;min-height:280px;position:relative;overflow:hidden}
+.step:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--green)}
+.num{font-size:11px;color:var(--green);font-weight:900;letter-spacing:.4px}
+.step h3{margin:10px 0 8px;font-size:21px}
+.step p{font-size:14px}
+.step-visual{height:110px;margin:18px 0 12px;border-radius:14px;background:#151c17;border:1px solid #2d372f;display:flex;align-items:center;justify-content:center}
+.step-visual svg{width:94px;height:94px}
+.demo{display:grid;grid-template-columns:1fr 1fr;gap:25px;margin-top:40px}
+.phone{max-width:340px;margin:auto;background:#050605;border:7px solid #202520;border-radius:30px;padding:17px}
+.profile{background:#fff;color:#111;border-radius:18px;padding:16px}
+.lost{background:#ffdfe4;color:#d81f35;padding:10px;border-radius:9px;text-align:center;font-weight:900;font-size:12px;border:1px solid #ff8e9b}
+.pet{height:140px;border-radius:14px;background:linear-gradient(135deg,#e8eee9,#cad3cc);display:flex;align-items:center;justify-content:center;font-size:65px;margin:12px 0}
+.contact{display:block;background:var(--green);padding:12px;text-align:center;border-radius:8px;margin-top:8px;font-weight:900}
+.cta{background:linear-gradient(180deg,#121913,#0d110e);border:1px solid #30392e;border-radius:22px;padding:50px;text-align:center}
+.cta p{color:var(--muted);max-width:600px;margin:auto;line-height:1.6}
+footer{padding:30px 0;color:#777;border-top:1px solid var(--line);font-size:13px}
+.foot{display:flex;justify-content:space-between}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:35px}.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:750px){nav{display:none}.hero,.demo{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.hero{padding-top:55px}.hero h1{letter-spacing:-2.5px}.visual{min-height:435px}.tag{width:260px;height:260px;padding:21px}.qr-wrap{width:124px;height:124px}}
+</style></head><body>
+<header><div class="wrap head"><div class="logo">MASTER<b>PET</b></div><nav><a href="#como">Como funciona</a><a href="#perfil">Perfil</a><a href="#beneficios">Benefícios</a></nav><a class="btn" href="#ativar">Quero minha MasterPET</a></div></header>
+<section class="hero wrap" style="border:0"><div><span class="badge">UMA SOLUÇÃO MASTERTECH</span><h1>A identidade <span class="green">inteligente</span> do seu pet.</h1><p>Uma tag premium com QR Code exclusivo. Quem encontrar seu pet pode acessar o perfil dele e falar com a família em poucos segundos.</p><div class="actions"><a class="btn" href="#ativar">Quero minha MasterPET</a><a class="btn dark" href="#como">Como funciona</a></div></div><div class="visual">
+  <div class="tag">
+    <div class="hole"></div>
+    <div class="tag-title">MASTER<span>PET</span></div>
+    <div class="qr-wrap"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQAAAAAab1qeAAACEklEQVR4nO2aUW+DMAyE76b+/798ezg7wLQHqFRmM1OpheaTkliJfTahcPL6OgsOOeSQQ/4L8gUA9L0Ie1OKEAgoWz7U+/PIFwDbC4RAEZtRtVo+1PvzSNsTmxVtVFuW2rV0mVEhcre7ibTjbb0/j5RdJsNv8t7eH0HGflf+EIL8hyjsFmmXGf0tCUlpMv3y2aAuM/pbkgcnSYROslg6tHWZUQmSIAlKWzwHBQLg6KU3SJuRSN0JLTVKFhpnF1ICCa9Qa3gx1qYqjbMF6QUoQQ7w9qArJDlgFRhnG5IiRYikLXpwnrPfL8b3TIZsU8CPlP/n1EMu6s8UmkLcSnnvksjoz7PXz/UZj1oBP7/azKgAKUXaDoEMFepLS/IXGGcXktQuG0r1mXp04tFlcqsax+JkyE6R6VwrjLM+ucR7rEbI1eTt5UcyXWZUgEyjukjH0PQCwK0aWmCcXUhLeTEyIccgWzHDf4lxdiFdAKGDe8YfZ0ic+H6JzK3ub25ZkktL9qvjP6+RFMl83x7inpAIuupUZJwNyEMNPoryXPIpCyOTH529DudD7DujKiIXl1drlxkVsGfq+ZCe9NvNlKCa/X7VnlmTW5sdWr504tHbpORUk/EeCZJWAl9onF1IxgmwVcNj7v47en8EeTgfkudBUjWFeWe/X7Vnljt9ui6yeG/0jPJtZlRIf97e+5BDDjlkX/Ib7zb/fOu0gU4AAAAASUVORK5CYII=" alt="QR Code MasterPET MP-0001"></div>
+    <div class="tag-id">MP-0001</div>
+    <div class="tag-note">Tecnologia que protege quem você ama.</div>
+  </div>
+</div></div></section>
+<section id="beneficios"><div class="wrap center"><small class="green">MUITO MAIS QUE UMA TAG</small><h2>Seu pet identificado. Sua família mais tranquila.</h2><p class="sub">Personalização premium e tecnologia em uma solução simples.</p><div class="grid"><div class="card"><h3>⚡ Acesso rápido</h3><p>Um QR Code leva direto ao perfil do pet, sem precisar instalar aplicativo.</p></div><div class="card"><h3>📲 Contato com a família</h3><p>WhatsApp e telefone ficam disponíveis para quem encontrar o animal.</p></div><div class="card"><h3>🔐 Dados sob controle</h3><p>As informações podem ser atualizadas sem trocar a tag física.</p></div></div></div></section>
+<section id="como"><div class="wrap center">
+  <small class="green">COMO FUNCIONA</small>
+  <h2>Do QR Code ao reencontro.</h2>
+  <p class="sub">Uma experiência simples para o tutor e ainda mais simples para quem encontra o pet.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="num">01 — ATIVE</div>
+      <div class="step-visual">
+        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+          <rect x="24" y="16" width="52" height="68" rx="8" stroke="#b7ff00" stroke-width="3"/>
+          <circle cx="50" cy="34" r="8" stroke="#fff" stroke-width="3"/>
+          <path d="M35 55h30M35 64h21" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="70" cy="72" r="11" fill="#b7ff00"/><path d="M65 72l3 3 6-7" stroke="#081006" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>Cadastre</h3>
+      <p>Crie o perfil do pet e informe os contatos da família.</p>
+    </div>
+    <div class="step">
+      <div class="num">02 — USE</div>
+      <div class="step-visual">
+        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+          <path d="M31 44c0-8 6-14 14-14h10c8 0 14 6 14 14v12c0 8-6 14-14 14H45c-8 0-14-6-14-14V44Z" stroke="#fff" stroke-width="3"/>
+          <path d="M21 50c7-8 12-10 19-10M79 50c-7-8-12-10-19-10" stroke="#b7ff00" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="50" cy="49" r="8" stroke="#b7ff00" stroke-width="3"/>
+          <path d="M50 57v8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Coloque a tag</h3>
+      <p>Identificação permanente para acompanhar o pet todos os dias.</p>
+    </div>
+    <div class="step">
+      <div class="num">03 — ESCANEOU</div>
+      <div class="step-visual">
+        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+          <rect x="29" y="12" width="42" height="76" rx="9" stroke="#fff" stroke-width="3"/>
+          <rect x="39" y="28" width="22" height="22" rx="2" stroke="#b7ff00" stroke-width="3"/>
+          <path d="M42 34h6v6h-6M52 34h6M42 44h6M52 44h6v-6" stroke="#fff" stroke-width="2"/>
+          <path d="M18 54h-4v10h4M82 54h4v10h-4" stroke="#b7ff00" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Alguém encontra</h3>
+      <p>A pessoa escaneia o QR e acessa o perfil do pet pelo celular.</p>
+    </div>
+    <div class="step">
+      <div class="num">04 — CONTATE</div>
+      <div class="step-visual">
+        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+          <path d="M22 28c0-5 4-9 9-9h38c5 0 9 4 9 9v25c0 5-4 9-9 9H49l-12 10v-10h-6c-5 0-9-4-9-9V28Z" stroke="#fff" stroke-width="3"/>
+          <path d="M36 37h28M36 47h18" stroke="#b7ff00" stroke-width="3" stroke-linecap="round"/>
+          <path d="M67 70c3 4 6 7 10 7" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M77 68c3 1 5 3 7 6" stroke="#b7ff00" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Família é avisada</h3>
+      <p>WhatsApp e ligação ficam a um toque de distância para agilizar o reencontro.</p>
+    </div>
+  </div>
+</div></section>
+<section id="perfil"><div class="wrap"><div class="center"><small class="green">EXPERIÊNCIA MASTERPET</small><h2>O perfil do seu pet.</h2><p class="sub">Uma página objetiva para ajudar quem encontrou seu animal.</p></div><div class="demo"><div class="phone"><div class="profile"><div class="lost">⚠ PET PERDIDO — AJUDE A ENCONTRAR</div><div class="pet">🐶</div><h2 style="font-size:29px;margin:5px 0">Flora</h2><p style="color:#666">Yorkshire Terrier • Fêmea</p><a class="contact">💬 Falar com a família</a><a class="contact" style="background:#111;color:#fff">📞 Ligar para o responsável</a></div></div><div class="card"><small class="green">EXEMPLO</small><h3 style="font-size:27px">Flora tem uma identidade digital.</h3><p>Nome, foto, informações básicas e canais de contato podem ficar disponíveis para facilitar o reencontro.</p><p><b>Importante:</b> o perfil não precisa exibir o endereço residencial da família.</p></div></div></div></section>
+<section id="ativar"><div class="wrap"><div class="cta"><small class="green">COMECE AGORA</small><h2>Seu pet merece uma MasterPET.</h2><p>Na primeira versão, você recebe a tag personalizada, ativa o QR Code e cria o perfil do seu pet.</p><div class="actions" style="justify-content:center"><a class="btn" href="https://wa.me/554599893990" target="_blank">Quero minha MasterPET</a><a class="btn dark" href="https://wa.me/554599893990" target="_blank">Ativar minha tag</a></div></div></div></section>
+<footer><div class="wrap foot"><span>© 2026 MasterPET</span><span>Uma solução da MasterTech</span></div></footer>
+</body></html>
