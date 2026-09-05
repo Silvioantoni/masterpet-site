@@ -64,21 +64,73 @@ function activateTag(){
  setTimeout(()=>confirmActivation(tagId,email,btn,frame),1800);
 }
 function confirmActivation(tagId,email,btn,frame){
- const cb='mpActCheck_'+Date.now();
- window[cb]=(data)=>{
-   try{
-     if(data&&data.ok&&data.pet){
-       localStorage.setItem('masterpet_activation_message','Tag '+tagId+' ativada com sucesso. Faça login para acessar seu perfil.');
-       show('✅ Sua MasterPET foi ativada! Redirecionando para a Área do Tutor...',true);
-       setTimeout(()=>{location.href='/tutor/?activated=1&email='+encodeURIComponent(email)},900);
-     }else if(data&&data.error==='TAG_NOT_FOUND'){show('Tag não encontrada. Confira o ID informado.',false);reset(btn,frame);}
-     else if(data&&data.error==='TAG_CODE_INVALID'){show('Código de ativação inválido para esta tag.',false);reset(btn,frame);}
-     else if(data&&data.error==='TAG_ALREADY_ACTIVE'){show('Essa tag já está ativa.',false);reset(btn,frame);}
-     else {show('Não foi possível concluir a ativação. Confira os dados e tente novamente.',false);reset(btn,frame);}
-   }catch(e){show('Não foi possível confirmar a ativação.',false);reset(btn,frame);}
- };
- const s=document.createElement('script');s.src=API+'?action=publicpet&tagId='+encodeURIComponent(tagId)+'&callback='+cb+'&_='+Date.now();document.body.appendChild(s);
- setTimeout(()=>{if(btn.disabled){show('A ativação foi enviada. Aguarde alguns segundos e consulte a Área do Tutor.',true);localStorage.setItem('masterpet_activation_message','Ativação enviada para '+tagId+'. Faça login na Área do Tutor para continuar.');setTimeout(()=>location.href='/tutor/?activated=1&email='+encodeURIComponent(email),1200);}},6500);
+ const cbBase='mpActCheck_'+Date.now();
+ let attempts=0;
+ const maxAttempts=6;
+ let finished=false;
+
+ function finishWithRedirect(){
+   if(finished) return;
+   finished=true;
+   localStorage.setItem('masterpet_activation_message','Tag '+tagId+' ativada com sucesso. Faça login para acessar seu perfil.');
+   show('✅ Sua MasterPET foi ativada! Redirecionando para a Área do Tutor...',true);
+   setTimeout(()=>{location.href='/tutor/?activated=1&email='+encodeURIComponent(email)},900);
+ }
+
+ function fail(msg){
+   if(finished) return;
+   finished=true;
+   show(msg,false);
+   reset(btn,frame);
+ }
+
+ function verify(){
+   if(finished) return;
+   attempts++;
+   const cb=cbBase+'_'+attempts;
+   window[cb]=(data)=>{
+     try{
+       if(data&&data.ok&&data.pet){
+         finishWithRedirect();
+         return;
+       }
+       if(data&&data.error==='TAG_NOT_FOUND' && attempts<maxAttempts){
+         setTimeout(verify,1200);
+         return;
+       }
+       if(data&&data.error==='TAG_CODE_INVALID'){
+         fail('Código de ativação inválido para esta tag.');
+         return;
+       }
+       if(data&&data.error==='TAG_ALREADY_ACTIVE'){
+         // A tag já ficou ativa; tentar mais uma vez pode ser apenas atraso de sincronização.
+         if(attempts<maxAttempts){ setTimeout(verify,1200); return; }
+         fail('Essa tag já está ativa.');
+         return;
+       }
+       if(attempts<maxAttempts){
+         setTimeout(verify,1200);
+         return;
+       }
+       fail('Não foi possível confirmar a ativação. Acesse a Área do Tutor e verifique seu cadastro.');
+     }finally{
+       delete window[cb];
+     }
+   };
+
+   const s=document.createElement('script');
+   s.src=API+'?action=publicpet&tagId='+encodeURIComponent(tagId)+'&callback='+cb+'&_='+Date.now();
+   s.onerror=()=>{
+     delete window[cb];
+     if(attempts<maxAttempts) setTimeout(verify,1200);
+     else fail('Não foi possível confirmar a ativação. Acesse a Área do Tutor e verifique seu cadastro.');
+   };
+   document.body.appendChild(s);
+   setTimeout(()=>{try{s.remove()}catch(e){}},10000);
+ }
+
+ // Dá alguns segundos para o Apps Script concluir a gravação antes da primeira verificação.
+ setTimeout(verify,1600);
 }
 function reset(btn,frame){btn.disabled=false;btn.textContent='ATIVAR MINHA MASTERPET';setTimeout(()=>frame.remove(),500);}
 </script></body></html>
