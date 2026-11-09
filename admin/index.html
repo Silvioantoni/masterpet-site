@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MasterPET • Produção</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
+<meta name="robots" content="noindex,nofollow">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
@@ -96,11 +98,11 @@ async function apiJsonp(params){
     const s=document.createElement('script');
     s.src=API+'?'+qs+'&callback='+cb;
     document.body.appendChild(s);
-    setTimeout(()=>{delete window[cb];if(s.parentNode)s.remove();reject(new Error('timeout'))},10000);
+    setTimeout(()=>{delete window[cb];if(s.parentNode)s.remove();reject(new Error('timeout'))},30000);
   });
 }
 function friendly(e){
- return ({ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada no Apps Script.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
+ return ({TOO_MANY_ATTEMPTS:'Muitas tentativas erradas. Aguarde 15 minutos.',INVALID_PREFIX:'Prefixo inválido: use de 2 a 5 letras (ex.: MP).',BUSY_TRY_AGAIN:'Servidor ocupado, tente de novo.',ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada. No Apps Script, execute definirSenhaAdminPeloEditor com a planilha aberta.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
 }
 function showApp(){$('loginCard').classList.add('hidden');$('app').classList.remove('hidden')}
 function logout(){localStorage.removeItem('masterpet_admin_token');adminToken='';location.reload()}
@@ -116,13 +118,16 @@ $('loginBtn').onclick=async()=>{
  finally{btn.disabled=false;btn.textContent='ENTRAR'}
 };
 $('logoutBtn').onclick=logout;
+$('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
 $('refreshBtn').onclick=loadTags;
 $('lotBtn').onclick=async()=>{
  const q=Math.max(1,Math.min(500,Number($('qty').value)||0));
+ const pre=($('prefix').value.trim()||'MP').toUpperCase();
+ if(!confirm('Gerar '+q+' novas tags com prefixo '+pre+'? Elas serão gravadas na planilha.')) return;
  $('lotBtn').disabled=true;show($('appMsg'),'ok','Gerando lote...');
  try{
    const d=await apiJsonp({action:'admincreatelot',adminToken:adminToken,quantidade:q,prefix:$('prefix').value.trim()||'MP'});
-   if(d.ok){show($('appMsg'),'ok',d.total+' tags criadas com sucesso.');loadTags();}
+   if(d.ok){show($('appMsg'),'ok',d.total+' tags criadas com sucesso'+(d.primeira?' ('+d.primeira+' a '+d.ultima+').':'.'));loadTags();}
    else show($('appMsg'),'err',friendly(d.error));
  }catch(e){show($('appMsg'),'err','Não foi possível gerar o lote.')}
  finally{$('lotBtn').disabled=false}
@@ -132,13 +137,13 @@ function jsonp(url){
    const cb='mpjson_'+Date.now()+'_'+Math.floor(Math.random()*9999);
    window[cb]=d=>{try{resolve(d)}finally{delete window[cb];s.remove()}};
    const s=document.createElement('script');s.src=url+'&callback='+cb;document.body.appendChild(s);
-   setTimeout(()=>{delete window[cb];s.remove();reject(new Error('timeout'))},8000);
+   setTimeout(()=>{window[cb]=function(){};s.remove();reject(new Error('timeout'))},30000);
  });
 }
 async function loadTags(){
  try{
    const d=await jsonp(API+'?action=adminlisttags&adminToken='+encodeURIComponent(adminToken));
-   if(!d.ok){logout();return}
+   if(!d.ok){if(d.error==='ADMIN_AUTH_INVALID'){logout();return}show($('appMsg'),'err',friendly(d.error));return}
    tags=d.tags||[];
    $('total').textContent=tags.length;
    $('available').textContent=tags.filter(t=>String(t.status).toUpperCase()==='DISPONIVEL').length;
