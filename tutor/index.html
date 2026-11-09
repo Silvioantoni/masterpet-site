@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MasterPET — Área do Tutor</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
 <style>
 :root{
   --theme-transition: .25s;
@@ -41,7 +42,12 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
     <div id="loginNotice" class="hidden" style="margin-top:14px;padding:12px;border-radius:10px;background:#1b2700;border:1px solid #3b5300;color:var(--g);font-size:13px"></div><form id="loginForm" onsubmit="event.preventDefault();login()"><div class="field"><label>E-mail</label><input id="email" type="email" placeholder="seu@email.com" autocomplete="email"></div>
     <div class="field"><label>Senha</label><input id="password" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="btn wide" type="submit">Entrar na MasterPET</button></form>
-    <div id="loginError" class="error hidden">E-mail ou senha inválidos.</div><button type="button" onclick="testAPI()" style="margin-top:10px;background:none;border:0;color:#96a19d;font-size:12px;cursor:pointer">Testar conexão com o servidor</button>
+    <div id="loginError" class="error hidden">E-mail ou senha inválidos.</div><button type="button" onclick="openReset()" style="margin-top:10px;background:none;border:0;color:var(--g);font-size:13px;font-weight:700;cursor:pointer;padding:0">Esqueci minha senha</button>
+    <div id="resetBox" class="hidden" style="margin-top:14px;border-top:1px solid var(--line);padding-top:6px">
+      <div id="resetStep1"><p style="margin:10px 0 0">Informe o e-mail da sua conta. Enviaremos um código de 6 dígitos.</p><div class="field"><label>E-mail</label><input id="resetEmail" type="email" autocomplete="email"></div><button type="button" class="btn wide" id="resetSendBtn" onclick="sendReset()">Enviar código</button></div>
+      <div id="resetStep2" class="hidden"><p style="margin:10px 0 0">Se o e-mail estiver cadastrado, o código chega em instantes (confira também o spam). Ele vale por 15 minutos.</p><div class="field"><label>Código</label><input id="resetCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></div><div class="field"><label>Nova senha (mínimo 8 caracteres)</label><input id="resetPass" type="password" autocomplete="new-password"></div><div class="field"><label>Confirmar nova senha</label><input id="resetPass2" type="password" autocomplete="new-password"></div><button type="button" class="btn wide" id="resetSaveBtn" onclick="saveReset()">Salvar nova senha</button></div>
+      <div id="resetMsg" class="error hidden"></div>
+    </div><button type="button" onclick="testAPI()" style="margin-top:10px;background:none;border:0;color:#96a19d;font-size:12px;cursor:pointer">Testar conexão com o servidor</button>
     <div class="demo">Ainda não ativou sua tag? <a href="/ativar/" style="color:var(--g);font-weight:800;text-decoration:none">Ativar minha MasterPET</a></div>
   </div>
 </div>
@@ -221,7 +227,9 @@ async function login(){
     const r=await jsonp('login',{email:e,password:p});
     if(!r || !r.ok){
       err.textContent = r && r.error==='PASSWORD_NOT_CONFIGURED'
-        ? 'Este tutor ainda não possui senha configurada.'
+        ? 'Este tutor ainda não possui senha configurada. Use "Esqueci minha senha" para criar uma.'
+        : r && r.error==='TOO_MANY_ATTEMPTS'
+        ? 'Muitas tentativas erradas. Aguarde 15 minutos ou use "Esqueci minha senha".'
         : 'E-mail ou senha inválidos.';
       err.classList.remove('hidden'); return;
     }
@@ -242,6 +250,45 @@ async function login(){
   }
 }
 
+function resetMsg(t,ok){const m=document.getElementById('resetMsg');m.textContent=t;m.style.color=ok?'var(--g)':'#ff8888';m.classList.remove('hidden');}
+function openReset(){
+  const box=document.getElementById('resetBox'); box.classList.toggle('hidden');
+  document.getElementById('resetEmail').value=document.getElementById('email').value.trim();
+  document.getElementById('resetMsg').classList.add('hidden');
+}
+async function sendReset(){
+  const email=document.getElementById('resetEmail').value.trim().toLowerCase();
+  if(!/^\S+@\S+\.\S+$/.test(email)) return resetMsg('Informe um e-mail válido.');
+  const b=document.getElementById('resetSendBtn'); b.disabled=true; b.textContent='Enviando...';
+  try{
+    const r=await jsonp('requestreset',{email});
+    if(r&&r.ok){ document.getElementById('resetStep1').classList.add('hidden'); document.getElementById('resetStep2').classList.remove('hidden'); document.getElementById('resetMsg').classList.add('hidden'); document.getElementById('resetCode').focus(); }
+    else resetMsg(r&&r.error==='TOO_MANY_ATTEMPTS'?'Você já pediu vários códigos. Aguarde 1 hora e tente de novo.':'Não foi possível enviar o código agora.');
+  }catch(e){ resetMsg('Não foi possível conectar ao servidor. Tente novamente.'); }
+  finally{ b.disabled=false; b.textContent='Enviar código'; }
+}
+async function saveReset(){
+  const email=document.getElementById('resetEmail').value.trim().toLowerCase();
+  const code=document.getElementById('resetCode').value.replace(/\D/g,''), p1=document.getElementById('resetPass').value, p2=document.getElementById('resetPass2').value;
+  if(code.length!==6) return resetMsg('Digite o código de 6 dígitos.');
+  if(p1.length<8) return resetMsg('A nova senha precisa ter pelo menos 8 caracteres.');
+  if(p1!==p2) return resetMsg('As senhas não conferem.');
+  const b=document.getElementById('resetSaveBtn'); b.disabled=true; b.textContent='Salvando...';
+  try{
+    const r=await jsonp('resetpassword',{email,code,password:p1});
+    if(r&&r.ok&&r.token){
+      MP_TOKEN=r.token; localStorage.setItem('masterpet_token',MP_TOKEN);
+      MP_TUTOR=r.tutor||{}; localStorage.setItem('masterpet_tutor',JSON.stringify(MP_TUTOR));
+      document.getElementById('login').classList.add('hidden'); document.getElementById('app').classList.remove('hidden');
+      renderTutorUI(); toast('✅ Senha alterada. Bem-vindo de volta!'); await loadTutorData(); renderTutorUI();
+      return;
+    }
+    const msgs={RESET_CODE_INVALID:'Código incorreto.',RESET_CODE_EXPIRED:'Código expirado ou já usado. Peça um novo código.',TOO_MANY_ATTEMPTS:'Muitas tentativas. Peça um novo código.',PASSWORD_TOO_SHORT:'A nova senha precisa ter pelo menos 8 caracteres.'};
+    resetMsg(msgs[r&&r.error]||'Não foi possível redefinir a senha.');
+    if(r&&(r.error==='RESET_CODE_EXPIRED'||r.error==='TOO_MANY_ATTEMPTS')){document.getElementById('resetStep2').classList.add('hidden');document.getElementById('resetStep1').classList.remove('hidden');}
+  }catch(e){ resetMsg('Não foi possível conectar ao servidor. Tente novamente.'); }
+  finally{ b.disabled=false; b.textContent='Salvar nova senha'; }
+}
 async function loadTutorData(){
   if(!MP_TOKEN) return;
   const [pets, accesses] = await Promise.all([
