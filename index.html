@@ -33,6 +33,8 @@ a{text-decoration:none;color:inherit}
 .tag-id{font-weight:900;font-size:15px;letter-spacing:1px}
 .tag-note{position:absolute;left:0;right:0;bottom:-54px;color:#9da69f;font-size:13px;text-align:center}
 section{padding:78px 0;border-top:1px solid var(--line)}
+.mform{display:grid;gap:12px}.mform label{display:grid;gap:6px;color:var(--muted);font-size:13px;font-weight:700}.mform input,.mform select{background:#070908;border:1px solid var(--line);border-radius:10px;padding:13px;color:#fff;font-size:15px}.mform input:focus,.mform select:focus{outline:none;border-color:var(--green)}
+.counter{display:flex;gap:22px;margin-top:22px;color:var(--muted);font-size:14px}.counter[hidden],.counter [hidden]{display:none}.counter b{display:block;color:#fff;font-size:28px;letter-spacing:-1px}
 .faqs{max-width:820px;margin:34px auto 0;display:grid;gap:10px}
 .faq{background:#0d120f;border:1px solid var(--line);border-radius:14px;padding:0 20px}
 .faq summary{cursor:pointer;list-style:none;padding:18px 28px 18px 0;font-weight:800;font-size:17px;position:relative}
@@ -66,8 +68,8 @@ footer{padding:30px 0;color:#777;border-top:1px solid var(--line);font-size:13px
 @media(max-width:900px){.hero{grid-template-columns:1fr;gap:35px}.steps{grid-template-columns:1fr 1fr}}
 @media(max-width:750px){nav{display:none}.hero,.demo{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.hero{padding-top:55px}.hero h1{letter-spacing:-2.5px}.visual{min-height:435px}.tag{width:260px;height:260px;padding:21px}.qr-wrap{width:124px;height:124px}}
 </style></head><body>
-<header><div class="wrap head"><div class="logo">MASTER<b>PET</b></div><nav><a href="#como">Como funciona</a><a href="#perfil">Perfil</a><a href="#beneficios">Benefícios</a><a href="#duvidas">Dúvidas</a><a href="/tutor/">Área do Tutor</a></nav><a class="btn" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET</a></div></header>
-<section class="hero wrap" style="border:0"><div><span class="badge">UMA SOLUÇÃO MASTERTECH</span><h1>A identidade <span class="green">inteligente</span> do seu pet.</h1><p>Uma tag premium com QR Code exclusivo. Quem encontrar seu pet pode acessar o perfil dele e falar com a família em poucos segundos.</p><div class="actions"><a class="btn" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET</a><a class="btn dark" href="#como">Como funciona</a></div></div><div class="visual">
+<header><div class="wrap head"><div class="logo">MASTER<b>PET</b></div><nav><a href="#como">Como funciona</a><a href="#monte">Monte a sua</a><a href="#perfil">Perfil</a><a href="#beneficios">Benefícios</a><a href="#duvidas">Dúvidas</a><a href="/tutor/">Área do Tutor</a></nav><a class="btn" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET</a></div></header>
+<section class="hero wrap" style="border:0"><div><span class="badge">UMA SOLUÇÃO MASTERTECH</span><h1>A identidade <span class="green">inteligente</span> do seu pet.</h1><p>Uma tag premium com QR Code exclusivo. Quem encontrar seu pet pode acessar o perfil dele e falar com a família em poucos segundos.</p><div class="actions"><a class="btn" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET</a><a class="btn dark" href="#como">Como funciona</a></div><div class="counter" id="counter" hidden><div><b id="cPets">—</b>pets protegidos</div><div><b id="cReenc">—</b>reencontros</div></div></div><div class="visual">
   <div class="tag">
     <div class="hole"></div>
     <div class="tag-title">MASTER<span>PET</span></div>
@@ -137,8 +139,43 @@ footer{padding:30px 0;color:#777;border-top:1px solid var(--line);font-size:13px
   </div>
 </div></section>
 <section id="perfil"><div class="wrap"><div class="center"><small class="green">EXPERIÊNCIA MASTERPET</small><h2>O perfil do seu pet.</h2><p class="sub">Uma página objetiva para ajudar quem encontrou seu animal.</p></div><div class="demo"><div class="phone"><div class="profile"><div class="lost">⚠ PET PERDIDO — AJUDE A ENCONTRAR</div><div class="pet">🐶</div><h2 style="font-size:29px;margin:5px 0">Flora</h2><p style="color:#666">Yorkshire Terrier • Fêmea</p><a class="contact">💬 Falar com a família</a><a class="contact" style="background:#111;color:#fff">📞 Ligar para o responsável</a></div></div><div class="card"><small class="green">EXEMPLO</small><h3 style="font-size:27px">Flora tem uma identidade digital.</h3><p>Nome, foto, informações básicas e canais de contato podem ficar disponíveis para facilitar o reencontro.</p><p><b>Importante:</b> o perfil não precisa exibir o endereço residencial da família.</p></div></div></div></section>
+<section id="monte"><div class="wrap"><div class="center"><small class="green">MONTE A SUA</small><h2>Veja como fica a MasterPET do seu pet.</h2><p class="sub">Digite o nome do seu pet e veja a prévia do perfil que aparece quando alguém escaneia a tag.</p></div>
+<div class="demo" style="align-items:center">
+  <div class="card"><div class="mform">
+    <label>Nome do pet<input id="mNome" maxlength="24" placeholder="Ex.: Flora" oninput="mUpdate()"></label>
+    <label>Espécie<select id="mEsp" onchange="mUpdate()"><option>Cachorro</option><option>Gato</option><option>Outro</option></select></label>
+    <label>Sua cidade<input id="mCidade" maxlength="40" placeholder="Ex.: Cascavel - PR" oninput="mUpdate()"></label>
+  </div>
+  <a class="btn" id="mWa" href="https://wa.me/554599893990" target="_blank" rel="noopener" style="width:100%;text-align:center;margin-top:16px">Quero a MasterPET do meu pet</a>
+  <p style="font-size:13px;margin-bottom:0">Você fala direto com a MasterPET no WhatsApp, com a mensagem já pronta.</p></div>
+  <div class="phone"><div class="profile"><div class="pet" id="mEmoji">🐶</div><h2 style="font-size:29px;margin:5px 0" id="mNomeP">Seu pet</h2><p style="color:#666" id="mMeta">Cachorro • Perfil MasterPET</p><a class="contact">💬 Falar com a família</a><a class="contact" style="background:#111;color:#fff">📞 Ligar para a família</a></div></div>
+</div></div></section>
 <section id="duvidas"><div class="wrap"><div class="center"><small class="green">DÚVIDAS FREQUENTES</small><h2>Tudo o que você precisa saber.</h2></div><div class="faqs"><details class="faq"><summary>Precisa instalar algum aplicativo?</summary><p>Não. Quem encontra o pet só aponta a câmera do celular para o QR Code da tag e o perfil abre no navegador. O tutor também usa a Área do Tutor pelo navegador e, se quiser, pode instalá-la como app na tela inicial.</p></details><details class="faq"><summary>O que aparece quando alguém escaneia a tag?</summary><p>O perfil do pet: foto, nome, espécie, raça, sexo e botões para chamar a família no WhatsApp ou ligar. Seu e-mail, sua senha e seu endereço nunca aparecem.</p></details><details class="faq"><summary>E se meu pet se perder?</summary><p>Na Área do Tutor, ative o Modo Perdido. O perfil passa a mostrar um alerta vermelho com a sua mensagem, você recebe um e-mail quando alguém abre o perfil e pode gerar um cartaz "Procura-se" com QR Code ou compartilhar o alerta em grupos.</p></details><details class="faq"><summary>Posso mudar a foto, os dados ou o telefone depois?</summary><p>Sim, quantas vezes quiser, pela Área do Tutor. A tag física continua a mesma: o QR Code sempre mostra os dados atualizados.</p></details><details class="faq"><summary>Como ativo minha tag?</summary><p>Escaneie a tag ou acesse <a class="green" href="/ativar/">masterpet.tec.br/ativar</a>, informe o ID da tag e o código de ativação que acompanha a peça e crie sua conta. Em seguida você já entra na Área do Tutor.</p></details><details class="faq"><summary>Tenho mais de um pet. Preciso de outra conta?</summary><p>Não. Ative cada tag com o mesmo e-mail e a mesma senha: todos os pets aparecem juntos na sua Área do Tutor.</p></details><details class="faq"><summary>A tag precisa de bateria ou internet?</summary><p>A tag não precisa de bateria nem de carga. Só o celular de quem escaneia precisa estar com internet.</p></details><details class="faq"><summary>Perdi a tag física. E agora?</summary><p>Fale com a MasterPET pelo WhatsApp. A tag antiga pode ser desativada para que ninguém a use, e o perfil do seu pet continua guardado na sua conta.</p></details><details class="faq"><summary>Esqueci minha senha.</summary><p>Na Área do Tutor, toque em "Esqueci minha senha". Enviamos um código de 6 dígitos para o seu e-mail para você criar uma senha nova.</p></details></div><p class="center" style="color:var(--muted);margin-top:26px">Ficou alguma dúvida? <a class="green" href="https://wa.me/554599893990" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p></div></section>
 <section id="tutor-area"><div class="wrap"><div class="cta" style="display:grid;grid-template-columns:1.4fr .6fr;gap:28px;align-items:center"><div><small class="green">ÁREA DO TUTOR</small><h2>Seu pet, sempre sob seu controle.</h2><p>Entre na sua conta para acessar o perfil do pet, atualizar a foto e os dados, acompanhar acessos ao QR Code e ativar o Modo Perdido.</p></div><div class="actions" style="justify-content:center"><a class="btn" href="/tutor/">Entrar na Área do Tutor</a></div></div></div></section>
 <section id="ativar"><div class="wrap"><div class="cta"><small class="green">COMECE AGORA</small><h2>Seu pet merece uma MasterPET.</h2><p>Na primeira versão, você recebe a tag personalizada, ativa o QR Code e cria o perfil do seu pet.</p><div class="actions" style="justify-content:center"><a class="btn" href="https://wa.me/554599893990" target="_blank">Quero minha MasterPET</a><a class="btn dark" href="/ativar/">Ativar minha tag</a><a class="btn dark" href="/tutor/">Área do Tutor</a></div></div></div></section>
 <footer><div class="wrap foot"><span>© 2026 MasterPET</span><span>Uma solução da MasterTech</span></div></footer>
+<script>
+// Prévia + WhatsApp com mensagem pronta
+function mUpdate(){
+  const n=document.getElementById('mNome').value.trim(), e=document.getElementById('mEsp').value, c=document.getElementById('mCidade').value.trim();
+  document.getElementById('mNomeP').textContent=n||'Seu pet';
+  document.getElementById('mMeta').textContent=e+' • Perfil MasterPET';
+  document.getElementById('mEmoji').textContent=e==='Gato'?'🐱':e==='Cachorro'?'🐶':'🐾';
+  const msg='Olá! Quero uma MasterPET'+(n?' para o '+(e==='Outro'?'meu pet':'meu '+e.toLowerCase())+' '+n:'')+(c?'. Sou de '+c:'')+'.';
+  document.getElementById('mWa').href='https://wa.me/554599893990?text='+encodeURIComponent(msg);
+}
+// Contador público: só aparece quando os números já impressionam (ajuste os mínimos abaixo).
+const MIN_PETS=20, MIN_REENC=3;
+(function(){
+  const cb='mpStats_'+Date.now(), s=document.createElement('script');
+  window[cb]=d=>{ delete window[cb]; s.remove();
+    if(!d||!d.ok) return;
+    if(d.petsProtegidos>=MIN_PETS){ document.getElementById('cPets').textContent=d.petsProtegidos; document.getElementById('counter').hidden=false; }
+    if(d.reencontros>=MIN_REENC){ document.getElementById('cReenc').textContent=d.reencontros; } else { document.getElementById('cReenc').parentElement.hidden=true; }
+  };
+  s.onerror=()=>s.remove();
+  s.src='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec?action=publicstats&callback='+cb;
+  setTimeout(()=>{ document.body.appendChild(s); },1500);
+})();
+</script>
 </body></html>
