@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<link rel="dns-prefetch" href="https://drive.google.com">
 <meta name="theme-color" content="#090b0c">
 <title>MasterPET</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
@@ -156,11 +159,28 @@ function registrarAcesso(tagId){
   }catch(e){}
 }
 
+// ===== Perfil salvo no aparelho (stale-while-revalidate) =====
+const SAVED_MAX_MS=7*24*3600*1000;
+function readSaved(tagId){
+  try{ const o=JSON.parse(localStorage.getItem("mp_pub_"+tagId)||"null"); if(o&&o.t&&Date.now()-o.t<SAVED_MAX_MS&&o.d&&o.d.ok) return o.d; }catch(e){}
+  return null;
+}
+function keepSaved(tagId,data){ try{ const d=Object.assign({},data); delete d.cache; localStorage.setItem("mp_pub_"+tagId,JSON.stringify({t:Date.now(),d})); }catch(e){} }
+function forgetSaved(tagId){ try{ localStorage.removeItem("mp_pub_"+tagId); }catch(e){} }
+function savedNotice(){
+  const c=document.getElementById("content"); if(!c||document.getElementById("savedNote")) return;
+  c.insertAdjacentHTML("afterbegin",'<div id="savedNote" class="info" style="margin-bottom:12px;font-size:13px">📶 Sem conexão com o servidor agora. Mostrando o último perfil salvo neste aparelho. <a href="#" onclick="location.reload();return false" style="color:#1a7f00;font-weight:700">Tentar de novo</a></div>');
+}
+
 function load(){
   const tagId=getTagId();
   if(!tagId || !isValidTagId(tagId)){ showNotFoundPage(); return; }
   const noScan=new URLSearchParams(window.location.search).get("noscan")==="1";
-  document.getElementById("content").innerHTML='<div class="loading" id="loading">Buscando o perfil do pet...</div>';
+  // Perfil salvo neste aparelho (só dados públicos): aparece na hora e é atualizado logo em seguida.
+  const saved=readSaved(tagId);
+  let showingSaved=false;
+  if(saved){ try{ render(saved,tagId); showingSaved=true; }catch(e){} }
+  if(!showingSaved) document.getElementById("content").innerHTML='<div class="loading" id="loading">Buscando o perfil do pet...</div>';
 
   // JSONP é usado primeiro para funcionar de forma consistente no Safari/iPhone,
   // onde chamadas cross-origin ao Apps Script podem ficar presas no carregamento.
@@ -175,6 +195,7 @@ function load(){
     clearTimeout(slow);
     script.remove();
     window[callbackName] = function(){ delete window[callbackName]; };
+    if(showingSaved){ savedNotice(); return; }
     showLoadError("Tempo esgotado ao carregar o perfil.");
   }, 45000);
 
@@ -183,12 +204,14 @@ function load(){
     script.remove();
     delete window[callbackName];
     try {
-      if(data && data.error==="TAG_NOT_FOUND"){ showNotActivated(tagId); return; }
-      if(data && data.error==="TAG_BLOCKED"){ showBlocked(tagId); return; }
+      if(data && data.error==="TAG_NOT_FOUND"){ forgetSaved(tagId); showNotActivated(tagId); return; }
+      if(data && data.error==="TAG_BLOCKED"){ forgetSaved(tagId); showBlocked(tagId); return; }
       if(!data || !data.ok) throw new Error(data?.error || "Não foi possível carregar a tag.");
       render(data,tagId);
+      keepSaved(tagId,data);
       if(!noScan) registrarAcesso(tagId);
     } catch(e) {
+      if(showingSaved){ savedNotice(); return; }
       showLoadError(e.message);
     }
   };
@@ -197,6 +220,7 @@ function load(){
     clearTimeout(timeout); clearTimeout(slow);
     script.remove();
     delete window[callbackName];
+    if(showingSaved){ savedNotice(); return; }
     showLoadError("Não foi possível conectar ao servidor.");
   };
 
