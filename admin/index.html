@@ -102,6 +102,11 @@ async function apiJsonp(params){
     setTimeout(()=>{delete window[cb];if(s.parentNode)s.remove();reject(new Error('timeout'))},30000);
   });
 }
+async function postApi(payload){
+  const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),35000);
+  try{ const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:ctrl.signal}); return await r.json(); }
+  finally{ clearTimeout(t); }
+}
 function friendly(e){
  return ({TAG_NOT_ACTIVE:'Só é possível bloquear uma tag ativa.',TAG_NOT_BLOCKED:'Esta tag não está bloqueada.',TOO_MANY_ATTEMPTS:'Muitas tentativas erradas. Aguarde 15 minutos.',INVALID_PREFIX:'Prefixo inválido: use de 2 a 5 letras (ex.: MP).',BUSY_TRY_AGAIN:'Servidor ocupado, tente de novo.',ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada. No Apps Script, execute definirSenhaAdminPeloEditor com a planilha aberta.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
 }
@@ -112,7 +117,8 @@ $('loginBtn').onclick=async()=>{
  if(!pass){show($('loginMsg'),'err','Informe a senha.');return}
  btn.disabled=true;btn.textContent='ENTRANDO...';
  try{
-   const d=await apiJsonp({action:'adminlogin',password:pass});
+   // Senha vai no corpo de um POST, não no endereço. Se o navegador não conseguir, usa o método antigo.
+   let d; try{ d=await postApi({action:'adminlogin',password:pass}); }catch(e){ if(e&&e.name==='AbortError') throw e; d=await apiJsonp({action:'adminlogin',password:pass}); }
    if(d.ok){adminToken=d.token;localStorage.setItem('masterpet_admin_token',adminToken);showApp();loadTags();}
    else show($('loginMsg'),'err',friendly(d.error));
  }catch(e){show($('loginMsg'),'err','Não foi possível conectar ao servidor.')}

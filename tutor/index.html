@@ -59,7 +59,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
 </div>
 <div id="app" class="app hidden">
 <aside class="sidebar"><div class="brand">MASTER<span>PET</span></div><div class="sub">TECNOLOGIA PARA O SEU PET</div><nav class="nav">
-<button class="active" onclick="page('inicio',this)">🏠 Início</button><button onclick="page('pet',this)">🐾 Meu Pet</button><button onclick="page('perdido',this)">🚨 Pet Perdido</button><button onclick="page('acessos',this)">📱 Acessos</button><button onclick="page('tag',this)">🏷️ Minha Tag</button><button id="installBtn" class="hidden" onclick="installApp()">📲 Instalar app</button><button id="themeBtn" onclick="toggleTheme()">☀️ Modo claro</button>
+<button class="active" onclick="page('inicio',this)">🏠 Início</button><button onclick="page('pet',this)">🐾 Meu Pet</button><button onclick="page('perdido',this)">🚨 Pet Perdido</button><button onclick="page('acessos',this)">📱 Acessos</button><button onclick="page('tag',this)">🏷️ Minha Tag</button><button onclick="page('conta',this)">👤 Minha conta</button><button id="installBtn" class="hidden" onclick="installApp()">📲 Instalar app</button><button id="themeBtn" onclick="toggleTheme()">☀️ Modo claro</button>
 </nav><div class="bottom"><div class="userbox">Logado como<br><b style="color:#fff" id="tutorEmail">—</b></div><button class="nav" style="color:#89938f" onclick="logout()">↪ Sair</button></div></aside>
 <main class="main"><header class="top"><div class="hello"><h1 id="heading">Olá, <span id="tutorName">Tutor</span> 👋</h1><p>Gerencie a segurança do <span id="tutorPetName">seu pet</span>.</p></div><select id="petSelect" class="petselect hidden" onchange="selectPet(this.value)" aria-label="Escolher pet"></select><div class="avatar" id="tutorAvatar">T</div></header>
 <section id="inicio" class="page active">
@@ -91,9 +91,21 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
   </div>
 </div>
 </div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos exibidos no perfil público</h3><div id="petContacts" class="actions"></div><div class="form" style="margin-top:14px"><div><label>WhatsApp (com DDD)</label><input id="contactWa" inputmode="numeric" placeholder="45999999999"></div><div><label>Telefone para ligação (opcional)</label><input id="contactTel" inputmode="numeric" placeholder="Deixe vazio para usar o WhatsApp"></div></div><div class="row" style="margin-top:12px"><span class="muted">Quem encontrar seu pet vai usar estes números.</span><button class="btn" id="saveContactsBtn" type="button" onclick="saveContacts()">💾 Salvar contatos</button></div></div></section>
-<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">carregando...</b>.</p></div><div id="switch" class="switch" onclick="if(!document.getElementById('lostBtn').disabled)toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" placeholder="Ex.: Ela é dócil, mas tem medo de barulho. Por favor, me chame no WhatsApp."></textarea><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()" disabled>Carregando...</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div><div class="card" style="margin-top:15px"><h2 class="title">📣 Espalhe o alerta</h2><p class="muted">Quanto mais gente souber, mais rápido seu pet volta. Ative o modo perdido antes de compartilhar.</p><div class="actions"><button class="action" onclick="openPoster()"><strong>📄 Cartaz para imprimir</strong><span>Foto, mensagem, WhatsApp e QR Code. Imprima ou salve em PDF.</span></button><button class="action" onclick="shareAlert()"><strong>📤 Compartilhar alerta</strong><span>Envie o link do perfil para grupos do bairro, amigos e redes sociais.</span></button></div></div></section>
+<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">carregando...</b>.</p></div><div id="switch" class="switch" onclick="if(!document.getElementById('lostBtn').disabled)toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" placeholder="Ex.: Ela é dócil, mas tem medo de barulho. Por favor, me chame no WhatsApp."></textarea><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()" disabled>Carregando...</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div><div id="lostHistory" class="card hidden" style="margin-top:15px"></div><div class="card" style="margin-top:15px"><h2 class="title">📣 Espalhe o alerta</h2><p class="muted">Quanto mais gente souber, mais rápido seu pet volta. Ative o modo perdido antes de compartilhar.</p><div class="actions"><button class="action" onclick="openPoster()"><strong>📄 Cartaz para imprimir</strong><span>Foto, mensagem, WhatsApp e QR Code. Imprima ou salve em PDF.</span></button><button class="action" onclick="shareAlert()"><strong>📤 Compartilhar alerta</strong><span>Envie o link do perfil para grupos do bairro, amigos e redes sociais.</span></button></div></div></section>
 <section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted" id="accessSubtitle">Histórico real das tags vinculadas ao tutor.</p><div class="minigrid"><div class="card stat"><div class="label">Total</div><div class="value" id="accTotal">0</div></div><div class="card stat"><div class="label">Hoje</div><div class="value" id="accToday">0</div></div><div class="card stat"><div class="label">Último acesso</div><div class="value" style="font-size:17px" id="accLast">—</div></div></div><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody id="accessRows"><tr><td colspan="4" class="muted">Carregando...</td></tr></tbody></table></div></div></section>
-<section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div><div style="margin-top:16px;border:1px dashed #3a4441;padding:17px;border-radius:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap"><div id="tagQr" style="background:#fff;padding:10px;border-radius:10px;width:160px;height:160px"></div><div style="flex:1;min-width:200px"><b>🔳 QR Code da sua tag</b><p class="muted">Leva ao mesmo perfil da tag de metal. Use para um adesivo reserva na coleira, na caixa de transporte ou no cartão de vacina.</p><button class="btn" onclick="downloadTagQr()">⬇️ Baixar QR Code</button></div></div></div></section>
+<section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div><div style="margin-top:16px;border:1px dashed #3a4441;padding:17px;border-radius:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap"><div id="tagQr" style="background:#fff;padding:10px;border-radius:10px;width:160px;height:160px"></div><div style="flex:1;min-width:200px"><b>🔳 QR Code da sua tag</b><p class="muted">Leva ao mesmo perfil da tag de metal. Use para um adesivo reserva na coleira, na caixa de transporte ou no cartão de vacina.</p><button class="btn" onclick="downloadTagQr()">⬇️ Baixar QR Code</button></div></div></div>
+<div class="card" style="margin-top:15px"><h2 class="title">➕ Adicionar outro pet</h2><p class="muted">Recebeu uma nova tag MasterPET? Vincule aqui, sem criar outra conta. O WhatsApp da sua conta será usado como contato.</p>
+<div class="form"><div><label>ID da nova tag</label><input id="ltTag" placeholder="MP-0000" autocomplete="off"></div><div><label>Código de ativação</label><input id="ltCode" placeholder="XXXXX-XXXXX" autocomplete="off"></div>
+<div><label>Nome do pet</label><input id="ltNome"></div><div><label>Espécie</label><select id="ltEspecie"><option>Cachorro</option><option>Gato</option><option>Outro</option></select></div>
+<div><label>Sexo</label><select id="ltSexo"><option value="NAO_INFORMADO">Não informado</option><option>Macho</option><option>Fêmea</option></select></div><div><label>Raça</label><input id="ltRaca"></div></div>
+<button class="btn" id="ltBtn" style="margin-top:15px" onclick="linkNewTag()">Vincular nova tag</button></div></section>
+<section id="conta" class="page"><div class="card"><h2 class="title">👤 Minha conta</h2><p class="muted" id="contaInfo">—</p>
+<div class="actions"><button class="action" onclick="exportMyData()"><strong>⬇️ Baixar meus dados</strong><span>Arquivo com todos os dados da sua conta, pets, contatos e acessos (LGPD).</span></button>
+<button class="action" onclick="logout()"><strong>↪ Sair desta conta</strong><span>Encerra a sessão neste aparelho.</span></button></div></div>
+<div class="card" style="margin-top:15px;border-color:#633333"><h2 class="title" style="color:#ff8585">🗑️ Excluir minha conta</h2>
+<p class="muted">Apaga seus dados pessoais, as fotos e os contatos, e desativa as tags dos seus pets. Quem escanear verá "tag desativada". <b>Não dá para desfazer.</b></p>
+<div class="form"><div><label>Sua senha</label><input id="delPass" type="password" autocomplete="current-password"></div><div><label>Digite EXCLUIR para confirmar</label><input id="delConfirm" autocomplete="off"></div></div>
+<button class="btn" id="delBtn" style="margin-top:15px;background:var(--red);color:#fff" onclick="deleteMyAccount()">Excluir minha conta definitivamente</button></div></section>
 </main></div><div id="toast" class="toast hidden"></div>
 <script>
 loadTheme();
@@ -357,7 +369,7 @@ function renderAllData(){
   const petStatus=statusLabel(pet.status), tagStatus=statusLabel(pet.tagStatus);
   document.getElementById('homePetName').textContent=petEmoji(pet)+' '+nome;
   document.getElementById('homePetStatus').textContent='● '+petStatus;
-  document.getElementById('homeAccessCount').textContent=accesses.length;
+  document.getElementById('homeAccessCount').textContent=accesses.filter(a=>!/^MODO_PERDIDO/.test(String(a.acao||''))).length;
   const now=new Date(), month=now.getMonth(), year=now.getFullYear();
   const monthCount=accesses.filter(a=>{const d=new Date(a.dataHora);return !isNaN(d)&&d.getMonth()===month&&d.getFullYear()===year}).length;
   document.getElementById('homeAccessMonth').textContent='+'+monthCount+' este mês';
@@ -407,6 +419,8 @@ function renderAllData(){
   renderLost(lost);
   renderTagQr(tag);
   renderAccesses(accesses,tag);
+  renderLostHistory(accesses,lost);
+  document.getElementById('contaInfo').textContent='Conta: '+cleanText((MP_TUTOR||{}).email,'—')+' · '+((window.MP_DATA&&window.MP_DATA.pets)||[]).length+' pet(s)';
 }
 
 function toDateInput(v){
@@ -600,14 +614,65 @@ function renderAccesses(accesses,tag){
   document.getElementById('accessSubtitle').textContent='Histórico real da tag '+tag+'.';
   const ts=a=>{const d=new Date(a.dataHora);return isNaN(d)?0:d.getTime();};
   accesses=accesses.slice().sort((a,b)=>ts(b)-ts(a));
+  const views=accesses.filter(a=>!/^MODO_PERDIDO/.test(String(a.acao||'')));
   const today=new Date().toDateString();
-  document.getElementById('accTotal').textContent=accesses.length;
-  document.getElementById('accToday').textContent=accesses.filter(a=>{const d=new Date(a.dataHora);return !isNaN(d)&&d.toDateString()===today}).length;
-  const last=accesses[0]?fmtDateTime(accesses[0].dataHora):null;
+  document.getElementById('accTotal').textContent=views.length;
+  document.getElementById('accToday').textContent=views.filter(a=>{const d=new Date(a.dataHora);return !isNaN(d)&&d.toDateString()===today}).length;
+  const last=views[0]?fmtDateTime(views[0].dataHora):null;
   document.getElementById('accLast').textContent=last?last.date+' '+last.time:'—';
   const tbody=document.getElementById('accessRows'); tbody.innerHTML='';
   if(!accesses.length){tbody.innerHTML='<tr><td colspan="4" class="muted">Nenhum acesso registrado.</td></tr>';return;}
-  accesses.forEach(a=>{const dt=fmtDateTime(a.dataHora),loc=(a.locationAuthorized&&a.latitude&&a.longitude)?'<a target="_blank" href="https://www.google.com/maps?q='+encodeURIComponent(a.latitude+','+a.longitude)+'">Ver localização</a>':'Não informada'; const tr=document.createElement('tr'); const acao={VISUALIZOU_PERFIL:'👀 Perfil visualizado',ENCONTREI:'📍 Encontrado'}[String(a.acao||'').toUpperCase()]||cleanText(a.acao,'QR acessado'); tr.innerHTML='<td>'+esc(dt.date)+'</td><td>'+esc(dt.time)+'</td><td>'+esc(acao)+'</td><td>'+loc+'</td>'; tbody.appendChild(tr);});
+  accesses.forEach(a=>{const dt=fmtDateTime(a.dataHora),loc=(a.locationAuthorized&&a.latitude&&a.longitude)?'<a target="_blank" href="https://www.google.com/maps?q='+encodeURIComponent(a.latitude+','+a.longitude)+'">Ver localização</a>':'Não informada'; const tr=document.createElement('tr'); const acao={VISUALIZOU_PERFIL:'👀 Perfil visualizado',ENCONTREI:'📍 Encontrado',ENCONTREI_PET:'📍 Encontrado',MODO_PERDIDO_ATIVADO:'🚨 Modo perdido ativado',MODO_PERDIDO_DESATIVADO:'✅ Modo perdido desativado'}[String(a.acao||'').toUpperCase()]||cleanText(a.acao,'QR acessado'); tr.innerHTML='<td>'+esc(dt.date)+'</td><td>'+esc(dt.time)+'</td><td>'+esc(acao)+'</td><td>'+loc+'</td>'; tbody.appendChild(tr);});
+}
+function renderLostHistory(acc,lost){
+  const box=document.getElementById('lostHistory'); const ts=a=>{const d=new Date(a.dataHora);return isNaN(d)?0:d.getTime();};
+  const evs=acc.filter(a=>/^MODO_PERDIDO/.test(String(a.acao||''))).sort((a,b)=>ts(b)-ts(a));
+  if(!evs.length){box.classList.add('hidden');return;}
+  let head='';
+  if(lost){ const since=evs.find(e=>e.acao==='MODO_PERDIDO_ATIVADO'); if(since){ const t=ts(since), n=acc.filter(a=>a.acao==='VISUALIZOU_PERFIL'&&ts(a)>=t).length, d=fmtDateTime(since.dataHora);
+    head='<div class="warning" style="margin:10px 0"><strong>🚨 Perdido desde '+esc(d.date)+' às '+esc(d.time)+'</strong><br><span class="muted">'+n+' visualização(ões) do perfil desde então.</span></div>'; } }
+  box.innerHTML='<h2 class="title">🕑 Histórico do modo perdido</h2>'+head+'<div class="tablewrap"><table><tbody>'+evs.slice(0,10).map(e=>{const d=fmtDateTime(e.dataHora);return '<tr><td>'+esc(d.date)+'</td><td>'+esc(d.time)+'</td><td>'+(e.acao==='MODO_PERDIDO_ATIVADO'?'🚨 Ativado':'✅ Desativado')+'</td></tr>';}).join('')+'</tbody></table></div>';
+  box.classList.remove('hidden');
+}
+async function exportMyData(){
+  try{
+    const r=await jsonp('exportdata',{token:MP_TOKEN});
+    if(!r||!r.ok){ toast(r&&r.error==='AUTH_INVALID'?'Sessão expirada. Entre novamente.':'Não foi possível gerar o arquivo.'); return; }
+    const blob=new Blob([JSON.stringify(r,null,2)],{type:'application/json'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='MasterPET_meus_dados_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+    toast('✅ Arquivo com seus dados baixado.');
+  }catch(e){ toast('Não foi possível conectar ao servidor.'); }
+}
+async function deleteMyAccount(){
+  const pass=document.getElementById('delPass').value, conf=document.getElementById('delConfirm').value.trim().toUpperCase();
+  if(conf!=='EXCLUIR') return toast('Digite EXCLUIR para confirmar.');
+  if(!pass) return toast('Informe sua senha.');
+  if(!confirm('Tem certeza? Seus dados serão apagados e as tags dos seus pets serão desativadas. Não dá para desfazer.')) return;
+  const b=document.getElementById('delBtn'); b.disabled=true; b.textContent='Excluindo...';
+  try{
+    const r=await secureCall('deleteaccount',{token:MP_TOKEN,password:pass});
+    if(r&&r.ok){ alert('Sua conta foi excluída. Obrigado por ter usado a MasterPET.'); logout(); location.href='/'; return; }
+    toast({INVALID_CREDENTIALS:'Senha incorreta.',TOO_MANY_ATTEMPTS:'Muitas tentativas. Aguarde 15 minutos.',AUTH_INVALID:'Sessão expirada. Entre novamente.'}[r&&r.error]||'Não foi possível excluir a conta.');
+  }catch(e){ toast('Não foi possível conectar ao servidor.'); }
+  finally{ b.disabled=false; b.textContent='Excluir minha conta definitivamente'; }
+}
+async function linkNewTag(){
+  const v=id=>document.getElementById(id).value.trim();
+  const tagId=v('ltTag').toUpperCase().replace(/\s+/g,''), code=v('ltCode').toUpperCase().replace(/\s+/g,'');
+  if(!/^[A-Z]{2,5}-[A-Z0-9-]+$/.test(tagId)) return toast('Informe o ID da tag, ex.: MP-0013.');
+  if(!code) return toast('Informe o código de ativação.');
+  if(!v('ltNome')) return toast('Informe o nome do pet.');
+  const b=document.getElementById('ltBtn'); b.disabled=true; b.textContent='Vinculando...';
+  try{
+    const r=await jsonp('linktag',{token:MP_TOKEN,tagId,code,nomePet:v('ltNome'),especie:v('ltEspecie'),sexo:v('ltSexo'),raca:v('ltRaca')});
+    if(r&&r.ok){
+      await loadTutorData(); const ps=window.MP_DATA.pets, i=ps.findIndex(p=>p.tag===r.tagId); if(i>=0) selectPet(i);
+      ['ltTag','ltCode','ltNome','ltRaca'].forEach(id=>document.getElementById(id).value='');
+      toast('✅ Tag '+r.tagId+' vinculada! Agora complete o perfil do novo pet.'); page('pet'); return;
+    }
+    toast({TAG_CODE_INVALID:'Código de ativação incorreto.',TAG_ALREADY_ACTIVE:'Esta tag já está ativa.',TAG_NOT_FOUND:'Tag não encontrada. Confira o ID.',TAG_NOT_AVAILABLE:'Esta tag não está disponível.',TOO_MANY_ATTEMPTS:'Muitas tentativas. Aguarde 1 hora.',AUTH_INVALID:'Sessão expirada. Entre novamente.'}[r&&r.error]||'Não foi possível vincular a tag.');
+  }catch(e){ try{await loadTutorData();}catch(_){} toast('Não conseguimos confirmar. Confira se o novo pet apareceu.'); }
+  finally{ b.disabled=false; b.textContent='Vincular nova tag'; }
 }
 function petIsLost(p){return ['PERDIDO','PERDIDA','LOST'].includes(String(p&&p.status||'').toUpperCase());}
 function openPoster(){ const p=currentPet(); if(!p) return toast('Nenhum pet disponível.'); window.open('/tutor/cartaz/?pet='+encodeURIComponent(p.id),'_blank'); }
