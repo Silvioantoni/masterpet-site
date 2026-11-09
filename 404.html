@@ -31,6 +31,47 @@
 .loading{text-align:center;padding:50px 20px;color:#555}
 .cta{background:#39ff00;color:#071000}.ghost{background:#fff;color:#171a1b;border:1px solid #d5dadc}
 .info{padding:18px;border:1px solid #e0e4e6;background:#f8fafb;border-radius:14px;line-height:1.5;font-size:14px;color:#333}.error{padding:18px;border:1px solid #f0caca;background:#fff5f5;border-radius:14px}
+
+@font-face{font-family:"Space Grotesk";src:url(/fonts/space-grotesk-var.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Inter";src:url(/fonts/inter-var.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--display:"Space Grotesk",ui-sans-serif,system-ui,Arial,sans-serif;--body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;--lime:#b7ff00;--ease:cubic-bezier(.2,.8,.2,1)}
+/* ===== Camada premium ===== */
+body{font-family:var(--body);-webkit-font-smoothing:antialiased;color:#0f140f;background:#070807}
+@media(min-width:520px){body{background:radial-gradient(700px 420px at 50% -5%,rgba(183,255,0,.14),transparent 65%),#070807;padding:32px 0 40px}
+  .app{border-radius:30px;overflow:hidden;min-height:auto;box-shadow:0 40px 120px -30px #000,0 0 0 1px rgba(255,255,255,.06)}}
+.app{background:#f6f8f5}
+.hero{position:relative;overflow:hidden;background:radial-gradient(420px 260px at 50% 0%,rgba(183,255,0,.18),transparent 70%),linear-gradient(180deg,#0b0e0b,#121612);padding:30px 22px 34px}
+.hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:36px 36px;-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 70%);pointer-events:none}
+.hero>*{position:relative}
+.logo{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.04em}
+.logo span{color:var(--lime)}
+.slogan{font:600 9.5px/1 var(--body);letter-spacing:.24em;color:#8f9a90;margin-top:8px}
+.petpic{width:132px;height:132px;margin:24px auto 14px;border:3px solid var(--lime);box-shadow:0 0 0 8px rgba(183,255,0,.10),0 20px 50px -10px rgba(183,255,0,.35);background:#1a1f1a}
+.petname{font-family:var(--display);font-size:34px;font-weight:700;letter-spacing:-.035em}
+.breed{color:#a8b2a9;font-size:14px;margin-top:8px}
+.content{padding:20px 18px 6px}
+.status{border-radius:20px;padding:18px;border-color:#cdeba0;background:linear-gradient(180deg,#f3fbe3,#ffffff)}
+.status strong{font-family:var(--display);font-size:18px;letter-spacing:-.02em}
+.status .dot{float:left;margin:5px 10px 0 2px;background:#5fa800;box-shadow:0 0 0 4px rgba(95,168,0,.15)}
+.status[style*="ff5364"] .dot{display:none}
+.btn{min-height:58px;border-radius:999px;margin:12px 0;font:600 16px/1.2 var(--body);letter-spacing:-.01em;gap:8px;transition:transform .2s var(--ease),box-shadow .2s}
+.btn:active{transform:scale(.98)}
+.whats,.cta{background:var(--lime)!important;color:#0b1000!important;box-shadow:0 14px 30px -14px rgba(120,170,0,.75)}
+.phone{background:#0f130f;color:#fff;box-shadow:0 14px 30px -16px rgba(0,0,0,.6)}
+.ghost{background:#fff;border-color:#dfe5dd;color:#0f140f}
+.card{background:#fff;border:1px solid #e4e9e2;border-radius:22px;padding:18px;margin-top:14px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 12px 30px -20px rgba(0,0,0,.18)}
+.card h2{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px}
+.row{padding:12px 0;border-bottom-color:#eef1ec;font-size:14.5px}
+.label{color:#6b766c}.value{font-weight:600}
+.note{color:#3f4a40}
+.info{border-radius:18px;background:#fff;border-color:#e4e9e2}
+.error{border-radius:18px}
+.card textarea,.card input:not([type=checkbox]):not([type=hidden]){border:1px solid #dfe5dd!important;border-radius:14px!important;padding:13px 14px!important;font:15px/1.4 var(--body)!important;background:#f8faf7;transition:border-color .2s,box-shadow .2s}
+.card textarea:focus,.card input:focus{outline:none;border-color:#8cc400!important;box-shadow:0 0 0 4px rgba(183,255,0,.25)}
+input[type=checkbox]{accent-color:#6fae00;width:18px;height:18px}
+.footer{font:600 10px/1.6 var(--body);letter-spacing:.2em;color:#9aa49b;padding:26px 20px 30px}
+.loading{color:#6b766c}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
