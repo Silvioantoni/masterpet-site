@@ -175,6 +175,7 @@ function load(){
     delete window[callbackName];
     try {
       if(data && data.error==="TAG_NOT_FOUND"){ showNotActivated(tagId); return; }
+      if(data && data.error==="TAG_BLOCKED"){ showBlocked(tagId); return; }
       if(!data || !data.ok) throw new Error(data?.error || "Não foi possível carregar a tag.");
       render(data,tagId);
       if(!noScan) registrarAcesso(tagId);
@@ -214,6 +215,15 @@ function showNotActivated(tagId){
     '<a class="btn cta" href="/ativar/?tagId='+encodeURIComponent(tagId)+'">🐾 Ativar minha MasterPET</a>'+
     '<a class="btn ghost" href="/">Conhecer a MasterPET</a>'+
     '<p class="note" style="text-align:center;font-size:12px;color:#8a9295">Encontrou um pet com esta tag? A família ainda não concluiu o cadastro.</p>';
+}
+
+function showBlocked(tagId){
+  document.title="MasterPET — Tag desativada";
+  document.getElementById("petname").textContent=tagId;
+  document.getElementById("breed").textContent="Tag desativada";
+  document.getElementById("content").innerHTML=
+    '<div class="info"><strong>Esta tag MasterPET foi desativada.</strong><br>Ela pode ter sido perdida, substituída ou estar em análise. Se você encontrou um pet usando esta tag, fale com a MasterPET pelo WhatsApp que ajudamos a localizar a família.</div>'+
+    '<a class="btn whats" target="_blank" href="https://wa.me/554599893990?text='+encodeURIComponent("Olá! Encontrei um pet com a tag MasterPET "+tagId+", que aparece como desativada.")+'">💬 Falar com a MasterPET</a>';
 }
 
 function showNotFoundPage(){

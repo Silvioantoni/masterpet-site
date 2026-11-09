@@ -60,9 +60,10 @@ button.dark{background:#1c2622;color:#fff;border:1px solid #3b4b44}button:disabl
     </div>
 
     <div class="card" style="margin-top:18px">
+      <div class="row" style="margin-bottom:12px"><div class="field"><label>Buscar</label><input id="search" placeholder="Tag, pet, tutor, e-mail ou status" oninput="render()"></div></div>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>TAG</th><th>STATUS</th><th>CÓDIGO</th><th>URL</th><th>QR</th></tr></thead>
+          <thead><tr><th>TAG</th><th>STATUS</th><th>PET / TUTOR</th><th>CÓDIGO</th><th>URL</th><th>AÇÕES</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -102,7 +103,7 @@ async function apiJsonp(params){
   });
 }
 function friendly(e){
- return ({TOO_MANY_ATTEMPTS:'Muitas tentativas erradas. Aguarde 15 minutos.',INVALID_PREFIX:'Prefixo inválido: use de 2 a 5 letras (ex.: MP).',BUSY_TRY_AGAIN:'Servidor ocupado, tente de novo.',ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada. No Apps Script, execute definirSenhaAdminPeloEditor com a planilha aberta.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
+ return ({TAG_NOT_ACTIVE:'Só é possível bloquear uma tag ativa.',TAG_NOT_BLOCKED:'Esta tag não está bloqueada.',TOO_MANY_ATTEMPTS:'Muitas tentativas erradas. Aguarde 15 minutos.',INVALID_PREFIX:'Prefixo inválido: use de 2 a 5 letras (ex.: MP).',BUSY_TRY_AGAIN:'Servidor ocupado, tente de novo.',ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada. No Apps Script, execute definirSenhaAdminPeloEditor com a planilha aberta.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
 }
 function showApp(){$('loginCard').classList.add('hidden');$('app').classList.remove('hidden')}
 function logout(){localStorage.removeItem('masterpet_admin_token');adminToken='';location.reload()}
@@ -153,18 +154,33 @@ async function loadTags(){
 }
 function render(){
  const tb=$('tbody');tb.innerHTML='';
- tags.slice().reverse().forEach(t=>{
+ const q=(($('search')&&$('search').value)||'').trim().toLowerCase();
+ tags.slice().reverse().filter(t=>!q||[t.idTag,t.status,t.pet,t.tutor,t.tutorEmail].join(' ').toLowerCase().includes(q)).forEach(t=>{
    const tr=document.createElement('tr');
    const status=String(t.status||'');
-   tr.innerHTML='<td class="tag"></td><td class="status"></td><td class="code"></td><td></td><td></td>';
+   tr.innerHTML='<td class="tag"></td><td class="status"></td><td></td><td class="code"></td><td></td><td></td>';
    tr.children[0].textContent=t.idTag;
-   tr.children[1].textContent=status;
-   tr.children[2].textContent=t.codigo||'—';
+   tr.children[1].textContent=status+(String(t.petStatus).toUpperCase()==='PERDIDO'?' • 🚨 PERDIDO':'');
+   if(status.toUpperCase()==='BLOQUEADA') tr.children[1].style.color='#ff5265';
+   tr.children[2].innerHTML=t.pet?'<b></b><br><span class="muted"></span>':'<span class="muted">—</span>';
+   if(t.pet){tr.children[2].querySelector('b').textContent=t.pet;tr.children[2].querySelector('span').textContent=(t.tutor||'')+(t.tutorEmail?' • '+t.tutorEmail:'');}
+   tr.children[3].textContent=t.codigo||'—';
    const a=document.createElement('a');a.href=t.qrUrl;a.target='_blank';a.textContent=t.qrUrl.replace('https://masterpet.tec.br/p/','');
-   tr.children[3].appendChild(a);
-   const b=document.createElement('button');b.className='dark';b.textContent='VER QR';b.onclick=()=>openQr(t);tr.children[4].appendChild(b);
+   tr.children[4].appendChild(a);
+   const b=document.createElement('button');b.className='dark';b.textContent='VER QR';b.onclick=()=>openQr(t);tr.children[5].appendChild(b);
+   const st=status.toUpperCase();
+   if(st==='ATIVA'||st==='BLOQUEADA'){const x=document.createElement('button');x.className='dark';x.style.marginLeft='6px';x.textContent=st==='ATIVA'?'BLOQUEAR':'DESBLOQUEAR';x.onclick=()=>setTagStatus(t,st==='ATIVA'?'BLOQUEADA':'ATIVA');tr.children[5].appendChild(x);}
    tb.appendChild(tr);
  });
+}
+async function setTagStatus(t,status){
+ const msg=status==='BLOQUEADA'?'Bloquear a tag '+t.idTag+'? O perfil público passará a mostrar "tag desativada".':'Desbloquear a tag '+t.idTag+'? O perfil do pet volta a aparecer.';
+ if(!confirm(msg)) return;
+ try{
+   const d=await apiJsonp({action:'admintagstatus',adminToken:adminToken,tagId:t.idTag,status:status});
+   if(d.ok){show($('appMsg'),'ok','Tag '+t.idTag+' agora está '+status+'.');loadTags();}
+   else show($('appMsg'),'err',friendly(d.error));
+ }catch(e){show($('appMsg'),'err','Não foi possível alterar a tag. Clique em ATUALIZAR para conferir.');}
 }
 function openQr(t){
  $('qrcode').innerHTML='';new QRCode($('qrcode'),{text:t.qrUrl,width:240,height:240,correctLevel:QRCode.CorrectLevel.H});
