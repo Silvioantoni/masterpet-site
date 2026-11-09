@@ -67,6 +67,22 @@ function jsonp(params,timeoutMs=15000){
   });
 }
 
+
+// Envia dados sensíveis (senha) no CORPO de um POST, nunca no endereço.
+// O Apps Script responde com redirecionamento + "Access-Control-Allow-Origin: *"; texto simples não exige preflight.
+async function postApi(payload,timeoutMs=35000){
+  const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),timeoutMs);
+  try{
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:ctrl.signal,redirect:'follow'});
+    return await res.json();
+  }finally{ clearTimeout(t); }
+}
+// Usa POST; só se o navegador não conseguir (bloqueio/rede), volta ao método antigo para o login não parar.
+async function secureCall(action,params){
+  try{ return await postApi(Object.assign({action},params)); }
+  catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonp(Object.assign({action},params)); }
+}
+
 (function prefill(){
   const q=new URLSearchParams(location.search);
   const t=(q.get('tagId')||q.get('tag')||'').trim().toUpperCase();
@@ -114,7 +130,7 @@ async function activateTag(){
  let publicMatch=false, publicOther=false;
  for(let attempt=1;attempt<=7;attempt++){
    try{
-     const lg=await jsonp({action:'login',email,password:pass});
+     const lg=await secureCall('login',{email,password:pass});
      if(lg&&lg.ok&&lg.token){
        const pets=await jsonp({action:'tutorpets',token:lg.token});
        const has=pets&&pets.ok&&(pets.pets||[]).some(p=>String(p.tag||'').toUpperCase()===tagId);
