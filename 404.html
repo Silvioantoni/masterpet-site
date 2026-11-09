@@ -99,6 +99,7 @@ function render(data, tagId){
   const wa=contacts.find(x=>String(x.tipo).toUpperCase()==="WHATSAPP" && String(x.valor||"").trim());
   const phone=contacts.find(x=>String(x.tipo).toUpperCase()==="TELEFONE" && String(x.valor||"").trim()) || wa;
   const wnum=normalizePhone(wa?.valor);
+  window.MP_FAMILY_WA=wnum; window.MP_PET_NAME=p.nome||'Pet';
   const pnum=normalizePhone(phone?.valor);
   const name=p.nome || "Pet";
   const status=String(p.status||"ATIVO").toUpperCase();
@@ -125,7 +126,9 @@ function render(data, tagId){
   content.innerHTML =
     statusHtml+
     buttons+
+    (isLost?'<button class="btn cta" type="button" id="locBtn" onclick="sendLocation()">📍 Enviar minha localização para a família</button><div class="note" style="font-size:12px;text-align:center;margin-top:-4px">Só é enviada se você tocar no botão e permitir.</div>':'')+
     (isLost?'<button class="btn ghost" type="button" onclick="shareProfile()">📤 Compartilhar este alerta</button>':'')+
+    healthHtml(p.saude)+
     '<section class="card"><h2>🐾 Sobre o pet</h2>'+
       '<div class="row"><span class="label">Nome</span><span class="value">'+esc(p.nome)+'</span></div>'+
       '<div class="row"><span class="label">Raça</span><span class="value">'+esc(p.raca||"-")+'</span></div>'+
@@ -136,6 +139,32 @@ function render(data, tagId){
     '<section class="card"><h2>❤️ Ajude a família</h2><p class="note">Se você encontrou este pet, entre em contato pelos canais disponíveis acima. A MasterPET protege os dados privados da família.</p></section>';
 }
 
+
+function healthHtml(sd){
+  if(!sd||!(sd.alergias||sd.medicamentos||sd.veterinario)) return '';
+  const row=(l,v)=>v?'<div class="row"><span class="label">'+l+'</span><span class="value">'+esc(v)+'</span></div>':'';
+  return '<section class="card"><h2>🩺 Cuidados de saúde</h2>'+row('Alergias',sd.alergias)+row('Medicamentos',sd.medicamentos)+row('Veterinário',sd.veterinario)+'</section>';
+}
+// Localização: SÓ com toque explícito + permissão do navegador. Vai para a família por WhatsApp e e-mail.
+function sendLocation(){
+  const b=document.getElementById('locBtn');
+  if(!navigator.geolocation){ alert('Seu navegador não permite compartilhar a localização. Use o botão do WhatsApp.'); return; }
+  b.disabled=true; b.textContent='📍 Obtendo localização...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat=pos.coords.latitude.toFixed(6), lng=pos.coords.longitude.toFixed(6), maps='https://www.google.com/maps?q='+lat+','+lng;
+    try{
+      const form=document.createElement('form'); form.method='POST'; form.action=API; form.target='mpAccessFrame'; form.style.display='none';
+      const f={action:'recordfound',tagId:getTagId(),latitude:lat,longitude:lng,locationAuthorized:'true'};
+      Object.keys(f).forEach(k=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=f[k];form.appendChild(i);});
+      document.body.appendChild(form); form.submit(); setTimeout(()=>form.remove(),2500);
+    }catch(e){}
+    b.textContent='✅ Localização enviada para a família';
+    if(window.MP_FAMILY_WA) window.open('https://wa.me/'+window.MP_FAMILY_WA+'?text='+encodeURIComponent('Olá! Encontrei '+window.MP_PET_NAME+' pela MasterPET. Estou aqui: '+maps),'_blank');
+  },err=>{
+    b.disabled=false; b.textContent='📍 Enviar minha localização para a família';
+    alert(err.code===1?'Você não permitiu a localização. Tudo bem: use o botão do WhatsApp para falar com a família.':'Não foi possível obter a localização agora. Tente de novo ou use o WhatsApp.');
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+}
 
 function shareProfile(){
   const url=location.origin+'/p/'+encodeURIComponent(getTagId());
