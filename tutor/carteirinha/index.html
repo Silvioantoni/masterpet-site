@@ -29,6 +29,26 @@
 .foot p{margin:0;color:#a5afa7;font-size:12px;line-height:1.5}
 .hint{color:#7d8a83;font-size:12px;text-align:center;max-width:380px;line-height:1.5}
 @media print{body{background:#fff}.bar,.hint{display:none}.card{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+@font-face{font-family:"Space Grotesk";src:url(/fonts/space-grotesk-var.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Inter";src:url(/fonts/inter-var.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--display:"Space Grotesk",ui-sans-serif,system-ui,Arial,sans-serif;--body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;--lime:#b7ff00;--ease:cubic-bezier(.2,.8,.2,1)}
+/* ===== Camada premium ===== */
+body{font-family:var(--body);-webkit-font-smoothing:antialiased;background:radial-gradient(700px 420px at 50% -5%,rgba(183,255,0,.10),transparent 65%),#070807}
+.bar{background:rgba(7,8,7,.8);backdrop-filter:blur(14px);border-bottom-color:#1f261f}
+.bar button,.bar a{border-radius:999px;padding:11px 18px;font:600 14px var(--body)}
+.primary{box-shadow:0 10px 26px -12px rgba(183,255,0,.55)}
+.ghost{background:rgba(255,255,255,.04)}
+.card{border-radius:26px;background:radial-gradient(320px 200px at 100% 0%,rgba(183,255,0,.12),transparent 70%),linear-gradient(160deg,#141a13,#0b0e0b 60%,#121812);border-color:#2b342b;box-shadow:0 40px 100px -30px #000,inset 0 1px 0 rgba(255,255,255,.04)}
+.brand{font-family:var(--display);font-weight:700;letter-spacing:-.03em}
+.tagid{font:700 12px var(--body);letter-spacing:.12em}
+.photo{border-radius:22px;border-width:2px;box-shadow:0 0 0 5px rgba(183,255,0,.10)}
+.name{font-family:var(--display);font-weight:700;font-size:27px;letter-spacing:-.035em}
+.meta{font-size:13px}
+.row{font-size:13.5px;border-top-color:#1f261f}.row b{font-weight:600}
+.qr{border-radius:14px}
+.hint{font-size:13px}
+@media print{body{background:#fff}.bar,.hint{display:none}.card{box-shadow:none}}
 </style>
 </head>
 <body>

@@ -44,6 +44,25 @@ body{margin:0;background:#2a2f31;font-family:Arial,Helvetica,sans-serif;color:#1
   .sheet{margin:0;box-shadow:none;width:210mm;height:297mm;transform:none!important}
   .top,.note{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+@font-face{font-family:"Space Grotesk";src:url(/fonts/space-grotesk-var.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Inter";src:url(/fonts/inter-var.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--display:"Space Grotesk",ui-sans-serif,system-ui,Arial,sans-serif;--body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;--lime:#b7ff00;--ease:cubic-bezier(.2,.8,.2,1)}
+/* ===== Camada premium ===== */
+body{font-family:var(--body);background:radial-gradient(800px 400px at 50% -10%,rgba(183,255,0,.08),transparent 60%),#121512}
+.bar{background:rgba(7,8,7,.82);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border-bottom-color:#1f261f;padding:12px 20px}
+.bar .brand{font-family:var(--display);font-weight:700;letter-spacing:-.03em;font-size:17px}
+.bar button,.bar a{border-radius:999px;padding:11px 18px;font:600 14px var(--body)}
+.primary{box-shadow:0 10px 26px -12px rgba(183,255,0,.55)}
+.ghost{background:rgba(255,255,255,.04)}
+.msg{font-family:var(--body)}
+.sheet{box-shadow:0 40px 100px -30px #000}
+.top h1,.name,.contact .phone,.foot b{font-family:var(--display);font-weight:700}
+.top h1{letter-spacing:.6mm}
+.name{letter-spacing:-.4mm}
+.contact .phone{letter-spacing:0}
+.foot b span{color:#5e9600}
+@media print{body{background:#fff}.bar,.msg{display:none!important}.sheet{box-shadow:none}}
 </style>
 </head>
 <body>
