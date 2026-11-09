@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /tutor/
+Disallow: /p/
+Sitemap: https://masterpet.tec.br/sitemap.xml
