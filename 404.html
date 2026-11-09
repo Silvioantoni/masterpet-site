@@ -115,7 +115,7 @@ function render(data, tagId){
 
   const isLost = status === "PERDIDO" || status === "PET PERDIDO" || status === "LOST";
   const statusHtml = isLost
-    ? '<div class="status" style="border-color:#ff5364;background:#fff0f2"><span class="dot" style="background:#ff3048"></span><strong style="color:#c9142c">🚨 '+esc(name)+' está '+(female?'PERDIDA':'PERDIDO')+'</strong><div style="margin-top:6px;color:#8a3a43;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você '+(female?'a':'o')+' encontrou, entre em contato com a família.</div></div>'
+    ? '<div class="status" style="border-color:#ff5364;background:#fff0f2"><span class="dot" style="background:#ff3048"></span><strong style="color:#c9142c">🚨 '+esc(name)+' está '+(female?'PERDIDA':'PERDIDO')+'</strong><div style="margin-top:6px;color:#8a3a43;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você '+(female?'a':'o')+' encontrou, entre em contato com a família.</div>'+(p.mensagemPerdido?'<div style="margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #ffc7cf;color:#5a1f27;font-size:14px;line-height:1.45"><b>Mensagem da família:</b><br>'+esc(p.mensagemPerdido)+'</div>':'')+'</div>'
     : '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está '+(female?'identificada':'identificado')+'</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>';
 
   content.innerHTML =

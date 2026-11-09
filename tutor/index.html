@@ -326,6 +326,7 @@ function renderAllData(){
   document.getElementById('tagStatus').textContent=tagStatus;
   document.getElementById('tagDate').textContent='—';
   document.getElementById('tagUrl').textContent='https://masterpet.tec.br/p/'+encodeURIComponent(tag);
+  const lm=document.getElementById('lostMessage'); if(lm && document.activeElement!==lm) lm.value=cleanText(pet.mensagemPerdido,'');
   renderLost(lost);
   renderAccesses(accesses,tag);
 }
