@@ -70,6 +70,12 @@ body{margin:0;background:#2a2f31;font-family:Arial,Helvetica,sans-serif;color:#1
 <script>
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
 let PET=null;
+async function postTutorPets(token){
+  const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),35000);
+  try{ const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'tutorpets',token}),signal:ctrl.signal}); return await r.json(); }
+  catch(e){ if(e&&e.name==='AbortError') throw e; return await jsonp('tutorpets',{token}); }
+  finally{ clearTimeout(t); }
+}
 function jsonp(action,params={}){
   return new Promise((resolve,reject)=>{
     const cb='mp_cz_'+Date.now()+'_'+Math.random().toString(36).slice(2);
@@ -106,7 +112,7 @@ function shareAlert(){
   if(!token){ location.href='/tutor/'; return; }
   const petId=new URLSearchParams(location.search).get('pet')||'';
   try{
-    const r=await jsonp('tutorpets',{token});
+    const r=await postTutorPets(token);
     if(!r||!r.ok){ document.getElementById('msg').innerHTML='Sua sessão expirou. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.'; return; }
     PET=(r.pets||[]).find(p=>p.id===petId)||(r.pets||[])[0];
     if(!PET){ document.getElementById('msg').textContent='Nenhum pet encontrado nesta conta.'; return; }

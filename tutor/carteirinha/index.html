@@ -44,6 +44,12 @@
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const br=v=>{const m=String(v||'').match(/(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(v||'');};
+async function postTutorPets(token){
+  const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),35000);
+  try{ const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'tutorpets',token}),signal:ctrl.signal}); return await r.json(); }
+  catch(e){ if(e&&e.name==='AbortError') throw e; return await jsonp('tutorpets',{token}); }
+  finally{ clearTimeout(t); }
+}
 function jsonp(action,params){return new Promise((res,rej)=>{const cb='mpCard_'+Date.now(),s=document.createElement('script');let done=false;
   const fin=(f,v)=>{if(done)return;done=true;clearTimeout(t);window[cb]=function(){};s.remove();f(v)};const t=setTimeout(()=>fin(rej,new Error('TIMEOUT')),35000);
   window[cb]=d=>fin(res,d);s.onerror=()=>fin(rej,new Error('NET'));s.src=API+'?action='+action+'&callback='+cb+Object.entries(params).map(([k,v])=>'&'+k+'='+encodeURIComponent(v)).join('');document.body.appendChild(s);});}
@@ -51,7 +57,7 @@ function jsonp(action,params){return new Promise((res,rej)=>{const cb='mpCard_'+
   const token=localStorage.getItem('masterpet_token'); if(!token){location.href='/tutor/';return;}
   const want=new URLSearchParams(location.search).get('pet')||'';
   let p;
-  try{ const r=await jsonp('tutorpets',{token}); if(!r||!r.ok){document.getElementById('msg').innerHTML='Sessão expirada. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.';return;} p=(r.pets||[]).find(x=>x.id===want)||(r.pets||[])[0]; }
+  try{ const r=await postTutorPets(token); if(!r||!r.ok){document.getElementById('msg').innerHTML='Sessão expirada. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.';return;} p=(r.pets||[]).find(x=>x.id===want)||(r.pets||[])[0]; }
   catch(e){ document.getElementById('msg').textContent='Não foi possível carregar. Verifique a internet e recarregue.'; return; }
   if(!p){ document.getElementById('msg').textContent='Nenhum pet nesta conta.'; return; }
   const url='https://masterpet.tec.br/p/'+encodeURIComponent(p.tag);
