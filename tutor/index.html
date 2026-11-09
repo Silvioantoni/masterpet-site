@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://script.google.com https://script.googleusercontent.com; form-action 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style id="af">html{display:none}</style><script>if(window.self===window.top){document.getElementById("af").remove();}else{window.top.location=window.self.location;}</script><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MasterPET — Área do Tutor</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -9,6 +12,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MasterPET">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
 <style>
 :root{
@@ -90,8 +95,8 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
     <div id="photoUploadStatus" class="muted" style="margin-top:5px"></div>
   </div>
 </div>
-</div><div><label>Cidade</label><input id="petCidade" readonly placeholder="Ex.: Cascavel - PR"></div><div></div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div><div class="full" style="margin-top:6px"><h3 style="margin:6px 0 0">🩺 Saúde</h3><p class="muted" style="margin:4px 0 0">Ajuda quem encontrar seu pet e gera lembretes de vacina por e-mail.</p></div><div><label>Alergias</label><input id="hAlergias" readonly placeholder="Ex.: dipirona, frango"></div><div><label>Medicamentos de uso contínuo</label><input id="hMedicamentos" readonly placeholder="Ex.: insulina 2x ao dia"></div><div><label>Veterinário (nome e telefone)</label><input id="hVet" readonly placeholder="Ex.: Clínica X (45) 3222-0000"></div><div><label>Próxima vacina</label><input id="hProxVacina" type="date" readonly></div><div class="full"><label>Vacinas tomadas (só você vê)</label><textarea id="hVacinas" readonly placeholder="Ex.: V10 em 03/2026, antirrábica em 05/2026" style="min-height:70px"></textarea></div><div class="full"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input id="hPublica" type="checkbox" disabled style="width:auto"> Mostrar alergias, medicamentos e veterinário no perfil público (recomendado se o pet precisa de cuidado especial)</label></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos exibidos no perfil público</h3><div id="petContacts" class="actions"></div><div class="form" style="margin-top:14px"><div><label>WhatsApp (com DDD)</label><input id="contactWa" inputmode="numeric" placeholder="45999999999"></div><div><label>Telefone para ligação (opcional)</label><input id="contactTel" inputmode="numeric" placeholder="Deixe vazio para usar o WhatsApp"></div></div><div class="row" style="margin-top:12px"><span class="muted">Quem encontrar seu pet vai usar estes números.</span><button class="btn" id="saveContactsBtn" type="button" onclick="saveContacts()">💾 Salvar contatos</button></div><h3>📷 Mais fotos <span class="muted" style="font-size:13px;font-weight:400">(até 4: lados, manchas, coleira)</span></h3><div id="gallery" style="display:flex;gap:10px;flex-wrap:wrap"></div><input id="galleryFile" type="file" accept="image/*" style="display:none" onchange="addGalleryPhoto(event)"><button class="btn" id="galleryBtn" type="button" style="margin-top:10px" onclick="document.getElementById('galleryFile').click()">➕ Adicionar foto</button><h3>✈️ Modo viagem / hotel</h3><p class="muted" style="margin-top:-6px">Vai viajar ou deixar o pet no hotelzinho? Coloque o contato de quem vai cuidar. Ele aparece primeiro no perfil até a data escolhida e depois sai sozinho.</p><div id="travelStatus" class="muted" style="margin-bottom:8px"></div><div class="form" style="margin-top:0"><div><label>Quem vai cuidar</label><input id="tvNome" maxlength="60" placeholder="Ex.: Hotelzinho Patas"></div><div><label>WhatsApp de quem cuida</label><input id="tvTel" inputmode="numeric" placeholder="45999999999"></div><div><label>Até quando</label><input id="tvAte" type="date"></div></div><div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="btn" id="tvBtn" type="button" onclick="saveTravel(false)">💾 Ativar modo viagem</button><button class="btn" type="button" id="tvClear" onclick="saveTravel(true)" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Encerrar</button></div></div></section>
-<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">carregando...</b>.</p></div><div id="switch" class="switch" onclick="if(!document.getElementById('lostBtn').disabled)toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" placeholder="Ex.: Ela é dócil, mas tem medo de barulho. Por favor, me chame no WhatsApp."></textarea><div class="form" style="margin-top:12px"><div><label>💰 Recompensa (opcional)</label><input id="lostReward" maxlength="40" placeholder="Ex.: R$ 300"></div><div><label>Cidade onde ele se perdeu</label><input id="lostCity" maxlength="60" placeholder="Ex.: Cascavel - PR"></div><div class="full"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input id="lostPublic" type="checkbox" checked style="width:auto"> Mostrar na lista pública <a href="/perdidos/" target="_blank" style="color:var(--g)">Pets perdidos</a> (foto, nome e cidade; seus contatos não aparecem)</label></div></div><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()" disabled>Carregando...</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div><div id="lostHistory" class="card hidden" style="margin-top:15px"></div><div class="card" style="margin-top:15px"><h2 class="title">📣 Espalhe o alerta</h2><p class="muted">Quanto mais gente souber, mais rápido seu pet volta. Ative o modo perdido antes de compartilhar.</p><div class="actions"><button class="action" onclick="openPoster()"><strong>📄 Cartaz para imprimir</strong><span>Foto, mensagem, WhatsApp e QR Code. Imprima ou salve em PDF.</span></button><button class="action" onclick="shareAlert()"><strong>📤 Compartilhar alerta</strong><span>Envie o link do perfil para grupos do bairro, amigos e redes sociais.</span></button></div></div></section>
+</div><div><label>Cidade</label><input id="petCidade" readonly placeholder="Ex.: Cascavel - PR"></div><div></div><div><label>Nº do RG Animal (SinPatinhas)</label><input id="petRg" readonly placeholder="Opcional"></div><div><label>Nº do microchip</label><input id="petChip" readonly inputmode="numeric" placeholder="Opcional"></div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div><div class="full" style="margin-top:6px"><h3 style="margin:6px 0 0">🩺 Saúde</h3><p class="muted" style="margin:4px 0 0">Ajuda quem encontrar seu pet e gera lembretes de vacina por e-mail.</p></div><div><label>Alergias</label><input id="hAlergias" readonly placeholder="Ex.: dipirona, frango"></div><div><label>Medicamentos de uso contínuo</label><input id="hMedicamentos" readonly placeholder="Ex.: insulina 2x ao dia"></div><div><label>Veterinário (nome e telefone)</label><input id="hVet" readonly placeholder="Ex.: Clínica X (45) 3222-0000"></div><div><label>Próxima vacina</label><input id="hProxVacina" type="date" readonly></div><div class="full"><label>Vacinas tomadas (só você vê)</label><textarea id="hVacinas" readonly placeholder="Ex.: V10 em 03/2026, antirrábica em 05/2026" style="min-height:70px"></textarea></div><div class="full"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input id="hPublica" type="checkbox" disabled style="width:auto"> Mostrar alergias, medicamentos e veterinário no perfil público (recomendado se o pet precisa de cuidado especial)</label></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos exibidos no perfil público</h3><div id="petContacts" class="actions"></div><div class="form" style="margin-top:14px"><div><label>WhatsApp (com DDD)</label><input id="contactWa" inputmode="numeric" placeholder="45999999999"></div><div><label>Telefone para ligação (opcional)</label><input id="contactTel" inputmode="numeric" placeholder="Deixe vazio para usar o WhatsApp"></div></div><div class="row" style="margin-top:12px"><span class="muted"><label style="display:flex;gap:8px;align-items:center;cursor:pointer;color:var(--txt)"><input type="checkbox" id="contactHidden" style="width:auto" onchange="saveHidden(this.checked)"> 🔒 Contato protegido: esconder meus números do perfil (quem encontrar manda mensagem pelo site e eu recebo por e-mail)</label></span><button class="btn" id="saveContactsBtn" type="button" onclick="saveContacts()">💾 Salvar contatos</button></div><h3>📷 Mais fotos <span class="muted" style="font-size:13px;font-weight:400">(até 4: lados, manchas, coleira)</span></h3><div id="gallery" style="display:flex;gap:10px;flex-wrap:wrap"></div><input id="galleryFile" type="file" accept="image/*" style="display:none" onchange="addGalleryPhoto(event)"><button class="btn" id="galleryBtn" type="button" style="margin-top:10px" onclick="document.getElementById('galleryFile').click()">➕ Adicionar foto</button><h3>✈️ Modo viagem / hotel</h3><p class="muted" style="margin-top:-6px">Vai viajar ou deixar o pet no hotelzinho? Coloque o contato de quem vai cuidar. Ele aparece primeiro no perfil até a data escolhida e depois sai sozinho.</p><div id="travelStatus" class="muted" style="margin-bottom:8px"></div><div class="form" style="margin-top:0"><div><label>Quem vai cuidar</label><input id="tvNome" maxlength="60" placeholder="Ex.: Hotelzinho Patas"></div><div><label>WhatsApp de quem cuida</label><input id="tvTel" inputmode="numeric" placeholder="45999999999"></div><div><label>Até quando</label><input id="tvAte" type="date"></div></div><div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="btn" id="tvBtn" type="button" onclick="saveTravel(false)">💾 Ativar modo viagem</button><button class="btn" type="button" id="tvClear" onclick="saveTravel(true)" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Encerrar</button></div></div></section>
+<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">carregando...</b>.</p></div><div id="switch" class="switch" onclick="if(!document.getElementById('lostBtn').disabled)toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" placeholder="Ex.: Ela é dócil, mas tem medo de barulho. Por favor, me chame no WhatsApp."></textarea><div class="form" style="margin-top:12px"><div><label>💰 Recompensa (opcional)</label><input id="lostReward" maxlength="40" placeholder="Ex.: R$ 300"></div><div><label>Cidade onde ele se perdeu</label><input id="lostCity" maxlength="60" placeholder="Ex.: Cascavel - PR"></div><div class="full"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input id="lostPublic" type="checkbox" checked style="width:auto"> Mostrar na lista pública <a href="/perdidos/" target="_blank" style="color:var(--g)">Pets perdidos</a> (foto, nome e cidade; seus contatos não aparecem)</label></div></div><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()" disabled>Carregando...</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div><div id="sightBox" class="card" style="margin-top:15px"><h2 class="title">👀 Avistamentos</h2><p class="muted">Quem vê seu pet pode registrar onde e quando. Você recebe por e-mail e acompanha aqui.</p><div id="sightMap" style="height:260px;border-radius:12px;overflow:hidden;display:none;margin-bottom:12px"></div><div id="sightList" class="muted">Carregando...</div></div><div id="lostHistory" class="card hidden" style="margin-top:15px"></div><div class="card" style="margin-top:15px"><h2 class="title">📣 Espalhe o alerta</h2><p class="muted">Quanto mais gente souber, mais rápido seu pet volta. Ative o modo perdido antes de compartilhar.</p><div class="actions"><button class="action" onclick="openPoster()"><strong>📄 Cartaz para imprimir</strong><span>Foto, mensagem, WhatsApp e QR Code. Imprima ou salve em PDF.</span></button><button class="action" onclick="shareAlert()"><strong>📤 Compartilhar alerta</strong><span>Envie o link do perfil para grupos do bairro, amigos e redes sociais.</span></button></div></div></section>
 <section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted" id="accessSubtitle">Histórico real das tags vinculadas ao tutor.</p><div class="minigrid"><div class="card stat"><div class="label">Total</div><div class="value" id="accTotal">0</div></div><div class="card stat"><div class="label">Hoje</div><div class="value" id="accToday">0</div></div><div class="card stat"><div class="label">Último acesso</div><div class="value" style="font-size:17px" id="accLast">—</div></div></div><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody id="accessRows"><tr><td colspan="4" class="muted">Carregando...</td></tr></tbody></table></div></div></section>
 <section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div><div style="margin-top:16px;border:1px dashed #3a4441;padding:17px;border-radius:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap"><div id="tagQr" style="background:#fff;padding:10px;border-radius:10px;width:160px;height:160px"></div><div style="flex:1;min-width:200px"><b>🔳 QR Code da sua tag</b><p class="muted">Leva ao mesmo perfil da tag de metal. Use para um adesivo reserva na coleira, na caixa de transporte ou no cartão de vacina.</p><button class="btn" onclick="downloadTagQr()">⬇️ Baixar QR Code</button> <button class="btn" style="margin-top:8px" onclick="openCard()">🪪 Carteirinha do pet</button></div></div></div>
 <div class="card" style="margin-top:15px"><h2 class="title">➕ Adicionar outro pet</h2><p class="muted">Recebeu uma nova tag MasterPET? Vincule aqui, sem criar outra conta. O WhatsApp da sua conta será usado como contato.</p>
@@ -117,7 +122,15 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 function petEmoji(p){const e=String(p&&p.especie||'').toLowerCase();return e.startsWith('gat')?'🐱':(e.startsWith('cach')||e.startsWith('cão')||e.startsWith('cao'))?'🐶':'🐾';}
 function accTag(a){return String(a.tag||a.idTag||a.tagId||a.ID_TAG||'').toUpperCase();}
 
-function jsonp(action, params={}){
+// V20: ações com token/senha vão por POST (nada sensível no endereço). Se o POST falhar
+// por bloqueio do navegador, cai para o método antigo (JSONP) para o painel não parar.
+const POST_ACTIONS=new Set(['tutorsightings','login','tutorpets','tutoraccesses','setpetstatus','updatepet','updatecontacts','exportdata','linktag','settempcontact','removephoto','addphoto','deleteaccount','requestreset','resetpassword']);
+async function jsonp(action, params={}){
+  if(!POST_ACTIONS.has(action)) return jsonpRaw(action,params);
+  try{ return await postApi(Object.assign({action},params)); }
+  catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonpRaw(action,params); }
+}
+function jsonpRaw(action, params={}){
   return new Promise((resolve,reject)=>{
     const cb='mp_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     const script=document.createElement('script');
@@ -147,10 +160,7 @@ async function postApi(payload,timeoutMs=35000){
   }finally{ clearTimeout(t); }
 }
 // Usa POST; só se o navegador não conseguir (bloqueio/rede), volta ao método antigo para o login não parar.
-async function secureCall(action,params){
-  try{ return await postApi(Object.assign({action},params)); }
-  catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonp(action,params); }
-}
+async function secureCall(action,params){ return jsonp(action,params); }
 
 function getTutor(){
   try { return JSON.parse(localStorage.getItem('masterpet_tutor') || '{}'); }
@@ -172,6 +182,7 @@ function renderTutorUI(){
   document.getElementById('tutorPetName').textContent=pet ? cleanText(pet.nome,'seu pet') : 'seu pet';
 }
 function page(id, btn){
+  if(id==='perdido') setTimeout(loadSightings,0);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const target=document.getElementById(id);
   if(target) target.classList.add('active');
@@ -345,7 +356,7 @@ async function loadTutorData(){
   setPetFieldsEditable(false);
 }
 function currentPet(){ const ps=(window.MP_DATA&&window.MP_DATA.pets)||[]; return ps[MP_PET_INDEX]||ps[0]||null; }
-function selectPet(i){ MP_PET_INDEX=Number(i)||0; try{localStorage.setItem('masterpet_pet_index',String(MP_PET_INDEX))}catch(e){} setPetFieldsEditable(false); renderAllData(); renderTutorUI(); }
+function selectPet(i){ setTimeout(renderSightings,0); MP_PET_INDEX=Number(i)||0; try{localStorage.setItem('masterpet_pet_index',String(MP_PET_INDEX))}catch(e){} setPetFieldsEditable(false); renderAllData(); renderTutorUI(); }
 function renderPetSelect(){
   const sel=document.getElementById('petSelect'); const ps=(window.MP_DATA&&window.MP_DATA.pets)||[];
   if(ps.length<2){sel.classList.add('hidden');return;}
@@ -401,6 +412,9 @@ function renderAllData(){
   const photoStatus=document.getElementById('photoUploadStatus'); if(photoStatus) photoStatus.textContent='';
   document.getElementById('petObs').value=cleanText(pet.observacoes,'');
   document.getElementById('petCidade').value=cleanText(pet.cidade,'');
+  document.getElementById('petRg').value=cleanText(pet.rgAnimal,'');
+  document.getElementById('petChip').value=cleanText(pet.microchip,'');
+  const ch=document.getElementById('contactHidden'); if(ch&&document.activeElement!==ch) ch.checked=!!pet.contatoOculto;
   renderGallery(pet); renderTravel(pet); renderLostOptions(pet);
   const sd=pet.saude||{};
   document.getElementById('hAlergias').value=cleanText(sd.alergias,'');
@@ -447,7 +461,7 @@ function toDateInput(v){
   return br?br[3]+'-'+br[2]+'-'+br[1]:'';
 }
 function setPetFieldsEditable(editing){
-  const ids=['petNome','petEspecie','petRaca','petSexo','petNascimento','petObs','petCidade','hAlergias','hMedicamentos','hVet','hProxVacina','hVacinas'];
+  const ids=['petNome','petEspecie','petRaca','petSexo','petNascimento','petObs','petCidade','petRg','petChip','hAlergias','hMedicamentos','hVet','hProxVacina','hVacinas'];
   const hp=document.getElementById('hPublica'); if(hp) hp.disabled=!editing;
   ids.forEach(id=>{
     const el=document.getElementById(id);
@@ -500,7 +514,9 @@ async function savePet(){
     PROXIMA_VACINA:document.getElementById('hProxVacina').value,
     VACINAS:document.getElementById('hVacinas').value.trim(),
     SAUDE_PUBLICA:document.getElementById('hPublica').checked?'SIM':'NAO',
-    CIDADE:document.getElementById('petCidade').value.trim()
+    CIDADE:document.getElementById('petCidade').value.trim(),
+    RG_ANIMAL:document.getElementById('petRg').value.trim(),
+    MICROCHIP:document.getElementById('petChip').value.trim()
   };
   if(!payload.NOME){
     btn.disabled=false; btn.textContent=original;
@@ -744,6 +760,32 @@ async function saveTravel(clear){
     else toast({INVALID_DATE_RANGE:'Escolha uma data entre hoje e 60 dias.',INVALID_PHONE:'WhatsApp inválido.',INVALID_DATE:'Data inválida.'}[r&&r.error]||'Não foi possível salvar.');
   }catch(e){ toast('Não foi possível conectar ao servidor.'); }
   finally{ b.disabled=false; }
+}
+async function saveHidden(on){
+  const pet=currentPet(); if(!pet) return;
+  try{ const r=await jsonp('updatepet',{token:MP_TOKEN,petId:pet.id,CONTATO_OCULTO:on?'SIM':'NAO'}); if(r&&r.ok){ await loadTutorData(); toast(on?'🔒 Contato protegido ativado.':'Seus números voltaram a aparecer no perfil.'); } else toast('Não foi possível salvar.'); }
+  catch(e){ toast('Não foi possível conectar ao servidor.'); }
+}
+let MP_SIGHT=null, sightMapObj=null;
+async function loadSightings(){
+  const list=document.getElementById('sightList'); if(!list) return;
+  try{ const r=await jsonp('tutorsightings',{token:MP_TOKEN}); MP_SIGHT=(r&&r.ok)?r.avistamentos:[]; }catch(e){ MP_SIGHT=MP_SIGHT||[]; }
+  renderSightings();
+}
+function renderSightings(){
+  const p=currentPet(), list=document.getElementById('sightList'), mapEl=document.getElementById('sightMap'); if(!list||!MP_SIGHT) return;
+  const mine=MP_SIGHT.filter(s=>!p||s.petId===p.id);
+  if(!mine.length){ list.textContent='Nenhum avistamento registrado ainda.'; mapEl.style.display='none'; return; }
+  list.innerHTML='<div class="tablewrap" style="margin-top:0"><table><tbody>'+mine.map(s=>{const d=fmtDateTime(s.dataHora);const map=(s.latitude&&s.longitude)?' <a target="_blank" style="color:var(--g)" href="https://www.google.com/maps?q='+encodeURIComponent(s.latitude+','+s.longitude)+'">📍 mapa</a>':'';
+    return '<tr><td style="white-space:nowrap">'+esc(d.date)+' '+esc(d.time)+'</td><td style="white-space:normal">'+esc(s.nota||'(sem mensagem)')+(s.contato?'<br><span class="muted">Contato: '+esc(s.contato)+'</span>':'')+map+'</td></tr>';}).join('')+'</tbody></table></div>';
+  const pts=mine.filter(s=>s.latitude&&s.longitude);
+  if(pts.length&&window.L){
+    mapEl.style.display='block';
+    if(!sightMapObj){ sightMapObj=L.map(mapEl); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(sightMapObj); }
+    if(sightMapObj._mpLayer) sightMapObj.removeLayer(sightMapObj._mpLayer);
+    const g=L.featureGroup(pts.map((s,i)=>{const d=fmtDateTime(s.dataHora);return L.circleMarker([+s.latitude,+s.longitude],{radius:i===0?10:7,color:'#111',weight:2,fillColor:i===0?'#ff3048':'#b7ff00',fillOpacity:.95}).bindPopup('<b>'+esc(d.date+' '+d.time)+'</b><br>'+esc(s.nota||''));}));
+    g.addTo(sightMapObj); sightMapObj._mpLayer=g; sightMapObj.fitBounds(g.getBounds(),{maxZoom:16,padding:[20,20]}); setTimeout(()=>sightMapObj.invalidateSize(),50);
+  } else mapEl.style.display='none';
 }
 function petIsLost(p){return ['PERDIDO','PERDIDA','LOST'].includes(String(p&&p.status||'').toUpperCase());}
 function openPoster(){ const p=currentPet(); if(!p) return toast('Nenhum pet disponível.'); window.open('/tutor/cartaz/?pet='+encodeURIComponent(p.id),'_blank'); }

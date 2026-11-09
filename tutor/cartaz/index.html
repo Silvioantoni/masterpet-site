@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://script.google.com https://script.googleusercontent.com; form-action 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style id="af">html{display:none}</style><script>if(window.self===window.top){document.getElementById("af").remove();}else{window.top.location=window.self.location;}</script><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>MasterPET — Cartaz de pet perdido</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
@@ -70,6 +73,12 @@ body{margin:0;background:#2a2f31;font-family:Arial,Helvetica,sans-serif;color:#1
 <script>
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
 let PET=null;
+async function postTutorPets(token){
+  const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),35000);
+  try{ const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'tutorpets',token}),signal:ctrl.signal}); return await r.json(); }
+  catch(e){ if(e&&e.name==='AbortError') throw e; return await jsonp('tutorpets',{token}); }
+  finally{ clearTimeout(t); }
+}
 function jsonp(action,params={}){
   return new Promise((resolve,reject)=>{
     const cb='mp_cz_'+Date.now()+'_'+Math.random().toString(36).slice(2);
@@ -106,7 +115,7 @@ function shareAlert(){
   if(!token){ location.href='/tutor/'; return; }
   const petId=new URLSearchParams(location.search).get('pet')||'';
   try{
-    const r=await jsonp('tutorpets',{token});
+    const r=await postTutorPets(token);
     if(!r||!r.ok){ document.getElementById('msg').innerHTML='Sua sessão expirou. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.'; return; }
     PET=(r.pets||[]).find(p=>p.id===petId)||(r.pets||[])[0];
     if(!PET){ document.getElementById('msg').textContent='Nenhum pet encontrado nesta conta.'; return; }

@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://script.google.com https://script.googleusercontent.com; form-action 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://script.google.com">
@@ -116,6 +118,7 @@ function render(data, tagId){
 
   const content=document.getElementById("content");
   let buttons="";
+  if(p.contatoProtegido && !wnum) buttons += '<div class="info" style="margin:10px 0">🔒 A família deste pet prefere receber mensagens pelo site. Use o formulário abaixo: a mensagem chega na hora para eles.</div><a class="btn whats" href="#sighting">✉️ Enviar mensagem para a família</a>';
   if(wnum) buttons += '<a class="btn whats" target="_blank" href="https://wa.me/'+wnum+'?text='+encodeURIComponent("Olá! Encontrei "+art+" "+name+". Estou entrando em contato pela MasterPET.")+'">💬 '+(temp?'Falar com quem está cuidando':'Falar com a família')+'</a>';
   if(pnum) buttons += '<a class="btn phone" href="tel:+'+pnum+'">📞 Ligar para a família</a>';
 
@@ -139,7 +142,10 @@ function render(data, tagId){
       '<div class="row"><span class="label">Espécie</span><span class="value">'+esc(p.especie||"-")+'</span></div>'+
       '<div class="row"><span class="label">Sexo</span><span class="value">'+esc(p.sexo||"-")+'</span></div>'+
       '<div class="row"><span class="label">ID da tag</span><span class="value">'+esc(p.tag||tagId)+'</span></div>'+
+      (p.rgAnimal?'<div class="row"><span class="label">RG Animal (SinPatinhas)</span><span class="value">'+esc(p.rgAnimal)+'</span></div>':'')+
+      (p.microchip?'<div class="row"><span class="label">Microchip</span><span class="value">'+esc(p.microchip)+'</span></div>':'')+
     '</section>'+
+    ((isLost||p.contatoProtegido)?sightingFormHtml(isLost,p.contatoProtegido,name):'')+
     '<section class="card"><h2>❤️ Ajude a família</h2><p class="note">Se você encontrou este pet, entre em contato pelos canais disponíveis acima. A MasterPET protege os dados privados da família.</p>'+(isLost?'<p class="note" style="margin-bottom:0"><a href="/perdidos/" style="color:#1a7f00;font-weight:700">Ver outros pets perdidos →</a></p>':'')+'</section>';
 }
 
@@ -147,6 +153,34 @@ function render(data, tagId){
 function galleryHtml(list){
   if(!list||!list.length) return '';
   return '<section class="card"><h2>📷 Mais fotos</h2><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+list.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener"><img src="'+esc(u)+'" alt="Foto do pet" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px"></a>').join('')+'</div></section>';
+}
+function sightingFormHtml(isLost,prot,name){
+  const title=isLost?'👀 Viu '+esc(name)+'?':'✉️ Mensagem para a família';
+  const help=isLost?'Conte onde e quando viu. Cada avistamento ajuda a família a refazer o caminho do pet, mesmo que você não consiga segurá-lo.':'Encontrou este pet? Escreva aqui. A família recebe sua mensagem na hora.';
+  return '<section class="card" id="sighting"><h2>'+title+'</h2><p class="note">'+help+'</p>'+
+    '<textarea id="sgNota" maxlength="400" placeholder="Ex.: Vi agora há pouco perto da padaria da Rua X, indo em direção à praça." style="width:100%;min-height:90px;border:1px solid #d5dadc;border-radius:10px;padding:10px;font:inherit"></textarea>'+
+    '<input id="sgContato" maxlength="80" placeholder="Seu nome e WhatsApp (opcional)" style="width:100%;margin-top:8px;border:1px solid #d5dadc;border-radius:10px;padding:10px;font:inherit">'+
+    '<label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px;color:#444"><input type="checkbox" id="sgLoc"> Incluir minha localização atual</label>'+
+    '<div aria-hidden=\"true\" style=\"position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden\"><label>Não preencha este campo<input id=\"sgWebsite\" name=\"website\" tabindex=\"-1\" autocomplete=\"off\"></label></div>'+'<button class="btn cta" type="button" id="sgBtn" onclick="sendSighting()">'+(isLost?'📍 Enviar avistamento para a família':'✉️ Enviar mensagem')+'</button><div id="sgMsg" class="note" style="text-align:center"></div></section>';
+}
+async function sendSighting(){
+  const nota=document.getElementById('sgNota').value.trim(), contato=document.getElementById('sgContato').value.trim(), wantLoc=document.getElementById('sgLoc').checked;
+  const b=document.getElementById('sgBtn'), m=document.getElementById('sgMsg');
+  if(!nota && !wantLoc){ m.textContent='Escreva uma mensagem ou inclua sua localização.'; return; }
+  b.disabled=true; b.textContent='Enviando...'; m.textContent='';
+  let lat='',lng='';
+  if(wantLoc && navigator.geolocation){
+    try{ const pos=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:true,timeout:15000,maximumAge:60000})); lat=pos.coords.latitude.toFixed(6); lng=pos.coords.longitude.toFixed(6); }
+    catch(e){ if(!nota){ b.disabled=false; b.textContent='Tentar de novo'; m.textContent='Não foi possível obter a localização. Escreva onde viu o pet.'; return; } }
+  }
+  const payload={action:'sighting',website:(document.getElementById('sgWebsite')||{}).value||'',tagId:getTagId(),nota,contato,latitude:lat,longitude:lng,locationAuthorized:lat?'true':'false'};
+  let r=null;
+  try{ const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); r=await res.json(); }
+  catch(e){ // plano B: formulário oculto (sem leitura da resposta)
+    try{ const f=document.createElement('form');f.method='POST';f.action=API;f.target='mpAccessFrame';f.style.display='none';Object.keys(payload).forEach(k=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=payload[k];f.appendChild(i);});document.body.appendChild(f);f.submit();setTimeout(()=>f.remove(),2500);r={ok:true}; }catch(_){}
+  }
+  if(r&&r.ok){ b.textContent='✅ Enviado para a família'; m.textContent='Obrigado! Sua ajuda faz diferença. 💚'; document.getElementById('sgNota').value=''; }
+  else { b.disabled=false; b.textContent='Tentar de novo'; m.textContent=r&&r.error==='TOO_MANY_ATTEMPTS'?'Muitos envios para este pet agora. Tente mais tarde.':'Não foi possível enviar agora. Tente de novo.'; }
 }
 function healthHtml(sd){
   if(!sd||!(sd.alergias||sd.medicamentos||sd.veterinario)) return '';
