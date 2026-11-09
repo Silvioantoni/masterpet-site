@@ -5,9 +5,9 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://script.google.com https://script.googleusercontent.com; form-action 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MasterPET — A identidade inteligente do seu pet</title>
+<title>MasterPET | A identidade inteligente do seu pet</title>
 <meta name="description" content="Tag de identificação inteligente para pets: escaneou o QR Code, falou com a família. Perfil online, Modo Perdido e histórico de leituras. MasterPET, a identidade inteligente do seu pet.">
-<meta property="og:type" content="website"><meta property="og:url" content="https://masterpet.tec.br/"><meta property="og:title" content="MasterPET — A identidade inteligente do seu pet"><meta property="og:description" content="Tag com QR Code que leva ao perfil do seu pet e conecta quem encontrou com a família em segundos."><meta property="og:locale" content="pt_BR"><meta property="og:image" content="https://masterpet.tec.br/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:type" content="website"><meta property="og:url" content="https://masterpet.tec.br/"><meta property="og:title" content="MasterPET | A identidade inteligente do seu pet"><meta property="og:description" content="Tag com QR Code que leva ao perfil do seu pet e conecta quem encontrou com a família em segundos."><meta property="og:locale" content="pt_BR"><meta property="og:image" content="https://masterpet.tec.br/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#070807">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -35,7 +35,6 @@ img,svg{display:block}
 .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
 .lime{color:var(--lime)}
 .eyebrow{display:inline-flex;align-items:center;gap:10px;font:600 12px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
-.eyebrow:before{content:"";width:22px;height:1px;background:var(--lime)}
 h1,h2,h3{font-family:var(--display);letter-spacing:-.035em;line-height:1.02;margin:0;font-weight:700}
 h2{font-size:clamp(34px,5vw,60px)}
 h3{font-size:22px;letter-spacing:-.02em;line-height:1.2}
@@ -233,12 +232,12 @@ section[id],header[id]{scroll-margin-top:84px}
 
 /* ---------- bento ---------- */
 .bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
-.bx{position:relative;border-radius:var(--radius);background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);padding:28px;overflow:hidden;transition:border-color .3s,transform .4s var(--ease);min-height:250px;display:flex;flex-direction:column;justify-content:flex-end}
+.bx{position:relative;border-radius:var(--radius);background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);padding:28px;overflow:hidden;transition:border-color .3s,transform .4s var(--ease);display:flex;flex-direction:column;justify-content:flex-start}
 .bx:hover{border-color:var(--line2);transform:translateY(-3px)}
 .bx:before{content:"";position:absolute;inset:0;background:radial-gradient(500px circle at var(--mx,50%) var(--my,0%),rgba(183,255,0,.09),transparent 40%);opacity:0;transition:opacity .3s;pointer-events:none}
 .bx:hover:before{opacity:1}
 .bx h3{margin-bottom:8px}.bx p{margin:0;color:var(--muted);font-size:15px}
-.bx .art{position:absolute;inset:0 0 auto 0;height:62%;display:grid;place-items:center}
+.bx .art{position:relative;height:190px;margin:-6px -6px 20px;display:grid;place-items:center}
 .b1{grid-column:span 3}.b2{grid-column:span 3}.b3,.b4,.b5{grid-column:span 2}
 .b6{grid-column:span 6;min-height:auto;flex-direction:row;align-items:center;justify-content:space-between;gap:24px}
 .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:99px;background:rgba(255,255,255,.05);border:1px solid var(--line2);font-size:13px}
@@ -251,7 +250,7 @@ section[id],header[id]{scroll-margin-top:84px}
 .vac div{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px}
 .vac em{font-style:normal;color:var(--lime);font-size:12px}
 .laserbox{width:150px;height:150px;border-radius:50%;background:conic-gradient(from 210deg,#cfd5d1,#959c97,#eceeec,#8b928d,#cfd5d1);position:relative;box-shadow:0 30px 50px -20px #000}
-.laserbox:after{content:"";position:absolute;left:50%;top:-60px;width:2px;height:110px;margin-left:-1px;background:linear-gradient(transparent,var(--lime));box-shadow:0 0 16px 3px var(--limeglow);animation:beam 1.6s ease-in-out infinite}
+.laserbox:after{content:"";position:absolute;left:50%;top:-34px;width:2px;height:90px;margin-left:-1px;background:linear-gradient(transparent,var(--lime));box-shadow:0 0 16px 3px var(--limeglow);animation:beam 1.6s ease-in-out infinite}
 @keyframes beam{0%,100%{transform:translateX(-24px)}50%{transform:translateX(24px)}}
 .nofee{font:700 clamp(40px,6vw,64px)/1 var(--display);letter-spacing:-.05em}
 .nofee s{color:var(--dim);text-decoration-thickness:3px;text-decoration-color:var(--red)}
@@ -325,6 +324,7 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}footer nav a:hover{color:var(--t
 @media (max-width:600px){
   .wrap{padding:0 18px}
   .bento{grid-template-columns:1fr}.b1,.b2,.b3,.b4,.b5,.b6{grid-column:auto}
+  .bx .art{height:160px}
   .phone{width:280px;height:580px}
   .trust{gap:12px 18px}
   .cmp{font-size:13px}.cmp th,.cmp td{padding:13px 8px}.cmp td:first-child{padding-left:14px}
@@ -367,13 +367,13 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}footer nav a:hover{color:var(--t
     <div>
       <span class="eyebrow rv">Gravada a laser · Feita no Brasil</span>
       <h1 class="rv d1">A identidade <span class="lime">inteligente</span> do seu <span class="stroke">pet.</span></h1>
-      <p class="lead rv d2">Uma tag de aço com QR Code único. Quem encontrar seu pet abre o perfil dele e fala com você em segundos — sem aplicativo, sem bateria, sem mensalidade.</p>
+      <p class="lead rv d2">Uma tag de aço com QR Code único. Quem encontrar seu pet abre o perfil dele e fala com você em segundos, sem aplicativo, sem bateria, sem mensalidade.</p>
       <div class="hero-cta rv d3">
         <a class="btn btn-primary" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET <span class="arr">→</span></a>
         <a class="btn btn-ghost" href="#como">Ver como funciona</a>
       </div>
       <div class="trust rv d3"><span><i>✓</i>Sem mensalidade</span><span><i>✓</i>Modo Perdido com alerta</span><span><i>✓</i>Seus dados protegidos (LGPD)</span></div>
-      <div class="counter" id="counter" hidden><div><b id="cPets">—</b>pets protegidos</div><div><b id="cReenc">—</b>reencontros</div></div>
+      <div class="counter" id="counter" hidden><div><b id="cPets">0</b>pets protegidos</div><div><b id="cReenc">0</b>reencontros</div></div>
     </div>
     <div class="stage" id="stage" aria-hidden="true">
       <div class="halo"></div><div class="ring r1"></div><div class="ring r2"></div>
@@ -462,7 +462,7 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}footer nav a:hover{color:var(--t
 <!-- ============ RECURSOS (bento) ============ -->
 <section id="recursos">
   <div class="wrap">
-    <div class="sechead center rv"><span class="eyebrow">Recursos</span><h2>Pensada em cada detalhe.</h2><p class="lead">Tudo o que uma tag deveria fazer — e o que nenhuma plaquinha comum faz.</p></div>
+    <div class="sechead center rv"><span class="eyebrow">Recursos</span><h2>Pensada em cada detalhe.</h2><p class="lead">Tudo o que uma tag deveria fazer, e o que nenhuma plaquinha comum faz.</p></div>
     <div class="bento">
       <div class="bx b1 rv"><div class="art"><div class="laserbox"></div></div><h3>Gravação a laser em aço</h3><p>O QR fica no metal: não descasca, não desbota, aguenta banho e chuva.</p></div>
       <div class="bx b2 rv d1"><div class="art"><div class="lock">🔒</div></div><h3>Contato protegido</h3><p>Prefere não expor seu número? Quem encontrar manda mensagem pelo site e você recebe por e-mail.</p></div>
@@ -479,11 +479,11 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}footer nav a:hover{color:var(--t
   <div class="wrap">
     <div class="sechead center rv"><span class="eyebrow">Por que MasterPET</span><h2>Feita para trazer seu pet de volta.</h2><p class="lead">Identificar é só o começo. A MasterPET ajuda quem encontrou a falar com você e ajuda você a encontrar seu pet.</p></div>
     <div class="cmpwrap rv"><table class="cmp"><thead><tr><th></th><th>Plaquinha<br>comum</th><th>Tag QR<br>comum</th><th class="mp">MASTER<b>PET</b></th></tr></thead><tbody>
-      <tr><td>Atualiza seus dados sem trocar a peça</td><td><span class="n">—</span></td><td><span class="y">✔</span></td><td class="mp"><span class="y">✔</span></td></tr>
-      <tr><td>Gravada a laser em metal (não desbota)</td><td><span class="y">✔</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
-      <tr><td>Modo Perdido com alerta e cartaz "Procura-se"</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
-      <tr><td>Quem vê o pet avisa e marca no mapa</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
-      <tr><td>Opção de esconder seu telefone</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Atualiza seus dados sem trocar a peça</td><td><span class="n">✕</span></td><td><span class="y">✔</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Gravada a laser em metal (não desbota)</td><td><span class="y">✔</span></td><td><span class="n">✕</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Modo Perdido com alerta e cartaz "Procura-se"</td><td><span class="n">✕</span></td><td><span class="n">✕</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Quem vê o pet avisa e marca no mapa</td><td><span class="n">✕</span></td><td><span class="n">✕</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Opção de esconder seu telefone</td><td><span class="n">✕</span></td><td><span class="n">✕</span></td><td class="mp"><span class="y">✔</span></td></tr>
       <tr><td>Sem bateria e sem mensalidade</td><td><span class="y">✔</span></td><td><span class="y">✔</span></td><td class="mp"><span class="y">✔</span></td></tr>
     </tbody></table></div>
     <p class="center gpsnote rv">📡 <b>Já usa GPS?</b> Use os dois: o GPS mostra onde o pet está, enquanto tiver bateria. A MasterPET faz quem o encontrar falar com você, sempre.</p>
