@@ -20,6 +20,21 @@ button.dark{background:#1c2622;color:#fff;border:1px solid #3b4b44}button:disabl
 .msg{padding:12px 14px;border-radius:10px;margin:0 0 15px;display:none}.ok{display:block;background:#123315;border:1px solid #4de24d;color:#baffba}.err{display:block;background:#35151a;border:1px solid #ff5265;color:#ffd1d6}
 .hidden{display:none!important}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#0b1210;border:1px solid #26372f;border-radius:13px;padding:14px}.stat b{font-size:26px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px 10px;border-bottom:1px solid #26352f;font-size:13px}th{color:#9faaA4}.tag{font-weight:900}.status{font-size:12px;color:#58ff00}.code{font-family:monospace;letter-spacing:.5px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}.modal.show{display:flex}.modalbox{background:#101916;border:1px solid #36463e;border-radius:18px;padding:20px;max-width:420px;width:100%}.qrbox{background:#fff;padding:12px;display:inline-block;border-radius:8px;margin:10px 0}.close{float:right;background:#1c2622;color:#fff}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px}
+.tile{background:#0b1210;border:1px solid #26372f;border-radius:13px;padding:14px}.tile .v{font-size:28px;font-weight:900;margin-top:4px}.tile.alert{border-color:#7e3041;background:#1d0f13}.tile.alert .v{color:#ff8094}
+.charts{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-top:14px}
+.chart h3{margin:0 0 2px;font-size:15px}.chart .muted{font-size:12px}
+.bars{position:relative;height:150px;display:flex;align-items:flex-end;gap:2px;margin-top:14px;border-bottom:1px solid #3a4a42}
+.bars .b{flex:1;height:100%;display:flex;align-items:flex-end;cursor:default;position:relative}
+.bars .b i{display:block;width:100%;background:#62a800;border-radius:4px 4px 0 0;min-height:0}
+.bars .b:hover i,.bars .b:focus i{background:#7fcc00}.bars .b:focus{outline:none}
+.bars .b.zero i{height:2px!important;background:#2a3832;border-radius:1px}
+.xl{display:flex;justify-content:space-between;color:#7d8a83;font-size:11px;margin-top:6px}
+.tip{position:fixed;pointer-events:none;background:#050806;border:1px solid #3b4b44;border-radius:8px;padding:7px 10px;font-size:12px;color:#fff;z-index:9;display:none;white-space:nowrap}
+.tip b{display:block;font-size:14px}
+.lists{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.lists table td{white-space:normal}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(2,1fr)}.charts,.lists{grid-template-columns:1fr}}
 @media(max-width:700px){.stats{grid-template-columns:1fr}.field,.field.small{max-width:none;width:100%}}
 </style>
 </head>
@@ -52,6 +67,26 @@ button.dark{background:#1c2622;color:#fff;border:1px solid #3b4b44}button:disabl
         <button class="dark" id="logoutBtn">SAIR</button>
       </div>
     </div>
+
+    <div class="card" id="dash">
+      <div class="row" style="justify-content:space-between"><h1 style="font-size:22px;margin:0">📊 Visão geral</h1><span class="muted" id="dashTime" style="font-size:12px">carregando...</span></div>
+      <div class="tiles">
+        <div class="tile"><div class="muted">Tutores</div><div class="v" id="dTut">—</div></div>
+        <div class="tile"><div class="muted">Pets</div><div class="v" id="dPets">—</div></div>
+        <div class="tile"><div class="muted">Acessos 7 dias</div><div class="v" id="dA7">—</div></div>
+        <div class="tile"><div class="muted">Acessos 30 dias</div><div class="v" id="dA30">—</div></div>
+        <div class="tile" id="dLostTile"><div class="muted">🚨 Perdidos agora</div><div class="v" id="dLost">—</div></div>
+      </div>
+      <div class="charts">
+        <div class="tile chart"><h3>Acessos aos perfis por dia</h3><div class="muted">Últimos 30 dias · leituras do QR (sem testes com ?noscan)</div><div class="bars" id="cDays" role="list"></div><div class="xl" id="xDays"></div></div>
+        <div class="tile chart"><h3>Tags ativadas por mês</h3><div class="muted">Últimos 12 meses</div><div class="bars" id="cMonths" role="list"></div><div class="xl" id="xMonths"></div></div>
+      </div>
+      <div class="lists">
+        <div class="tile"><h3 style="margin:0 0 8px;font-size:15px">🚨 Pets perdidos agora</h3><div id="lostList" class="muted">—</div></div>
+        <div class="tile"><h3 style="margin:0 0 8px;font-size:15px">🔝 Tags mais escaneadas (30 dias)</h3><div id="topList" class="muted">—</div></div>
+      </div>
+    </div>
+    <div class="tip" id="tip"></div>
 
     <div class="stats">
       <div class="stat"><div class="muted">Total de tags</div><b id="total">0</b></div>
@@ -119,14 +154,14 @@ $('loginBtn').onclick=async()=>{
  try{
    // Senha vai no corpo de um POST, não no endereço. Se o navegador não conseguir, usa o método antigo.
    let d; try{ d=await postApi({action:'adminlogin',password:pass}); }catch(e){ if(e&&e.name==='AbortError') throw e; d=await apiJsonp({action:'adminlogin',password:pass}); }
-   if(d.ok){adminToken=d.token;localStorage.setItem('masterpet_admin_token',adminToken);showApp();loadTags();}
+   if(d.ok){adminToken=d.token;localStorage.setItem('masterpet_admin_token',adminToken);showApp();loadTags();loadStats();}
    else show($('loginMsg'),'err',friendly(d.error));
  }catch(e){show($('loginMsg'),'err','Não foi possível conectar ao servidor.')}
  finally{btn.disabled=false;btn.textContent='ENTRAR'}
 };
 $('logoutBtn').onclick=logout;
 $('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
-$('refreshBtn').onclick=loadTags;
+$('refreshBtn').onclick=()=>{loadTags();loadStats();};
 $('lotBtn').onclick=async()=>{
  const q=Math.max(1,Math.min(500,Number($('qty').value)||0));
  const pre=($('prefix').value.trim()||'MP').toUpperCase();
@@ -188,6 +223,36 @@ async function setTagStatus(t,status){
    else show($('appMsg'),'err',friendly(d.error));
  }catch(e){show($('appMsg'),'err','Não foi possível alterar a tag. Clique em ATUALIZAR para conferir.');}
 }
+// ===== Relatórios =====
+const MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const fmtDia=d=>d.slice(8,10)+'/'+d.slice(5,7);
+const fmtMes=m=>MESES[Number(m.slice(5,7))-1]+'/'+m.slice(2,4);
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function bars(el,data,label,value,unit){
+  const max=Math.max(1,...data.map(value));
+  el.innerHTML=data.map(d=>{const v=value(d),h=Math.round(v/max*100);return '<div class="b'+(v?'':' zero')+'" role="listitem" tabindex="0" data-l="'+esc(label(d))+'" data-v="'+v+' '+unit+(v===1?'':'s')+'" aria-label="'+esc(label(d))+': '+v+' '+unit+(v===1?'':'s')+'"><i style="height:'+h+'%"></i></div>';}).join('');
+  const tip=$('tip');
+  el.querySelectorAll('.b').forEach(b=>{
+    const show=e=>{tip.innerHTML='<b>'+esc(b.dataset.v)+'</b>'+esc(b.dataset.l);tip.style.display='block';const r=b.getBoundingClientRect();tip.style.left=Math.min(window.innerWidth-tip.offsetWidth-8,Math.max(8,r.left+r.width/2-tip.offsetWidth/2))+'px';tip.style.top=(r.top-tip.offsetHeight-8)+'px';};
+    b.addEventListener('mouseenter',show);b.addEventListener('focus',show);b.addEventListener('touchstart',show,{passive:true});
+    b.addEventListener('mouseleave',()=>tip.style.display='none');b.addEventListener('blur',()=>tip.style.display='none');
+  });
+}
+async function loadStats(){
+  try{
+    const d=await apiJsonp({action:'adminstats',adminToken:adminToken});
+    if(!d.ok){ $('dashTime').textContent=d.error==='UNKNOWN_ACTION'?'Relatórios exigem o backend V16.':'Não foi possível carregar.'; return; }
+    $('dTut').textContent=d.tutores; $('dPets').textContent=d.pets; $('dA7').textContent=d.acessos7d; $('dA30').textContent=d.acessos30d;
+    $('dLost').textContent=d.perdidos.length; $('dLostTile').classList.toggle('alert',d.perdidos.length>0);
+    bars($('cDays'),d.acessosPorDia,x=>fmtDia(x.dia),x=>x.acessos,'acesso');
+    const ds=d.acessosPorDia; $('xDays').innerHTML='<span>'+fmtDia(ds[0].dia)+'</span><span>'+fmtDia(ds[15].dia)+'</span><span>hoje</span>';
+    bars($('cMonths'),d.ativacoesPorMes,x=>fmtMes(x.mes),x=>x.ativacoes,'ativação');
+    const ms=d.ativacoesPorMes; $('xMonths').innerHTML='<span>'+fmtMes(ms[0].mes)+'</span><span>'+fmtMes(ms[6].mes)+'</span><span>'+fmtMes(ms[11].mes)+'</span>';
+    $('lostList').innerHTML=d.perdidos.length?'<table>'+d.perdidos.map(p=>{const t=p.desde?new Date(p.desde):null;return '<tr><td><b>'+esc(p.pet)+'</b> · '+esc(p.tag)+'<br><span class="muted">'+esc(p.tutor)+(t&&!isNaN(t)?' · desde '+t.toLocaleDateString('pt-BR')+' '+t.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'')+'</span></td><td style="text-align:right">'+(p.whatsapp?'<a class="status" target="_blank" href="https://wa.me/'+(p.whatsapp.length<=11?'55':'')+esc(p.whatsapp)+'">WhatsApp</a>':'')+'</td></tr>';}).join('')+'</table>':'Nenhum pet perdido agora. 🎉';
+    $('topList').innerHTML=d.topTags.length?'<table>'+d.topTags.map(t=>'<tr><td><b>'+esc(t.tag)+'</b>'+(t.pet?' · '+esc(t.pet):'')+'</td><td style="text-align:right">'+t.acessos+'</td></tr>').join('')+'</table>':'Nenhuma leitura nos últimos 30 dias.';
+    $('dashTime').textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){ $('dashTime').textContent='Não foi possível carregar os relatórios.'; }
+}
 function openQr(t){
  $('qrcode').innerHTML='';new QRCode($('qrcode'),{text:t.qrUrl,width:240,height:240,correctLevel:QRCode.CorrectLevel.H});
  $('modalTitle').textContent=t.idTag;$('modalUrl').textContent=t.qrUrl;$('modalId').textContent=t.idTag;$('modal').classList.add('show');
@@ -209,7 +274,7 @@ $('zipBtn').onclick=async()=>{
  const blob=await zip.generateAsync({type:'blob'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MasterPET_QR_DISPONIVEIS.zip';a.click();
  show($('appMsg'),'ok','ZIP de QR Codes gerado.');
 };
-if(adminToken){showApp();loadTags()}
+if(adminToken){showApp();loadTags();loadStats()}
 </script>
 </body>
 </html>
