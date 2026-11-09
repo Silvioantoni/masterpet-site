@@ -80,7 +80,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
       <button class="btn" type="button" id="photoChooseBtn" onclick="document.getElementById('petFotoFile').click()" disabled>📷 Escolher foto</button>
       <button class="btn" type="button" id="photoRemoveBtn" onclick="removePetPhoto()" disabled style="background:transparent;border:1px solid var(--line);color:var(--txt)">🗑️ Remover</button>
     </div>
-    <div class="muted" style="margin-top:8px">JPG/PNG. A imagem será reduzida automaticamente para ficar leve.</div>
+    <div class="muted" style="margin-top:8px">JPG/PNG. A imagem é ajustada automaticamente e guardada com segurança no Google Drive da MasterPET.</div>
     <div id="photoUploadStatus" class="muted" style="margin-top:5px"></div>
   </div>
 </div>
@@ -514,7 +514,8 @@ async function handlePetPhoto(event){
   status.textContent='Processando foto...';
   try{
     if(!file.type.startsWith('image/')) throw new Error('INVALID_TYPE');
-    const dataUrl=await compressPetImage(file,700,45000);
+    // Com o backend V13 a foto vai para o Google Drive: dá para enviar com mais qualidade.
+    const dataUrl=await compressPetImage(file,1000,250000);
     document.getElementById('petFoto').value=dataUrl;
     renderPetPhotoPreview(dataUrl,document.getElementById('petNome').value||'Pet');
     status.textContent='✅ Foto pronta. Clique em “Salvar alterações” para gravar.';
