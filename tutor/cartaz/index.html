@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>MasterPET — Cartaz de pet perdido</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#2a2f31;font-family:Arial,Helvetica,sans-serif;color:#111}
+.bar{position:sticky;top:0;z-index:2;background:#070909;color:#fff;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid #283030}
+.bar .brand{font-weight:900;margin-right:auto}.bar .brand span{color:#b7ff00}
+.bar button,.bar a{border:0;border-radius:10px;padding:11px 15px;font-weight:900;cursor:pointer;font-size:14px;text-decoration:none}
+.primary{background:#b7ff00;color:#0b0d0d}.ghost{background:#151b1b;color:#fff;border:1px solid #283030!important}
+.msg{max-width:720px;margin:40px auto;color:#fff;text-align:center;padding:0 16px;line-height:1.5}
+.sheet{width:210mm;min-height:297mm;margin:20px auto;background:#fff;padding:14mm 14mm 10mm;display:flex;flex-direction:column;box-shadow:0 10px 40px #0008}
+.top{background:#d6142c;color:#fff;text-align:center;border-radius:6mm;padding:7mm 6mm}
+.top h1{margin:0;font-size:22mm;line-height:1;letter-spacing:1mm;font-weight:900}
+.top p{margin:3mm 0 0;font-size:6mm;font-weight:700}
+.photo{margin:8mm auto 6mm;width:120mm;height:120mm;border-radius:6mm;overflow:hidden;background:#eef1f2;display:flex;align-items:center;justify-content:center;font-size:40mm;border:2mm solid #111}
+.photo img{width:100%;height:100%;object-fit:cover}
+.name{text-align:center;font-size:16mm;font-weight:900;margin:0;line-height:1.05}
+.meta{text-align:center;font-size:6mm;color:#444;margin-top:2mm}
+.note{margin:6mm auto 6mm;max-width:170mm;text-align:center;font-size:5.5mm;line-height:1.35;background:#fff4f5;border:0.6mm solid #f3b3bd;border-radius:4mm;padding:4mm 6mm;color:#4a1a21}
+.contact{margin-top:auto;display:flex;align-items:center;gap:8mm;border-top:0.8mm dashed #999;padding-top:7mm}
+.contact .left{flex:1}
+.contact .call{font-size:6mm;font-weight:700;color:#333}
+.contact .phone{font-size:13mm;font-weight:900;letter-spacing:.3mm;margin:1mm 0 2mm}
+.contact .small{font-size:4.2mm;color:#555;line-height:1.35}
+.qr{width:46mm;text-align:center;font-size:3.6mm;color:#333}
+.qr #qrcode{width:42mm;height:42mm;margin:0 auto 2mm}
+.qr #qrcode img,.qr #qrcode canvas{width:42mm!important;height:42mm!important}
+.foot{text-align:center;font-size:3.6mm;color:#777;margin-top:5mm}
+.foot b span{color:#2a9a00}
+@media screen and (max-width:830px){.sheet{transform-origin:top left;margin:12px}}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  .bar,.msg{display:none!important}
+  .sheet{margin:0;box-shadow:none;width:210mm;height:297mm;transform:none!important}
+  .top,.note{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="brand">MASTER<span>PET</span> · Cartaz</div>
+  <button class="primary" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  <button class="ghost" id="shareBtn" onclick="shareAlert()">📤 Compartilhar alerta</button>
+  <a class="ghost" href="/tutor/">← Voltar</a>
+</div>
+<div id="msg" class="msg">Carregando dados do pet...</div>
+<div id="sheet" class="sheet" style="display:none">
+  <div class="top"><h1 id="title">PROCURA-SE</h1><p id="subtitle">Pet perdido · Ajude a voltar para casa</p></div>
+  <div class="photo" id="photo">🐾</div>
+  <h2 class="name" id="name">—</h2>
+  <div class="meta" id="meta">—</div>
+  <div class="note" id="note" style="display:none"></div>
+  <div class="contact">
+    <div class="left">
+      <div class="call">Viu este pet? Chame no WhatsApp:</div>
+      <div class="phone" id="phone">—</div>
+      <div class="small">Ou aponte a câmera do celular para o QR Code e fale com a família na hora pelo perfil MasterPET.</div>
+    </div>
+    <div class="qr"><div id="qrcode"></div><div id="tagId">—</div></div>
+  </div>
+  <div class="foot"><b>MASTER<span>PET</span></b> · A identidade inteligente do seu pet · masterpet.tec.br</div>
+</div>
+<script>
+const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
+let PET=null;
+function jsonp(action,params={}){
+  return new Promise((resolve,reject)=>{
+    const cb='mp_cz_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const s=document.createElement('script'); let done=false;
+    const finish=(fn,v)=>{if(done)return;done=true;clearTimeout(t);window[cb]=function(){delete window[cb]};s.remove();fn(v)};
+    const t=setTimeout(()=>finish(reject,new Error('TIMEOUT')),35000);
+    window[cb]=d=>finish(resolve,d);
+    s.onerror=()=>finish(reject,new Error('NETWORK'));
+    s.src=API+'?action='+encodeURIComponent(action)+'&callback='+cb+Object.entries(params).map(([k,v])=>'&'+encodeURIComponent(k)+'='+encodeURIComponent(v??'')).join('');
+    document.body.appendChild(s);
+  });
+}
+function fmtPhone(n){
+  n=String(n||'').replace(/\D/g,''); if(n.startsWith('55')&&n.length>11) n=n.slice(2);
+  if(n.length===11) return '('+n.slice(0,2)+') '+n.slice(2,7)+'-'+n.slice(7);
+  if(n.length===10) return '('+n.slice(0,2)+') '+n.slice(2,6)+'-'+n.slice(6);
+  return n;
+}
+function profileUrl(){ return 'https://masterpet.tec.br/p/'+encodeURIComponent(PET.tag); }
+function fitSheet(){
+  const s=document.getElementById('sheet'); const w=window.innerWidth-24, full=s.offsetWidth;
+  s.style.transform = (window.matchMedia('(max-width:830px)').matches && full>w) ? 'scale('+(w/full)+')' : '';
+  s.style.marginBottom = s.style.transform ? (-(1-(w/full))*s.offsetHeight+12)+'px' : '';
+}
+function shareAlert(){
+  if(!PET) return;
+  const lost=String(PET.status||'').toUpperCase()==='PERDIDO';
+  const text=(lost?'🚨 PET PERDIDO: ':'🐾 ')+PET.nome+(PET.raca?' ('+PET.raca+')':'')+'. '+(lost?'Se você viu, fale com a família pelo perfil: ':'Perfil MasterPET: ')+profileUrl();
+  if(navigator.share){ navigator.share({title:'MasterPET — '+PET.nome,text,url:profileUrl()}).catch(()=>{}); }
+  else window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+(async function(){
+  const token=localStorage.getItem('masterpet_token');
+  if(!token){ location.href='/tutor/'; return; }
+  const petId=new URLSearchParams(location.search).get('pet')||'';
+  try{
+    const r=await jsonp('tutorpets',{token});
+    if(!r||!r.ok){ document.getElementById('msg').innerHTML='Sua sessão expirou. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.'; return; }
+    PET=(r.pets||[]).find(p=>p.id===petId)||(r.pets||[])[0];
+    if(!PET){ document.getElementById('msg').textContent='Nenhum pet encontrado nesta conta.'; return; }
+  }catch(e){ document.getElementById('msg').textContent='Não foi possível carregar os dados. Verifique a internet e recarregue a página.'; return; }
+  const female=/^F/i.test(String(PET.sexo||'')), lost=String(PET.status||'').toUpperCase()==='PERDIDO';
+  document.getElementById('title').textContent=lost?'PROCURA-SE':'MASTERPET';
+  const esp=String(PET.especie||'').toLowerCase();
+  const who=esp.startsWith('gat')?(female?'Gata perdida':'Gato perdido'):(esp.startsWith('cach')||esp.startsWith('cão')||esp.startsWith('cao'))?(female?'Cadela perdida':'Cachorro perdido'):'Pet perdido';
+  document.getElementById('subtitle').textContent=lost?(who+' · Ajude a voltar para casa'):'Perfil de identificação do pet';
+  document.getElementById('name').textContent=PET.nome||'Pet';
+  document.getElementById('meta').textContent=[PET.especie,PET.raca,PET.sexo].filter(x=>x&&x!=='NAO_INFORMADO').join(' · ');
+  if(PET.foto){ const img=new Image(); img.alt=PET.nome; img.src=PET.foto; const ph=document.getElementById('photo'); ph.textContent=''; ph.appendChild(img); }
+  const note=String(PET.mensagemPerdido||'').trim();
+  if(note){ const n=document.getElementById('note'); n.textContent=note; n.style.display='block'; }
+  const wa=(PET.contatos||[]).find(c=>String(c.tipo).toUpperCase()==='WHATSAPP');
+  document.getElementById('phone').textContent=wa?fmtPhone(wa.valor):'Use o QR Code';
+  document.getElementById('tagId').textContent=PET.tag||'';
+  // Se a biblioteca de QR não carregar, o cartaz sai mesmo assim (com o endereço do perfil escrito).
+  if(window.QRCode) new QRCode(document.getElementById('qrcode'),{text:profileUrl(),width:400,height:400,correctLevel:QRCode.CorrectLevel.H});
+  else document.getElementById('qrcode').outerHTML='<div style="font-size:4mm;font-weight:700;word-break:break-all;padding-top:10mm">'+profileUrl().replace('https://','')+'</div>';
+  document.title='Cartaz — '+(PET.nome||'Pet');
+  document.getElementById('msg').style.display='none';
+  document.getElementById('sheet').style.display='flex';
+  fitSheet(); window.addEventListener('resize',fitSheet);
+})();
+</script>
+</body>
+</html>

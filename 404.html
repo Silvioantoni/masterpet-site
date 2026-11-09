@@ -122,6 +122,7 @@ function render(data, tagId){
   content.innerHTML =
     statusHtml+
     buttons+
+    (isLost?'<button class="btn ghost" type="button" onclick="shareProfile()">📤 Compartilhar este alerta</button>':'')+
     '<section class="card"><h2>🐾 Sobre o pet</h2>'+
       '<div class="row"><span class="label">Nome</span><span class="value">'+esc(p.nome)+'</span></div>'+
       '<div class="row"><span class="label">Raça</span><span class="value">'+esc(p.raca||"-")+'</span></div>'+
@@ -132,6 +133,14 @@ function render(data, tagId){
     '<section class="card"><h2>❤️ Ajude a família</h2><p class="note">Se você encontrou este pet, entre em contato pelos canais disponíveis acima. A MasterPET protege os dados privados da família.</p></section>';
 }
 
+
+function shareProfile(){
+  const url=location.origin+'/p/'+encodeURIComponent(getTagId());
+  const name=document.getElementById('petname').textContent;
+  const text='🚨 PET PERDIDO: '+name+'. Se você viu, fale com a família pelo perfil MasterPET: '+url;
+  if(navigator.share) navigator.share({title:'MasterPET — '+name,text,url}).catch(()=>{});
+  else window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
 
 function registrarAcesso(tagId){
   // Registra o escaneamento sem solicitar localização ao visitante.
