@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://script.google.com https://script.googleusercontent.com; form-action 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ative sua MasterPET</title>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
@@ -38,7 +40,7 @@ h1{font-size:34px;line-height:1.08;margin:18px 0 8px}.sub{margin:0 0 20px;color:
 <div class="field full"><label for="breed">Raça</label><input id="breed" placeholder="Ex.: Yorkshire Terrier"></div>
 </div>
 <div class="note">A senha precisa ter pelo menos 8 caracteres. O código de ativação é exclusivo da sua tag.</div>
-<div class="actions"><button id="activateBtn" onclick="activateTag()">ATIVAR MINHA MASTERPET</button></div>
+<div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden"><label>Não preencha este campo<input id="website" name="website" tabindex="-1" autocomplete="off"></label></div><div class="actions"><button id="activateBtn" onclick="activateTag()">ATIVAR MINHA MASTERPET</button></div>
 <div class="login">Já tenho cadastro → <a href="/tutor/">Entrar</a></div>
 </section></main>
 <script>
@@ -121,7 +123,7 @@ async function activateTag(){
  btn.textContent='ATIVANDO SUA MASTERPET...';show('Ativando sua MasterPET... isso pode levar alguns segundos.',true);
  const frame=document.createElement('iframe');frame.name='mpActFrame_'+Date.now();frame.style.display='none';document.body.appendChild(frame);
  const form=document.createElement('form');form.target=frame.name;form.method='POST';form.action=API;
- const data={action:'activatetag',tagId,code,nomeTutor:name,whatsapp:wa,email,senha:pass,nomePet:petName,especie:species,sexo:sex,raca:breed};
+ const data={action:'activatetag',website:($('website')||{}).value||'',tagId,code,nomeTutor:name,whatsapp:wa,email,senha:pass,nomePet:petName,especie:species,sexo:sex,raca:breed};
  Object.entries(data).forEach(([n,v])=>{const i=document.createElement('input');i.type='hidden';i.name=n;i.value=v;form.appendChild(i);});
  document.body.appendChild(form);form.submit();form.remove();
  setTimeout(()=>{try{frame.remove()}catch(e){}},30000);
