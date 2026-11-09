@@ -117,7 +117,15 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 function petEmoji(p){const e=String(p&&p.especie||'').toLowerCase();return e.startsWith('gat')?'🐱':(e.startsWith('cach')||e.startsWith('cão')||e.startsWith('cao'))?'🐶':'🐾';}
 function accTag(a){return String(a.tag||a.idTag||a.tagId||a.ID_TAG||'').toUpperCase();}
 
-function jsonp(action, params={}){
+// V20: ações com token/senha vão por POST (nada sensível no endereço). Se o POST falhar
+// por bloqueio do navegador, cai para o método antigo (JSONP) para o painel não parar.
+const POST_ACTIONS=new Set(['login','tutorpets','tutoraccesses','setpetstatus','updatepet','updatecontacts','exportdata','linktag','settempcontact','removephoto','addphoto','deleteaccount','requestreset','resetpassword']);
+async function jsonp(action, params={}){
+  if(!POST_ACTIONS.has(action)) return jsonpRaw(action,params);
+  try{ return await postApi(Object.assign({action},params)); }
+  catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonpRaw(action,params); }
+}
+function jsonpRaw(action, params={}){
   return new Promise((resolve,reject)=>{
     const cb='mp_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     const script=document.createElement('script');
@@ -147,10 +155,7 @@ async function postApi(payload,timeoutMs=35000){
   }finally{ clearTimeout(t); }
 }
 // Usa POST; só se o navegador não conseguir (bloqueio/rede), volta ao método antigo para o login não parar.
-async function secureCall(action,params){
-  try{ return await postApi(Object.assign({action},params)); }
-  catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonp(action,params); }
-}
+async function secureCall(action,params){ return jsonp(action,params); }
 
 function getTutor(){
   try { return JSON.parse(localStorage.getItem('masterpet_tutor') || '{}'); }

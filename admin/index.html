@@ -129,7 +129,12 @@ let tags=[];
 function $(id){return document.getElementById(id)}
 function show(el,type,text){el.className='msg '+type;el.textContent=text;el.style.display='block'}
 function hide(el){el.style.display='none'}
+// V20: tudo que leva adminToken vai por POST; JSONP só como plano B.
 async function apiJsonp(params){
+  try{ return await postApi(params); }
+  catch(e){ if(e&&e.name==='AbortError') throw new Error('timeout'); return await apiJsonpRaw(params); }
+}
+async function apiJsonpRaw(params){
   return new Promise((resolve,reject)=>{
     const cb='mpjsonp_'+Date.now()+'_'+Math.floor(Math.random()*9999);
     window[cb]=d=>{try{resolve(d)}finally{delete window[cb];if(s.parentNode)s.remove()}};
@@ -156,7 +161,7 @@ $('loginBtn').onclick=async()=>{
  btn.disabled=true;btn.textContent='ENTRANDO...';
  try{
    // Senha vai no corpo de um POST, não no endereço. Se o navegador não conseguir, usa o método antigo.
-   let d; try{ d=await postApi({action:'adminlogin',password:pass}); }catch(e){ if(e&&e.name==='AbortError') throw e; d=await apiJsonp({action:'adminlogin',password:pass}); }
+   let d; try{ d=await postApi({action:'adminlogin',password:pass}); }catch(e){ if(e&&e.name==='AbortError') throw e; d=await apiJsonpRaw({action:'adminlogin',password:pass}); }
    if(d.ok){adminToken=d.token;localStorage.setItem('masterpet_admin_token',adminToken);showApp();loadTags();loadStats();}
    else show($('loginMsg'),'err',friendly(d.error));
  }catch(e){show($('loginMsg'),'err','Não foi possível conectar ao servidor.')}
@@ -187,7 +192,7 @@ function jsonp(url){
 }
 async function loadTags(){
  try{
-   const d=await jsonp(API+'?action=adminlisttags&adminToken='+encodeURIComponent(adminToken));
+   const d=await apiJsonp({action:'adminlisttags',adminToken:adminToken});
    if(!d.ok){if(d.error==='ADMIN_AUTH_INVALID'){logout();return}show($('appMsg'),'err',friendly(d.error));return}
    tags=d.tags||[];
    $('total').textContent=tags.length;
