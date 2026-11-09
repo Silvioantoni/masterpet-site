@@ -1,181 +1,594 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://script.google.com https://script.googleusercontent.com; form-action 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests">
-<meta name="referrer" content="strict-origin-when-cross-origin"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MasterPET — A identidade inteligente do seu pet</title>
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MasterPET — A identidade inteligente do seu pet</title>
 <meta name="description" content="Tag de identificação inteligente para pets: escaneou o QR Code, falou com a família. Perfil online, Modo Perdido e histórico de leituras. MasterPET, a identidade inteligente do seu pet.">
 <meta property="og:type" content="website"><meta property="og:url" content="https://masterpet.tec.br/"><meta property="og:title" content="MasterPET — A identidade inteligente do seu pet"><meta property="og:description" content="Tag com QR Code que leva ao perfil do seu pet e conecta quem encontrou com a família em segundos."><meta property="og:locale" content="pt_BR"><meta property="og:image" content="https://masterpet.tec.br/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#090b0c">
+<meta name="theme-color" content="#070807">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/space-grotesk-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:"Space Grotesk";src:url(/fonts/space-grotesk-var.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Inter";src:url(/fonts/inter-var.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{
+  --bg:#070807;--bg2:#0b0d0b;--surface:#101310;--surface2:#151915;
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
+  --text:#f2f5f1;--muted:#9aa49d;--dim:#6b756e;
+  --lime:#b7ff00;--lime2:#d8ff7a;--limeglow:rgba(183,255,0,.35);
+  --red:#ff4d5e;--radius:22px;
+  --display:"Space Grotesk",ui-sans-serif,system-ui,Arial,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
 *{box-sizing:border-box}
-:root{--bg:#070908;--panel:#0f1411;--line:#242b26;--muted:#a5afa7;--green:#b7ff00;--white:#f5f7f5}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:#fff;font-family:Arial,Helvetica,sans-serif}
-.wrap{max-width:1180px;margin:auto;padding:0 24px}
-header{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;background:rgba(7,9,8,.96);position:sticky;top:0;z-index:10}
-.head{width:100%;display:flex;justify-content:space-between;align-items:center;gap:18px}
-.logo{font-size:25px;font-weight:900;letter-spacing:-1px}.logo b,.green{color:var(--green)}
-nav{display:flex;gap:26px;color:#b7bdb8;font-size:14px}
-a{text-decoration:none;color:inherit}
-.btn{display:inline-block;background:var(--green);color:#091007;padding:14px 19px;border-radius:10px;font-weight:900;border:1px solid var(--green);transition:.18s}
-.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
-.dark{background:transparent;color:#fff}
-.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:65px;align-items:center;padding:88px 24px 82px}
-.badge{display:inline-flex;color:var(--green);border:1px solid #3b4a31;border-radius:999px;padding:8px 13px;font-size:11px;font-weight:900;letter-spacing:.3px}
-.hero h1{font-size:clamp(46px,6vw,78px);line-height:.93;letter-spacing:-4px;margin:20px 0}
-.hero p,.sub{color:var(--muted);line-height:1.65;font-size:17px;max-width:640px}
-.actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:28px}
-.visual{min-height:475px;border:1px solid var(--line);border-radius:30px;background:radial-gradient(circle at 50% 44%,#22301e,#111512 48%,#080a09 76%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.visual:after{content:"";position:absolute;inset:auto 15% 10%;height:28px;background:#000;filter:blur(22px);opacity:.65;border-radius:50%}
-.tag{width:285px;height:285px;border-radius:50%;background:linear-gradient(145deg,#eef1ee,#b9beb9 48%,#7f8681);color:#0b0d0c;text-align:center;padding:25px 25px 20px;position:relative;z-index:2;box-shadow:0 28px 70px rgba(0,0,0,.58),inset 0 0 0 1px rgba(255,255,255,.7);transform:rotate(2deg)}
-.tag .hole{width:34px;height:34px;border-radius:50%;margin:0 auto 8px;background:#0e1110;box-shadow:inset 0 0 0 3px #d5d9d6}
-.tag-title{font-size:17px;font-weight:900;letter-spacing:.3px}
-.tag-title span{color:#1d9e00}
-.qr-wrap{width:138px;height:138px;margin:11px auto 10px;background:#fff;padding:7px;border-radius:6px;box-shadow:0 5px 15px rgba(0,0,0,.12)}
-.qr-wrap img{display:block;width:100%;height:100%}
-.tag-id{font-weight:900;font-size:15px;letter-spacing:1px}
-.tag-note{position:absolute;left:0;right:0;bottom:-54px;color:#9da69f;font-size:13px;text-align:center}
-section{padding:78px 0;border-top:1px solid var(--line)}
-.mform{display:grid;gap:12px}.mform label{display:grid;gap:6px;color:var(--muted);font-size:13px;font-weight:700}.mform input,.mform select{background:#070908;border:1px solid var(--line);border-radius:10px;padding:13px;color:#fff;font-size:15px}.mform input:focus,.mform select:focus{outline:none;border-color:var(--green)}
-.counter{display:flex;gap:22px;margin-top:22px;color:var(--muted);font-size:14px}.counter[hidden],.counter [hidden]{display:none}.counter b{display:block;color:#fff;font-size:28px;letter-spacing:-1px}
-.cmpwrap{max-width:760px;margin:30px auto 0;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+::selection{background:var(--lime);color:#071000}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.lime{color:var(--lime)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font:600 12px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+.eyebrow:before{content:"";width:22px;height:1px;background:var(--lime)}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.035em;line-height:1.02;margin:0;font-weight:700}
+h2{font-size:clamp(34px,5vw,60px)}
+h3{font-size:22px;letter-spacing:-.02em;line-height:1.2}
+.lead{font-size:clamp(17px,1.6vw,19px);color:var(--muted);max-width:620px}
+.center{text-align:center}.center .lead{margin-left:auto;margin-right:auto}
+section{position:relative;padding:clamp(80px,11vw,140px) 0}
+.sechead{margin-bottom:clamp(40px,6vw,64px)}
+.sechead h2{margin:18px 0 16px}
+:focus-visible{outline:2px solid var(--lime);outline-offset:3px;border-radius:8px}
+
+/* ---------- botões ---------- */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 24px;border-radius:999px;font:600 15px/1 var(--body);letter-spacing:-.01em;border:1px solid transparent;cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s;white-space:nowrap}
+.btn-primary{background:var(--lime);color:#081000;box-shadow:0 0 0 0 var(--limeglow),0 10px 30px -10px var(--limeglow)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 0 6px rgba(183,255,0,.12),0 18px 40px -12px var(--limeglow)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text);border-color:var(--line2);backdrop-filter:blur(10px)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);transform:translateY(-2px)}
+.btn .arr{transition:transform .25s var(--ease)}.btn:hover .arr{transform:translateX(3px)}
+.btn-sm{height:42px;padding:0 18px;font-size:14px}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .3s,border-color .3s,backdrop-filter .3s;border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(7,8,7,.72);backdrop-filter:saturate(160%) blur(16px);-webkit-backdrop-filter:saturate(160%) blur(16px);border-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:76px;gap:20px}
+.logo{font:700 22px/1 var(--display);letter-spacing:-.05em}.logo b{color:var(--lime);font-weight:700}
+.links{display:flex;gap:30px;font-size:14px;color:var(--muted)}
+.links a{position:relative;transition:color .2s}.links a:hover{color:var(--text)}
+.links a:after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:1px;background:var(--lime);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.links a:hover:after{transform:scaleX(1)}
+.navcta{display:flex;gap:10px;align-items:center}
+.burger{display:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--text);cursor:pointer}
+.burger span{display:block;width:18px;height:1.5px;background:currentColor;margin:4px auto;transition:transform .3s,opacity .3s}
+.sheet{position:fixed;inset:76px 12px auto 12px;z-index:49;background:rgba(14,17,14,.96);backdrop-filter:blur(18px);border:1px solid var(--line2);border-radius:20px;padding:10px;display:none}
+.sheet a{display:block;padding:14px 16px;border-radius:12px;font-weight:500}.sheet a:hover{background:rgba(255,255,255,.05)}
+.sheet.open{display:block;animation:pop .25s var(--ease)}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* ---------- banner fogos ---------- */
+#fogos{position:relative;z-index:51;background:linear-gradient(90deg,#2a0d14,#1b1030);border-bottom:1px solid #4a2333;font-size:14px}
+#fogos .wrap{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 24px}
+
+/* ---------- hero ---------- */
+.hero{padding:150px 0 90px;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:-20% -10% auto auto;width:900px;height:900px;background:radial-gradient(circle,rgba(183,255,0,.16),transparent 60%);filter:blur(10px);pointer-events:none}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse 70% 60% at 60% 40%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 70% 60% at 60% 40%,#000 20%,transparent 75%);opacity:.5;pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.hero h1{font-size:clamp(46px,7.2vw,96px);margin:22px 0 22px}
+.hero h1 .stroke{color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.55)}
+.hero .lead{margin:0 0 34px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.trust{display:flex;gap:22px;flex-wrap:wrap;margin-top:34px;color:var(--muted);font-size:14px}
+.trust span{display:inline-flex;align-items:center;gap:8px}
+.trust i{width:18px;height:18px;border-radius:50%;background:rgba(183,255,0,.14);display:inline-grid;place-items:center;color:var(--lime);font-style:normal;font-size:11px}
+.counter{display:flex;gap:34px;margin-top:30px}
+.counter[hidden],.counter [hidden]{display:none}
+.counter b{display:block;font:700 34px/1 var(--display);letter-spacing:-.03em}
+.counter div{color:var(--muted);font-size:13px}
+
+/* palco da tag 3D */
+.stage{position:relative;height:560px;perspective:1100px;display:grid;place-items:center}
+.halo{position:absolute;width:440px;height:440px;border-radius:50%;background:radial-gradient(circle,rgba(183,255,0,.22),transparent 65%);filter:blur(20px)}
+.ring{position:absolute;border:1px solid var(--line2);border-radius:50%}
+.ring.r1{width:470px;height:470px;animation:spin 40s linear infinite;border-style:dashed;border-color:rgba(183,255,0,.18)}
+.ring.r2{width:560px;height:560px;opacity:.5}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tag3d{position:relative;width:330px;height:330px;transform-style:preserve-3d;transition:transform .5s var(--ease);will-change:transform}
+.tagface{position:absolute;inset:0;border-radius:50%;
+  background:
+    radial-gradient(circle at var(--gx,35%) var(--gy,28%),rgba(255,255,255,.95),rgba(255,255,255,0) 32%),
+    conic-gradient(from 210deg,#cfd5d1,#9aa29d,#e9ece9,#8a918c,#d6dbd7,#a4aba6,#cfd5d1);
+  box-shadow:inset 0 0 0 10px #dfe3df,inset 0 0 0 11px #a7aea9,inset 0 6px 20px rgba(255,255,255,.5),0 50px 80px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.tagface:after{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-radial-gradient(circle at 50% 50%,rgba(0,0,0,.025) 0 1px,transparent 1px 3px);pointer-events:none}
+.hole{position:absolute;top:22px;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#0b0d0b,#202420);box-shadow:inset 0 2px 4px #000,0 1px 0 rgba(255,255,255,.7)}
+.tagname{margin-top:46px;font:700 22px/1 var(--display);letter-spacing:-.04em;color:#1d201e;text-shadow:0 1px 0 rgba(255,255,255,.6)}
+.tagqr{width:132px;height:132px;margin:12px 0 10px;opacity:.88;mix-blend-mode:multiply}
+.tagid{font:700 16px/1 var(--display);letter-spacing:.06em;color:#1d201e}
+.laser{position:absolute;left:8%;right:8%;height:2px;top:20%;background:linear-gradient(90deg,transparent,var(--lime),#fff,var(--lime),transparent);box-shadow:0 0 18px 4px var(--limeglow);opacity:0;border-radius:2px}
+.engrave .laser{animation:laser 2.4s var(--ease) .4s 1 both}
+@keyframes laser{0%{top:18%;opacity:0}8%{opacity:1}92%{opacity:1}100%{top:82%;opacity:0}}
+.engrave .tagqr,.engrave .tagname,.engrave .tagid{animation:reveal 2.4s var(--ease) .4s 1 both}
+@keyframes reveal{0%{clip-path:inset(0 0 100% 0)}100%{clip-path:inset(0 0 0 0)}}
+.float{position:absolute;display:flex;align-items:center;gap:12px;padding:12px 16px 12px 12px;border-radius:16px;background:rgba(18,22,18,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line2);box-shadow:0 20px 50px -20px #000;font-size:13px;white-space:nowrap;animation:bob 6s ease-in-out infinite}
+.float b{display:block;font-size:13.5px}.float small{color:var(--muted);font-size:12px}
+.float .ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:17px;flex:none}
+.f1{top:70px;left:-10px}.f1 .ic{background:rgba(183,255,0,.14)}
+.f2{bottom:96px;right:-14px;animation-delay:-2s}.f2 .ic{background:rgba(255,77,94,.16)}
+.f3{bottom:20px;left:30px;animation-delay:-4s}.f3 .ic{background:rgba(120,170,255,.16)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 0 var(--limeglow);animation:ping 2s infinite;display:inline-block;margin-right:6px}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(183,255,0,.6)}100%{box-shadow:0 0 0 10px rgba(183,255,0,0)}}
+
+/* faixa */
+.marquee{border-block:1px solid var(--line);overflow:hidden;padding:20px 0;background:var(--bg2)}
+.track{display:flex;gap:56px;width:max-content;animation:mq 38s linear infinite;font:500 15px/1 var(--display);color:var(--muted);letter-spacing:-.01em}
+.track span{display:inline-flex;align-items:center;gap:14px}.track span:before{content:"✦";color:var(--lime);font-size:12px}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- como funciona ---------- */
+.how{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center}
+.steps{display:flex;flex-direction:column;gap:6px}
+.stepbtn{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:52px 1fr;gap:18px;padding:22px 22px;border-radius:20px;border:1px solid transparent;transition:background .3s,border-color .3s;position:relative;overflow:hidden}
+.stepbtn:hover{background:rgba(255,255,255,.025)}
+.stepbtn.on{background:var(--surface);border-color:var(--line2)}
+.stepbtn .n{font:600 13px/52px var(--display);text-align:center;width:52px;height:52px;border-radius:15px;border:1px solid var(--line2);color:var(--muted);transition:all .3s}
+.stepbtn.on .n{background:var(--lime);color:#081000;border-color:var(--lime)}
+.stepbtn h3{font-size:20px;margin-top:4px}
+.stepbtn p{margin:6px 0 0;color:var(--muted);font-size:15px;max-height:0;opacity:0;overflow:hidden;transition:max-height .45s var(--ease),opacity .3s}
+.stepbtn.on p{max-height:120px;opacity:1}
+.stepbtn .bar{position:absolute;left:22px;right:22px;bottom:0;height:2px;background:var(--line)}
+.stepbtn .bar i{display:block;height:100%;width:0;background:var(--lime)}
+.stepbtn.on .bar i{animation:fill var(--dur,5s) linear forwards}
+@keyframes fill{to{width:100%}}
+
+/* celular */
+.phone{position:relative;width:310px;height:640px;margin:0 auto;border-radius:52px;padding:12px;background:linear-gradient(145deg,#2b302c,#0e110e);box-shadow:0 0 0 1px rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.06),0 60px 100px -40px rgba(0,0,0,.95),0 0 120px -40px rgba(183,255,0,.25)}
+.phone:before{content:"";position:absolute;top:22px;left:50%;width:96px;height:28px;margin-left:-48px;background:#000;border-radius:20px;z-index:3}
+.screen{position:relative;width:100%;height:100%;border-radius:42px;overflow:hidden;background:#f2f4f3;color:#111}
+.scr{position:absolute;inset:0;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .5s var(--ease),transform .5s var(--ease);display:flex;flex-direction:column}
+.scr.on{opacity:1;transform:none}
+.pv-hero{background:linear-gradient(160deg,#0a0c0a,#171b17);color:#fff;text-align:center;padding:62px 18px 22px}
+.pv-logo{font:700 15px/1 var(--display);letter-spacing:-.04em}.pv-logo b{color:var(--lime)}
+.pv-avatar{width:92px;height:92px;border-radius:50%;margin:16px auto 10px;border:3px solid var(--lime);display:grid;place-items:center;font-size:42px;background:#e9edeb;overflow:hidden}
+.pv-name{font:700 24px/1.1 var(--display);letter-spacing:-.03em}
+.pv-sub{font-size:12px;color:#aab3ad;margin-top:6px}
+.pv-body{padding:14px;display:flex;flex-direction:column;gap:9px}
+.pv-status{border-radius:14px;padding:12px;font-size:12.5px;background:#ecffe6;border:1px solid #a7ee93;color:#22551a}
+.pv-status b{display:block;font-size:13.5px;color:#0f3a06}
+.pv-btn{height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.pv-wa{background:var(--lime);color:#081000}.pv-call{background:#141714;color:#fff}
+.pv-card{background:#fff;border:1px solid #e3e7e4;border-radius:14px;padding:10px 12px;font-size:12.5px}
+.pv-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f2f1}.pv-row:last-child{border:0}.pv-row span{color:#78817c}
+.lostmode .pv-status{background:#fff0f2;border-color:#ffb3bd;color:#7a2430}.lostmode .pv-status b{color:#c8142c}
+.reward{display:none;background:#fff8e2;border:1px solid #f2d27a;color:#7a5a00;border-radius:12px;padding:9px 12px;font-size:12.5px;font-weight:700}
+.lostmode .reward{display:block}
+/* telas do passo a passo */
+.s-form{padding:70px 18px 18px;gap:10px;background:#0c0f0c;color:#fff}
+.s-form .t{font:700 22px/1.1 var(--display);letter-spacing:-.03em}
+.s-form .fld{background:#151915;border:1px solid #273027;border-radius:12px;padding:12px;font-size:13px;color:#cfd6d1}
+.s-form .fld small{display:block;color:#6f7a72;font-size:10.5px;margin-bottom:3px;letter-spacing:.06em;text-transform:uppercase}
+.s-form .ok{margin-top:auto;background:var(--lime);color:#081000;border-radius:12px;padding:13px;text-align:center;font-weight:800;font-size:14px}
+.s-collar{background:radial-gradient(circle at 50% 35%,#24301b,#0b0d0b 70%);align-items:center;justify-content:center;color:#fff;gap:18px}
+.collar{width:230px;height:34px;border-radius:20px;background:linear-gradient(#c43a2f,#8e2219);box-shadow:inset 0 2px 0 rgba(255,255,255,.25);position:relative}
+.collar .mini{position:absolute;left:50%;top:22px;width:96px;height:96px;margin-left:-48px;border-radius:50%;background:conic-gradient(from 210deg,#d1d6d2,#959c97,#eceeec,#8b928d,#d1d6d2);box-shadow:0 18px 30px -10px #000;display:grid;place-items:center;transform-origin:50% -10px;animation:swing 3.2s ease-in-out infinite}
+.collar .mini svg{width:44px;height:44px;opacity:.8}
+@keyframes swing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.s-collar p{margin:120px 0 0;font:600 15px/1.4 var(--display);text-align:center;color:#d7dcd8;padding:0 30px}
+.s-scan{background:#0b0d0b;align-items:center;justify-content:center}
+.viewfinder{position:relative;width:220px;height:220px;border-radius:24px}
+.viewfinder:before,.viewfinder:after{content:"";position:absolute;inset:0;border:3px solid var(--lime);border-radius:24px;clip-path:polygon(0 0,28% 0,28% 6%,6% 6%,6% 28%,0 28%,0 72%,6% 72%,6% 94%,28% 94%,28% 100%,72% 100%,72% 94%,94% 94%,94% 72%,100% 72%,100% 28%,94% 28%,94% 6%,72% 6%,72% 0,100% 0,100% 100%,0 100%)}
+.viewfinder .q{position:absolute;inset:34px;background:#fff;border-radius:10px;padding:10px}
+.viewfinder .scanline{position:absolute;left:12px;right:12px;height:2px;background:var(--lime);box-shadow:0 0 14px 3px var(--limeglow);animation:scan 2.2s ease-in-out infinite}
+@keyframes scan{0%,100%{top:18%}50%{top:82%}}
+.s-scan .toast{position:absolute;bottom:60px;left:20px;right:20px;background:rgba(255,255,255,.95);color:#111;border-radius:16px;padding:12px 14px;font-size:13px;display:flex;gap:10px;align-items:center;box-shadow:0 10px 30px #0008}
+.s-scan .toast b{display:block}
+.s-chat{background:#ece5dd;padding-top:58px}
+.chat-top{background:#0f3b2f;color:#fff;padding:14px 16px 12px;display:flex;gap:10px;align-items:center;font-size:14px;margin-top:-58px;padding-top:62px}
+.chat-top .av{width:34px;height:34px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:#081000;font-weight:800;font-size:13px}
+.bubbles{padding:16px 12px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:82%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.4;box-shadow:0 1px 1px rgba(0,0,0,.12);opacity:0;transform:translateY(8px)}
+.scr.on .bub{animation:in .5s var(--ease) forwards}
+.scr.on .bub:nth-child(2){animation-delay:.9s}.scr.on .bub:nth-child(3){animation-delay:1.8s}
+@keyframes in{to{opacity:1;transform:none}}
+.bub.me{align-self:flex-end;background:#d9fdd3}.bub.them{align-self:flex-start;background:#fff}
+
+/* ---------- demo modo perdido ---------- */
+.lost-sec{background:linear-gradient(180deg,var(--bg),#0a0b0a 40%,var(--bg))}
+.lost-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(30px,6vw,90px);align-items:center}
+.switch{display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:20px;background:var(--surface);border:1px solid var(--line2);cursor:pointer;width:max-content;max-width:100%;user-select:none;margin:30px 0 26px}
+.switch .tr{width:58px;height:32px;border-radius:99px;background:#2a302b;position:relative;transition:background .3s;flex:none}
+.switch .tr:after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .35s var(--ease)}
+.switch[aria-checked="true"] .tr{background:var(--red)}
+.switch[aria-checked="true"] .tr:after{transform:translateX(26px)}
+.switch b{display:block;font-size:16px}.switch small{color:var(--muted)}
+.feats{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.feats li{display:flex;gap:14px;align-items:flex-start;color:var(--muted)}
+.feats li b{color:var(--text);display:block;font-weight:600}
+.feats .ck{width:26px;height:26px;border-radius:8px;background:rgba(183,255,0,.12);color:var(--lime);display:grid;place-items:center;flex:none;font-size:13px;margin-top:2px}
+.lost-visual{position:relative;display:flex;justify-content:center}
+.mapcard{position:absolute;right:-10px;bottom:40px;width:250px;border-radius:20px;overflow:hidden;background:var(--surface);border:1px solid var(--line2);box-shadow:0 30px 60px -20px #000;transform:translateY(20px);opacity:0;transition:all .6s var(--ease);pointer-events:none}
+.lostmode-on .mapcard{transform:none;opacity:1}
+section[id],header[id]{scroll-margin-top:84px}
+.mapcard .map{height:150px;background:
+  linear-gradient(transparent 0 46%,#2a312b 46% 54%,transparent 54%),
+  linear-gradient(90deg,transparent 0 30%,#2a312b 30% 36%,transparent 36%),
+  linear-gradient(90deg,transparent 0 70%,#262c27 70% 74%,transparent 74%),
+  radial-gradient(circle at 70% 25%,#1a2b18 0 20%,transparent 21%),
+  #151915;position:relative}
+.pin{position:absolute;width:14px;height:14px;border-radius:50%;border:2px solid #0b0d0b;transform:scale(0);transition:transform .4s var(--ease)}
+.lostmode-on .pin{transform:scale(1)}
+.pin.p1{left:22%;top:58%;background:var(--lime);transition-delay:.3s}.pin.p2{left:48%;top:40%;background:var(--lime);transition-delay:.6s}.pin.p3{left:66%;top:22%;background:var(--red);transition-delay:.9s;box-shadow:0 0 0 6px rgba(255,77,94,.25)}
+.mapcard .cap{padding:12px 14px;font-size:13px}.mapcard .cap b{display:block}.mapcard .cap small{color:var(--muted)}
+.mail{position:absolute;left:-30px;top:60px;width:260px;padding:14px;border-radius:18px;background:rgba(18,22,18,.9);backdrop-filter:blur(12px);border:1px solid var(--line2);box-shadow:0 30px 60px -20px #000;font-size:13px;opacity:0;transform:translateY(-14px);transition:all .6s var(--ease) .2s;pointer-events:none}
+.lostmode-on .mail{opacity:1;transform:none}
+.mail small{color:var(--muted)}
+
+/* ---------- bento ---------- */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.bx{position:relative;border-radius:var(--radius);background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);padding:28px;overflow:hidden;transition:border-color .3s,transform .4s var(--ease);min-height:250px;display:flex;flex-direction:column;justify-content:flex-end}
+.bx:hover{border-color:var(--line2);transform:translateY(-3px)}
+.bx:before{content:"";position:absolute;inset:0;background:radial-gradient(500px circle at var(--mx,50%) var(--my,0%),rgba(183,255,0,.09),transparent 40%);opacity:0;transition:opacity .3s;pointer-events:none}
+.bx:hover:before{opacity:1}
+.bx h3{margin-bottom:8px}.bx p{margin:0;color:var(--muted);font-size:15px}
+.bx .art{position:absolute;inset:0 0 auto 0;height:62%;display:grid;place-items:center}
+.b1{grid-column:span 3}.b2{grid-column:span 3}.b3,.b4,.b5{grid-column:span 2}
+.b6{grid-column:span 6;min-height:auto;flex-direction:row;align-items:center;justify-content:space-between;gap:24px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:99px;background:rgba(255,255,255,.05);border:1px solid var(--line2);font-size:13px}
+.lock{width:84px;height:84px;border-radius:24px;background:rgba(183,255,0,.1);display:grid;place-items:center;font-size:38px;box-shadow:0 0 60px -10px var(--limeglow)}
+.poster{width:120px;height:160px;border-radius:8px;background:#fff;color:#111;transform:rotate(-6deg);box-shadow:0 30px 40px -20px #000;padding:8px;text-align:center}
+.poster .ph{background:#d6142c;color:#fff;font:800 11px/1 var(--display);padding:6px 0;border-radius:4px;letter-spacing:.06em}
+.poster .im{height:58px;margin:8px 0;border-radius:4px;background:linear-gradient(135deg,#e9ecea,#c8ceca)}
+.poster .ln{height:5px;border-radius:3px;background:#e1e5e2;margin:5px 10px}
+.vac{display:flex;flex-direction:column;gap:8px;width:76%}
+.vac div{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px}
+.vac em{font-style:normal;color:var(--lime);font-size:12px}
+.laserbox{width:150px;height:150px;border-radius:50%;background:conic-gradient(from 210deg,#cfd5d1,#959c97,#eceeec,#8b928d,#cfd5d1);position:relative;box-shadow:0 30px 50px -20px #000}
+.laserbox:after{content:"";position:absolute;left:50%;top:-60px;width:2px;height:110px;margin-left:-1px;background:linear-gradient(transparent,var(--lime));box-shadow:0 0 16px 3px var(--limeglow);animation:beam 1.6s ease-in-out infinite}
+@keyframes beam{0%,100%{transform:translateX(-24px)}50%{transform:translateX(24px)}}
+.nofee{font:700 clamp(40px,6vw,64px)/1 var(--display);letter-spacing:-.05em}
+.nofee s{color:var(--dim);text-decoration-thickness:3px;text-decoration-color:var(--red)}
+
+/* ---------- comparação ---------- */
+.cmpwrap{max-width:820px;margin:0 auto;border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
 .cmp{width:100%;border-collapse:collapse;font-size:15px}
-.cmp th,.cmp td{padding:15px 12px;border-bottom:1px solid var(--line);text-align:center}
-.cmp td:first-child{text-align:left;color:#e9eeea;font-weight:700}
-.cmp thead th{color:var(--muted);font-size:13px;font-weight:700;background:#0d120f;vertical-align:bottom}
-.cmp thead th.mp{color:#fff;font-size:15px;font-weight:900;letter-spacing:-.3px}.cmp thead th.mp b{color:var(--green)}
-.cmp .mp{background:#13200a;width:22%}
+.cmp th,.cmp td{padding:17px 14px;border-bottom:1px solid var(--line);text-align:center}
+.cmp td:first-child{text-align:left;font-weight:500}
+.cmp thead th{color:var(--muted);font-size:13px;font-weight:500;vertical-align:bottom}
+.cmp thead th.mp{color:var(--text);font:700 16px/1 var(--display);letter-spacing:-.04em}.cmp thead th.mp b{color:var(--lime)}
+.cmp .mp{background:rgba(183,255,0,.06);width:22%}
 .cmp tr:last-child td{border-bottom:0}
-.cmp .y{color:var(--green);font-weight:900;font-size:19px}.cmp .n{color:#4b5650;font-size:18px}
-.gpsnote{color:#cfd6d1;max-width:680px;margin:22px auto 0;line-height:1.6}.cmpfoot{color:#6f7a73;font-size:12px;margin-top:10px}
-@media(max-width:560px){.cmp{font-size:13px}.cmp th,.cmp td{padding:12px 6px}.cmp td:first-child{padding-left:12px}.cmp thead th{font-size:11px}.cmp thead th.mp{font-size:12px}}
-.faqs{max-width:820px;margin:34px auto 0;display:grid;gap:10px}
-.faq{background:#0d120f;border:1px solid var(--line);border-radius:14px;padding:0 20px}
-.faq summary{cursor:pointer;list-style:none;padding:18px 28px 18px 0;font-weight:800;font-size:17px;position:relative}
+.y{color:var(--lime);font-weight:800;font-size:18px}.n{color:#424a44;font-size:18px}
+.gpsnote{color:var(--muted);max-width:640px;margin:26px auto 0}.cmpfoot{color:var(--dim);font-size:12px;margin-top:10px}
+
+/* ---------- monte a sua ---------- */
+.build{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center}
+.panel{background:var(--surface);border:1px solid var(--line2);border-radius:28px;padding:clamp(24px,4vw,40px)}
+.field{display:grid;gap:8px;margin-bottom:16px}
+.field span{font-size:13px;color:var(--muted);font-weight:500}
+.field input,.field select{height:54px;border-radius:14px;border:1px solid var(--line2);background:#0b0d0b;color:var(--text);padding:0 16px;font:500 16px var(--body);transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none}
+.field select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 22px) 50%,calc(100% - 16px) 50%;background-size:6px 6px;background-repeat:no-repeat}
+.field input:focus,.field select:focus{outline:none;border-color:var(--lime);box-shadow:0 0 0 4px rgba(183,255,0,.12)}
+.panel .btn{width:100%;margin-top:6px}
+.panel .hint{color:var(--dim);font-size:13px;margin:12px 0 0}
+
+/* ---------- FAQ ---------- */
+.faqs{max-width:820px;margin:0 auto;display:grid;gap:10px}
+.faq{border:1px solid var(--line);border-radius:18px;background:var(--surface);transition:border-color .3s,background .3s}
+.faq[open]{border-color:var(--line2);background:var(--surface2)}
+.faq summary{list-style:none;cursor:pointer;padding:22px 60px 22px 24px;font:600 17px/1.35 var(--display);letter-spacing:-.015em;position:relative}
 .faq summary::-webkit-details-marker{display:none}
-.faq summary:after{content:"+";position:absolute;right:0;top:14px;color:var(--green);font-size:24px;font-weight:900}
-.faq[open] summary:after{content:"–"}
-.faq p{color:var(--muted);line-height:1.6;margin:0 0 18px}
-.center{text-align:center}.center .sub{margin:0 auto}
-h2{font-size:clamp(34px,4vw,48px);letter-spacing:-2.3px;margin:10px 0 15px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:38px}
-.card{background:linear-gradient(180deg,#111713,#0f1411);border:1px solid var(--line);border-radius:18px;padding:25px}
-.card p,.step p{color:var(--muted);line-height:1.58}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px}
-.step{background:#0d120f;border:1px solid var(--line);border-radius:20px;padding:18px 18px 21px;min-height:280px;position:relative;overflow:hidden}
-.step:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--green)}
-.num{font-size:11px;color:var(--green);font-weight:900;letter-spacing:.4px}
-.step h3{margin:10px 0 8px;font-size:21px}
-.step p{font-size:14px}
-.step-visual{height:110px;margin:18px 0 12px;border-radius:14px;background:#151c17;border:1px solid #2d372f;display:flex;align-items:center;justify-content:center}
-.step-visual svg{width:94px;height:94px}
-.demo{display:grid;grid-template-columns:1fr 1fr;gap:25px;margin-top:40px}
-.phone{max-width:340px;margin:auto;background:#050605;border:7px solid #202520;border-radius:30px;padding:17px}
-.profile{background:#fff;color:#111;border-radius:18px;padding:16px}
-.lost{background:#ffdfe4;color:#d81f35;padding:10px;border-radius:9px;text-align:center;font-weight:900;font-size:12px;border:1px solid #ff8e9b}
-.pet{height:140px;border-radius:14px;background:linear-gradient(135deg,#e8eee9,#cad3cc);display:flex;align-items:center;justify-content:center;font-size:65px;margin:12px 0}
-.contact{display:block;background:var(--green);padding:12px;text-align:center;border-radius:8px;margin-top:8px;font-weight:900}
-.cta{background:linear-gradient(180deg,#121913,#0d110e);border:1px solid #30392e;border-radius:22px;padding:50px;text-align:center}
-.cta p{color:var(--muted);max-width:600px;margin:auto;line-height:1.6}
-footer{padding:30px 0;color:#777;border-top:1px solid var(--line);font-size:13px}
-.foot{display:flex;justify-content:space-between}
-@media(max-width:900px){.hero{grid-template-columns:1fr;gap:35px}.steps{grid-template-columns:1fr 1fr}}
-@media(max-width:750px){nav{display:none}.hero,.demo{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.hero{padding-top:55px}.hero h1{letter-spacing:-2.5px}.visual{min-height:435px}.tag{width:260px;height:260px;padding:21px}.qr-wrap{width:124px;height:124px}}
-</style></head><body>
-<header><div class="wrap head"><div class="logo">MASTER<b>PET</b></div><nav><a href="#como">Como funciona</a><a href="#monte">Monte a sua</a><a href="#perfil">Perfil</a><a href="#porque">Por que MasterPET</a><a href="#duvidas">Dúvidas</a><a href="/perdidos/">Pets perdidos</a><a href="/tutor/">Área do Tutor</a></nav><a class="btn" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET</a></div></header>
-<div id="fogos" hidden style="background:linear-gradient(90deg,#2a0d14,#1b1030);border-bottom:1px solid #4a2333"><div class="wrap" style="display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 24px"><div style="line-height:1.45"><b>🎆 Fogos de fim de ano:</b> é a época em que <b>mais pets fogem</b>. Garanta a identificação do seu antes do Réveillon.</div><a class="btn" style="padding:10px 14px" href="https://wa.me/554599893990?text=Ol%C3%A1!%20Quero%20uma%20MasterPET%20antes%20dos%20fogos%20de%20fim%20de%20ano." target="_blank" rel="noopener">Quero proteger meu pet</a></div></div>
-<section class="hero wrap" style="border:0"><div><span class="badge">UMA SOLUÇÃO MASTERTECH</span><h1>A identidade <span class="green">inteligente</span> do seu pet.</h1><p>Uma tag premium com QR Code exclusivo. Quem encontrar seu pet pode acessar o perfil dele e falar com a família em poucos segundos.</p><div class="actions"><a class="btn" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET</a><a class="btn dark" href="#como">Como funciona</a></div><div class="counter" id="counter" hidden><div><b id="cPets">—</b>pets protegidos</div><div><b id="cReenc">—</b>reencontros</div></div></div><div class="visual">
-  <div class="tag">
-    <div class="hole"></div>
-    <div class="tag-title">MASTER<span>PET</span></div>
-    <div class="qr-wrap"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQAAAAAab1qeAAACEklEQVR4nO2aUW+DMAyE76b+/798ezg7wLQHqFRmM1OpheaTkliJfTahcPL6OgsOOeSQQ/4L8gUA9L0Ie1OKEAgoWz7U+/PIFwDbC4RAEZtRtVo+1PvzSNsTmxVtVFuW2rV0mVEhcre7ibTjbb0/j5RdJsNv8t7eH0HGflf+EIL8hyjsFmmXGf0tCUlpMv3y2aAuM/pbkgcnSYROslg6tHWZUQmSIAlKWzwHBQLg6KU3SJuRSN0JLTVKFhpnF1ICCa9Qa3gx1qYqjbMF6QUoQQ7w9qArJDlgFRhnG5IiRYikLXpwnrPfL8b3TIZsU8CPlP/n1EMu6s8UmkLcSnnvksjoz7PXz/UZj1oBP7/azKgAKUXaDoEMFepLS/IXGGcXktQuG0r1mXp04tFlcqsax+JkyE6R6VwrjLM+ucR7rEbI1eTt5UcyXWZUgEyjukjH0PQCwK0aWmCcXUhLeTEyIccgWzHDf4lxdiFdAKGDe8YfZ0ic+H6JzK3ub25ZkktL9qvjP6+RFMl83x7inpAIuupUZJwNyEMNPoryXPIpCyOTH529DudD7DujKiIXl1drlxkVsGfq+ZCe9NvNlKCa/X7VnlmTW5sdWr504tHbpORUk/EeCZJWAl9onF1IxgmwVcNj7v47en8EeTgfkudBUjWFeWe/X7Vnljt9ui6yeG/0jPJtZlRIf97e+5BDDjlkX/Ib7zb/fOu0gU4AAAAASUVORK5CYII=" alt="QR Code MasterPET MP-0001"></div>
-    <div class="tag-id">MP-0001</div>
-    <div class="tag-note">Tecnologia que protege quem você ama.</div>
-  </div>
-</div></div></section>
-<section id="beneficios"><div class="wrap center"><small class="green">MUITO MAIS QUE UMA TAG</small><h2>Seu pet identificado. Sua família mais tranquila.</h2><p class="sub">Personalização premium e tecnologia em uma solução simples.</p><div class="grid"><div class="card"><h3>⚡ Acesso rápido</h3><p>Um QR Code leva direto ao perfil do pet, sem precisar instalar aplicativo.</p></div><div class="card"><h3>📲 Contato com a família</h3><p>WhatsApp e telefone ficam disponíveis para quem encontrar o animal.</p></div><div class="card"><h3>🔐 Dados sob controle</h3><p>As informações podem ser atualizadas sem trocar a tag física.</p></div></div></div></section>
-<section id="como"><div class="wrap center">
-  <small class="green">COMO FUNCIONA</small>
-  <h2>Do QR Code ao reencontro.</h2>
-  <p class="sub">Uma experiência simples para o tutor e ainda mais simples para quem encontra o pet.</p>
-  <div class="steps">
-    <div class="step">
-      <div class="num">01 — ATIVE</div>
-      <div class="step-visual">
-        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
-          <rect x="24" y="16" width="52" height="68" rx="8" stroke="#b7ff00" stroke-width="3"/>
-          <circle cx="50" cy="34" r="8" stroke="#fff" stroke-width="3"/>
-          <path d="M35 55h30M35 64h21" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="70" cy="72" r="11" fill="#b7ff00"/><path d="M65 72l3 3 6-7" stroke="#081006" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <h3>Cadastre</h3>
-      <p>Crie o perfil do pet e informe os contatos da família.</p>
-    </div>
-    <div class="step">
-      <div class="num">02 — USE</div>
-      <div class="step-visual">
-        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
-          <path d="M31 44c0-8 6-14 14-14h10c8 0 14 6 14 14v12c0 8-6 14-14 14H45c-8 0-14-6-14-14V44Z" stroke="#fff" stroke-width="3"/>
-          <path d="M21 50c7-8 12-10 19-10M79 50c-7-8-12-10-19-10" stroke="#b7ff00" stroke-width="4" stroke-linecap="round"/>
-          <circle cx="50" cy="49" r="8" stroke="#b7ff00" stroke-width="3"/>
-          <path d="M50 57v8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h3>Coloque a tag</h3>
-      <p>Identificação permanente para acompanhar o pet todos os dias.</p>
-    </div>
-    <div class="step">
-      <div class="num">03 — ESCANEOU</div>
-      <div class="step-visual">
-        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
-          <rect x="29" y="12" width="42" height="76" rx="9" stroke="#fff" stroke-width="3"/>
-          <rect x="39" y="28" width="22" height="22" rx="2" stroke="#b7ff00" stroke-width="3"/>
-          <path d="M42 34h6v6h-6M52 34h6M42 44h6M52 44h6v-6" stroke="#fff" stroke-width="2"/>
-          <path d="M18 54h-4v10h4M82 54h4v10h-4" stroke="#b7ff00" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h3>Alguém encontra</h3>
-      <p>A pessoa escaneia o QR e acessa o perfil do pet pelo celular.</p>
-    </div>
-    <div class="step">
-      <div class="num">04 — CONTATE</div>
-      <div class="step-visual">
-        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
-          <path d="M22 28c0-5 4-9 9-9h38c5 0 9 4 9 9v25c0 5-4 9-9 9H49l-12 10v-10h-6c-5 0-9-4-9-9V28Z" stroke="#fff" stroke-width="3"/>
-          <path d="M36 37h28M36 47h18" stroke="#b7ff00" stroke-width="3" stroke-linecap="round"/>
-          <path d="M67 70c3 4 6 7 10 7" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-          <path d="M77 68c3 1 5 3 7 6" stroke="#b7ff00" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h3>Família é avisada</h3>
-      <p>WhatsApp e ligação ficam a um toque de distância para agilizar o reencontro.</p>
+.faq summary:after{content:"";position:absolute;right:24px;top:50%;width:12px;height:12px;margin-top:-8px;border-right:2px solid var(--lime);border-bottom:2px solid var(--lime);transform:rotate(45deg);transition:transform .3s var(--ease)}
+.faq[open] summary:after{transform:rotate(-135deg);margin-top:-2px}
+.faq p{margin:0;padding:0 24px 22px;color:var(--muted)}
+.faq a{color:var(--lime)}
+
+/* ---------- CTA final ---------- */
+.final{border-radius:36px;padding:clamp(40px,7vw,90px);background:radial-gradient(800px circle at 80% 0%,rgba(183,255,0,.18),transparent 50%),linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line2);position:relative;overflow:hidden;display:grid;grid-template-columns:1.3fr .7fr;gap:30px;align-items:center}
+.final h2{margin:16px 0}
+.final .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.minitag{width:200px;height:200px;border-radius:50%;margin-left:auto;background:conic-gradient(from 210deg,#cfd5d1,#959c97,#eceeec,#8b928d,#cfd5d1);box-shadow:inset 0 0 0 8px #dfe3df,0 40px 60px -20px #000;display:grid;place-items:center;transform:rotate(-12deg)}
+.minitag svg{width:90px;height:90px;opacity:.85;mix-blend-mode:multiply}
+.tutorline{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-top:20px;padding:26px 30px;border-radius:24px;border:1px solid var(--line);background:var(--bg2)}
+.tutorline p{margin:4px 0 0;color:var(--muted)}
+
+footer{border-top:1px solid var(--line);padding:46px 0 60px;color:var(--dim);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+footer nav{display:flex;gap:22px;flex-wrap:wrap}footer nav a:hover{color:var(--text)}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}
+
+/* ---------- responsivo ---------- */
+@media (max-width:980px){
+  .links{display:none}.burger{display:inline-block}.navcta .btn-ghost{display:none}
+  .hero{padding-top:120px;min-height:auto}
+  .hero .wrap,.how,.lost-grid,.build,.final{grid-template-columns:1fr}
+  .stage{height:440px;margin-top:10px}
+  .tag3d{width:270px;height:270px}.tagqr{width:108px;height:108px}.tagname{margin-top:38px;font-size:19px}
+  .ring.r1{width:380px;height:380px}.ring.r2{width:450px;height:450px}
+  .f1{left:0;top:30px}.f2{right:0;bottom:70px}.f3{display:none}
+  .bento{grid-template-columns:1fr 1fr}.b1,.b2,.b6{grid-column:span 2}.b3,.b4,.b5{grid-column:span 1}
+  .b6{flex-direction:column;align-items:flex-start}
+  .mail{left:0}.mapcard{right:0}
+  .minitag{margin:0 auto}
+}
+@media (max-width:600px){
+  .wrap{padding:0 18px}
+  .bento{grid-template-columns:1fr}.b1,.b2,.b3,.b4,.b5,.b6{grid-column:auto}
+  .phone{width:280px;height:580px}
+  .trust{gap:12px 18px}
+  .cmp{font-size:13px}.cmp th,.cmp td{padding:13px 8px}.cmp td:first-child{padding-left:14px}
+  .float{font-size:12px}.f2{bottom:40px}
+  .mail{width:230px;top:10px}.mapcard{width:220px;bottom:10px}
+  .navcta .btn-primary{padding:0 16px;font-size:14px;height:42px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .rv{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<div id="fogos" hidden><div class="wrap"><div><b>🎆 Fogos de fim de ano:</b> é a época em que <b>mais pets fogem</b>. Garanta a identificação do seu antes do Réveillon.</div><a class="btn btn-primary btn-sm" href="https://wa.me/554599893990?text=Ol%C3%A1!%20Quero%20uma%20MasterPET%20antes%20dos%20fogos%20de%20fim%20de%20ano." target="_blank" rel="noopener">Quero proteger meu pet</a></div></div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="MasterPET, início">MASTER<b>PET</b></a>
+    <nav class="links" aria-label="Principal">
+      <a href="#como">Como funciona</a><a href="#perdido">Modo Perdido</a><a href="#recursos">Recursos</a><a href="#monte">Monte a sua</a><a href="#duvidas">Dúvidas</a><a href="/perdidos/">Pets perdidos</a>
+    </nav>
+    <div class="navcta">
+      <a class="btn btn-ghost btn-sm" href="/tutor/">Área do Tutor</a>
+      <a class="btn btn-primary btn-sm" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero a minha</a>
+      <button class="burger" id="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="sheet"><span></span><span></span><span></span></button>
     </div>
   </div>
-</div></section>
-<section id="perfil"><div class="wrap"><div class="center"><small class="green">EXPERIÊNCIA MASTERPET</small><h2>O perfil do seu pet.</h2><p class="sub">Uma página objetiva para ajudar quem encontrou seu animal.</p></div><div class="demo"><div class="phone"><div class="profile"><div class="lost">⚠ PET PERDIDO — AJUDE A ENCONTRAR</div><div class="pet">🐶</div><h2 style="font-size:29px;margin:5px 0">Flora</h2><p style="color:#666">Yorkshire Terrier • Fêmea</p><a class="contact">💬 Falar com a família</a><a class="contact" style="background:#111;color:#fff">📞 Ligar para o responsável</a></div></div><div class="card"><small class="green">EXEMPLO</small><h3 style="font-size:27px">Flora tem uma identidade digital.</h3><p>Nome, foto, informações básicas e canais de contato podem ficar disponíveis para facilitar o reencontro.</p><p><b>Importante:</b> o perfil não precisa exibir o endereço residencial da família.</p></div></div></div></section>
-<section id="porque"><div class="wrap"><div class="center"><small class="green">POR QUE MASTERPET</small><h2>Feita para trazer seu pet de volta.</h2><p class="sub">Identificar é só o começo. A MasterPET ajuda quem encontrou a falar com você e ajuda você a encontrar seu pet.</p></div><div class="cmpwrap"><table class="cmp"><thead><tr><th></th><th>Plaquinha<br>comum</th><th>Tag QR<br>comum</th><th class="mp">MASTER<b>PET</b></th></tr></thead><tbody><tr><td>Atualiza seus dados sem trocar a peça</td><td><span class="n">—</span></td><td><span class="y">✔</span></td><td class="mp"><span class="y">✔</span></td></tr><tr><td>Gravada a laser em metal (não desbota)</td><td><span class="y">✔</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr><tr><td>Modo Perdido com alerta e cartaz "Procura-se"</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr><tr><td>Quem vê o pet avisa e marca no mapa</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr><tr><td>Opção de esconder seu telefone</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr><tr><td>Sem bateria e sem mensalidade</td><td><span class="y">✔</span></td><td><span class="y">✔</span></td><td class="mp"><span class="y">✔</span></td></tr></tbody></table></div><p class="center gpsnote">📡 <b>Já usa GPS?</b> Use os dois: o GPS mostra onde o pet está, enquanto tiver bateria. A MasterPET faz quem o encontrar falar com você, sempre.</p><p class="center cmpfoot">Comparação geral. Algumas marcas têm parte desses recursos. Compatível com o RG Animal do SinPatinhas.</p></div></section>
-<section id="monte"><div class="wrap"><div class="center"><small class="green">MONTE A SUA</small><h2>Veja como fica a MasterPET do seu pet.</h2><p class="sub">Digite o nome do seu pet e veja a prévia do perfil que aparece quando alguém escaneia a tag.</p></div>
-<div class="demo" style="align-items:center">
-  <div class="card"><div class="mform">
-    <label>Nome do pet<input id="mNome" maxlength="24" placeholder="Ex.: Flora" oninput="mUpdate()"></label>
-    <label>Espécie<select id="mEsp" onchange="mUpdate()"><option>Cachorro</option><option>Gato</option><option>Outro</option></select></label>
-    <label>Sua cidade<input id="mCidade" maxlength="40" placeholder="Ex.: Cascavel - PR" oninput="mUpdate()"></label>
+</header>
+<div class="sheet" id="sheet">
+  <a href="#como">Como funciona</a><a href="#perdido">Modo Perdido</a><a href="#recursos">Recursos</a><a href="#monte">Monte a sua</a><a href="#duvidas">Dúvidas</a><a href="/perdidos/">Pets perdidos</a><a href="/tutor/">Área do Tutor</a><a href="/ativar/">Ativar minha tag</a>
+</div>
+
+<main id="top">
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="wrap">
+    <div>
+      <span class="eyebrow rv">Gravada a laser · Feita no Brasil</span>
+      <h1 class="rv d1">A identidade <span class="lime">inteligente</span> do seu <span class="stroke">pet.</span></h1>
+      <p class="lead rv d2">Uma tag de aço com QR Code único. Quem encontrar seu pet abre o perfil dele e fala com você em segundos — sem aplicativo, sem bateria, sem mensalidade.</p>
+      <div class="hero-cta rv d3">
+        <a class="btn btn-primary" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET <span class="arr">→</span></a>
+        <a class="btn btn-ghost" href="#como">Ver como funciona</a>
+      </div>
+      <div class="trust rv d3"><span><i>✓</i>Sem mensalidade</span><span><i>✓</i>Modo Perdido com alerta</span><span><i>✓</i>Seus dados protegidos (LGPD)</span></div>
+      <div class="counter" id="counter" hidden><div><b id="cPets">—</b>pets protegidos</div><div><b id="cReenc">—</b>reencontros</div></div>
+    </div>
+    <div class="stage" id="stage" aria-hidden="true">
+      <div class="halo"></div><div class="ring r1"></div><div class="ring r2"></div>
+      <div class="tag3d" id="tag3d">
+        <div class="tagface engrave" id="tagface">
+          <div class="hole"></div>
+          <div class="tagname">MASTERPET</div>
+          <svg class="tagqr" viewBox="-1 -1 31 31" shape-rendering="crispEdges"><path d="M0 0h7v1h-7zM9 0h1v1h-1zM11 0h1v1h-1zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h2v1h-2zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM13 1h3v1h-3zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM13 2h1v1h-1zM16 2h5v1h-5zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h2v1h-2zM13 3h3v1h-3zM18 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM12 4h3v1h-3zM16 4h1v1h-1zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h1v1h-1zM13 5h2v1h-2zM17 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM11 7h1v1h-1zM14 7h1v1h-1zM17 7h1v1h-1zM19 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h3v1h-3zM15 8h2v1h-2zM18 8h1v1h-1zM21 8h1v1h-1zM23 8h1v1h-1zM0 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM11 9h2v1h-2zM14 9h2v1h-2zM20 9h3v1h-3zM25 9h1v1h-1zM28 9h1v1h-1zM2 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM16 10h2v1h-2zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h4v1h-4zM1 11h1v1h-1zM3 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM14 11h2v1h-2zM18 11h2v1h-2zM23 11h1v1h-1zM26 11h2v1h-2zM0 12h1v1h-1zM2 12h2v1h-2zM5 12h2v1h-2zM8 12h1v1h-1zM10 12h1v1h-1zM17 12h1v1h-1zM20 12h4v1h-4zM25 12h1v1h-1zM27 12h2v1h-2zM3 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM12 13h1v1h-1zM16 13h5v1h-5zM2 14h1v1h-1zM5 14h2v1h-2zM8 14h1v1h-1zM11 14h1v1h-1zM16 14h3v1h-3zM22 14h1v1h-1zM25 14h4v1h-4zM1 15h2v1h-2zM8 15h1v1h-1zM11 15h5v1h-5zM17 15h1v1h-1zM19 15h5v1h-5zM25 15h1v1h-1zM27 15h1v1h-1zM1 16h6v1h-6zM8 16h3v1h-3zM13 16h2v1h-2zM16 16h4v1h-4zM21 16h1v1h-1zM23 16h1v1h-1zM27 16h1v1h-1zM1 17h4v1h-4zM7 17h3v1h-3zM11 17h1v1h-1zM17 17h1v1h-1zM22 17h2v1h-2zM25 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM2 18h2v1h-2zM5 18h3v1h-3zM10 18h1v1h-1zM12 18h2v1h-2zM16 18h2v1h-2zM20 18h1v1h-1zM22 18h3v1h-3zM27 18h2v1h-2zM2 19h2v1h-2zM7 19h4v1h-4zM12 19h2v1h-2zM15 19h9v1h-9zM27 19h2v1h-2zM0 20h1v1h-1zM3 20h2v1h-2zM6 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM14 20h1v1h-1zM17 20h1v1h-1zM19 20h6v1h-6zM26 20h1v1h-1zM8 21h2v1h-2zM13 21h1v1h-1zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h3v1h-3zM0 22h7v1h-7zM10 22h1v1h-1zM13 22h2v1h-2zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM27 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM11 23h3v1h-3zM15 23h1v1h-1zM18 23h3v1h-3zM24 23h5v1h-5zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h2v1h-2zM12 24h1v1h-1zM14 24h1v1h-1zM20 24h5v1h-5zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM14 25h1v1h-1zM16 25h3v1h-3zM22 25h6v1h-6zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM9 26h1v1h-1zM17 26h3v1h-3zM24 26h3v1h-3zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM11 27h1v1h-1zM13 27h1v1h-1zM15 27h3v1h-3zM20 27h1v1h-1zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h5v1h-5zM15 28h1v1h-1zM17 28h2v1h-2zM20 28h2v1h-2zM23 28h1v1h-1zM25 28h1v1h-1zM27 28h1v1h-1z" fill="#151815"/></svg>
+          <div class="tagid">MP-0001</div>
+          <div class="laser"></div>
+        </div>
+      </div>
+      <div class="float f1"><div class="ic">👀</div><div><b><span class="dot"></span>Perfil da Flora aberto</b><small>agora · Cascavel, PR</small></div></div>
+      <div class="float f2"><div class="ic">📍</div><div><b>Avistamento registrado</b><small>“Vi perto da praça central”</small></div></div>
+      <div class="float f3"><div class="ic">💬</div><div><b>Nova mensagem</b><small>“Encontrei a Flora!”</small></div></div>
+    </div>
   </div>
-  <a class="btn" id="mWa" href="https://wa.me/554599893990" target="_blank" rel="noopener" style="width:100%;text-align:center;margin-top:16px">Quero a MasterPET do meu pet</a>
-  <p style="font-size:13px;margin-bottom:0">Você fala direto com a MasterPET no WhatsApp, com a mensagem já pronta.</p></div>
-  <div class="phone"><div class="profile"><div class="pet" id="mEmoji">🐶</div><h2 style="font-size:29px;margin:5px 0" id="mNomeP">Seu pet</h2><p style="color:#666" id="mMeta">Cachorro • Perfil MasterPET</p><a class="contact">💬 Falar com a família</a><a class="contact" style="background:#111;color:#fff">📞 Ligar para a família</a></div></div>
-</div></div></section>
-<section id="duvidas"><div class="wrap"><div class="center"><small class="green">DÚVIDAS FREQUENTES</small><h2>Tudo o que você precisa saber.</h2></div><div class="faqs"><details class="faq"><summary>Precisa instalar algum aplicativo?</summary><p>Não. Quem encontra o pet só aponta a câmera do celular para o QR Code da tag e o perfil abre no navegador. O tutor também usa a Área do Tutor pelo navegador e, se quiser, pode instalá-la como app na tela inicial.</p></details><details class="faq"><summary>O que aparece quando alguém escaneia a tag?</summary><p>O perfil do pet: foto, nome, espécie, raça, sexo e botões para chamar a família no WhatsApp ou ligar. Seu e-mail, sua senha e seu endereço nunca aparecem.</p></details><details class="faq"><summary>E se meu pet se perder?</summary><p>Na Área do Tutor, ative o Modo Perdido. O perfil passa a mostrar um alerta vermelho com a sua mensagem, você recebe um e-mail quando alguém abre o perfil e pode gerar um cartaz "Procura-se" com QR Code ou compartilhar o alerta em grupos.</p></details><details class="faq"><summary>Posso mudar a foto, os dados ou o telefone depois?</summary><p>Sim, quantas vezes quiser, pela Área do Tutor. A tag física continua a mesma: o QR Code sempre mostra os dados atualizados.</p></details><details class="faq"><summary>Como ativo minha tag?</summary><p>Escaneie a tag ou acesse <a class="green" href="/ativar/">masterpet.tec.br/ativar</a>, informe o ID da tag e o código de ativação que acompanha a peça e crie sua conta. Em seguida você já entra na Área do Tutor.</p></details><details class="faq"><summary>Tenho mais de um pet. Preciso de outra conta?</summary><p>Não. Ative cada tag com o mesmo e-mail e a mesma senha: todos os pets aparecem juntos na sua Área do Tutor.</p></details><details class="faq"><summary>A tag precisa de bateria ou internet?</summary><p>A tag não precisa de bateria nem de carga. Só o celular de quem escaneia precisa estar com internet.</p></details><details class="faq"><summary>Perdi a tag física. E agora?</summary><p>Fale com a MasterPET pelo WhatsApp. A tag antiga pode ser desativada para que ninguém a use, e o perfil do seu pet continua guardado na sua conta.</p></details><details class="faq"><summary>Esqueci minha senha.</summary><p>Na Área do Tutor, toque em "Esqueci minha senha". Enviamos um código de 6 dígitos para o seu e-mail para você criar uma senha nova.</p></details></div><p class="center" style="color:var(--muted);margin-top:26px">Ficou alguma dúvida? <a class="green" href="https://wa.me/554599893990" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p></div></section>
-<section id="tutor-area"><div class="wrap"><div class="cta" style="display:grid;grid-template-columns:1.4fr .6fr;gap:28px;align-items:center"><div><small class="green">ÁREA DO TUTOR</small><h2>Seu pet, sempre sob seu controle.</h2><p>Entre na sua conta para acessar o perfil do pet, atualizar a foto e os dados, acompanhar acessos ao QR Code e ativar o Modo Perdido.</p></div><div class="actions" style="justify-content:center"><a class="btn" href="/tutor/">Entrar na Área do Tutor</a></div></div></div></section>
-<section id="ativar"><div class="wrap"><div class="cta"><small class="green">COMECE AGORA</small><h2>Seu pet merece uma MasterPET.</h2><p>Na primeira versão, você recebe a tag personalizada, ativa o QR Code e cria o perfil do seu pet.</p><div class="actions" style="justify-content:center"><a class="btn" href="https://wa.me/554599893990" target="_blank">Quero minha MasterPET</a><a class="btn dark" href="/ativar/">Ativar minha tag</a><a class="btn dark" href="/tutor/">Área do Tutor</a></div></div></div></section>
-<footer><div class="wrap foot"><span>© 2026 MasterPET</span><span>Uma solução da MasterTech</span></div></footer>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="track">
+  <span>Aço inox gravado a laser</span><span>QR Code único</span><span>Sem aplicativo</span><span>Sem mensalidade</span><span>Modo Perdido</span><span>Mapa de avistamentos</span><span>Contato protegido</span><span>Ficha de saúde</span><span>Compatível com RG Animal</span>
+  <span>Aço inox gravado a laser</span><span>QR Code único</span><span>Sem aplicativo</span><span>Sem mensalidade</span><span>Modo Perdido</span><span>Mapa de avistamentos</span><span>Contato protegido</span><span>Ficha de saúde</span><span>Compatível com RG Animal</span>
+</div></div>
+
+<!-- ============ COMO FUNCIONA ============ -->
+<section id="como">
+  <div class="wrap">
+    <div class="sechead rv"><span class="eyebrow">Como funciona</span><h2>Do QR Code ao reencontro<br><span style="color:var(--muted)">em quatro passos.</span></h2></div>
+    <div class="how">
+      <div class="steps" id="steps" role="tablist" aria-label="Passo a passo">
+        <button class="stepbtn on" role="tab" aria-selected="true" data-step="0"><span class="n">01</span><div><h3>Ative em 2 minutos</h3><p>Escaneie a tag, use o código do cartão e crie o perfil do seu pet com foto e WhatsApp.</p></div><span class="bar"><i></i></span></button>
+        <button class="stepbtn" role="tab" aria-selected="false" data-step="1"><span class="n">02</span><div><h3>Coloque na coleira</h3><p>Aço gravado a laser: não desbota, não precisa de bateria e acompanha o pet todos os dias.</p></div><span class="bar"><i></i></span></button>
+        <button class="stepbtn" role="tab" aria-selected="false" data-step="2"><span class="n">03</span><div><h3>Alguém encontra e escaneia</h3><p>Qualquer celular abre o perfil na hora, sem baixar nada. Você recebe um aviso.</p></div><span class="bar"><i></i></span></button>
+        <button class="stepbtn" role="tab" aria-selected="false" data-step="3"><span class="n">04</span><div><h3>Vocês se falam</h3><p>Um toque e a pessoa chama você no WhatsApp. O reencontro começa em segundos.</p></div><span class="bar"><i></i></span></button>
+      </div>
+      <div class="rv d1"><div class="phone"><div class="screen" id="howScreen">
+        <div class="scr s-form on">
+          <div class="t">Ative sua<br><span style="color:var(--lime)">MasterPET</span></div>
+          <div class="fld"><small>ID da tag</small>MP-0001</div>
+          <div class="fld"><small>Código de ativação</small>•••••-•••••</div>
+          <div class="fld"><small>Nome do pet</small>Flora</div>
+          <div class="fld"><small>Seu WhatsApp</small>(45) 99999-0000</div>
+          <div class="ok">ATIVAR MINHA MASTERPET</div>
+        </div>
+        <div class="scr s-collar"><div class="collar"><div class="mini"><svg viewBox="-1 -1 31 31" shape-rendering="crispEdges"><path d="M0 0h7v1h-7zM9 0h1v1h-1zM11 0h1v1h-1zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h2v1h-2zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM13 1h3v1h-3zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM13 2h1v1h-1zM16 2h5v1h-5zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h2v1h-2zM13 3h3v1h-3zM18 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM12 4h3v1h-3zM16 4h1v1h-1zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h1v1h-1zM13 5h2v1h-2zM17 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM11 7h1v1h-1zM14 7h1v1h-1zM17 7h1v1h-1zM19 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h3v1h-3zM15 8h2v1h-2zM18 8h1v1h-1zM21 8h1v1h-1zM23 8h1v1h-1zM0 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM11 9h2v1h-2zM14 9h2v1h-2zM20 9h3v1h-3zM25 9h1v1h-1zM28 9h1v1h-1zM2 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM16 10h2v1h-2zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h4v1h-4zM1 11h1v1h-1zM3 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM14 11h2v1h-2zM18 11h2v1h-2zM23 11h1v1h-1zM26 11h2v1h-2zM0 12h1v1h-1zM2 12h2v1h-2zM5 12h2v1h-2zM8 12h1v1h-1zM10 12h1v1h-1zM17 12h1v1h-1zM20 12h4v1h-4zM25 12h1v1h-1zM27 12h2v1h-2zM3 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM12 13h1v1h-1zM16 13h5v1h-5zM2 14h1v1h-1zM5 14h2v1h-2zM8 14h1v1h-1zM11 14h1v1h-1zM16 14h3v1h-3zM22 14h1v1h-1zM25 14h4v1h-4zM1 15h2v1h-2zM8 15h1v1h-1zM11 15h5v1h-5zM17 15h1v1h-1zM19 15h5v1h-5zM25 15h1v1h-1zM27 15h1v1h-1zM1 16h6v1h-6zM8 16h3v1h-3zM13 16h2v1h-2zM16 16h4v1h-4zM21 16h1v1h-1zM23 16h1v1h-1zM27 16h1v1h-1zM1 17h4v1h-4zM7 17h3v1h-3zM11 17h1v1h-1zM17 17h1v1h-1zM22 17h2v1h-2zM25 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM2 18h2v1h-2zM5 18h3v1h-3zM10 18h1v1h-1zM12 18h2v1h-2zM16 18h2v1h-2zM20 18h1v1h-1zM22 18h3v1h-3zM27 18h2v1h-2zM2 19h2v1h-2zM7 19h4v1h-4zM12 19h2v1h-2zM15 19h9v1h-9zM27 19h2v1h-2zM0 20h1v1h-1zM3 20h2v1h-2zM6 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM14 20h1v1h-1zM17 20h1v1h-1zM19 20h6v1h-6zM26 20h1v1h-1zM8 21h2v1h-2zM13 21h1v1h-1zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h3v1h-3zM0 22h7v1h-7zM10 22h1v1h-1zM13 22h2v1h-2zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM27 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM11 23h3v1h-3zM15 23h1v1h-1zM18 23h3v1h-3zM24 23h5v1h-5zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h2v1h-2zM12 24h1v1h-1zM14 24h1v1h-1zM20 24h5v1h-5zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM14 25h1v1h-1zM16 25h3v1h-3zM22 25h6v1h-6zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM9 26h1v1h-1zM17 26h3v1h-3zM24 26h3v1h-3zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM11 27h1v1h-1zM13 27h1v1h-1zM15 27h3v1h-3zM20 27h1v1h-1zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h5v1h-5zM15 28h1v1h-1zM17 28h2v1h-2zM20 28h2v1h-2zM23 28h1v1h-1zM25 28h1v1h-1zM27 28h1v1h-1z" fill="#1a1d1a"/></svg></div></div><p>Pronta para o dia a dia.<br>Sem bateria, sem recarga.</p></div>
+        <div class="scr s-scan"><div class="viewfinder"><div class="q"><svg viewBox="-1 -1 31 31" shape-rendering="crispEdges"><path d="M0 0h7v1h-7zM9 0h1v1h-1zM11 0h1v1h-1zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h2v1h-2zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM13 1h3v1h-3zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM13 2h1v1h-1zM16 2h5v1h-5zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h2v1h-2zM13 3h3v1h-3zM18 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM12 4h3v1h-3zM16 4h1v1h-1zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h1v1h-1zM13 5h2v1h-2zM17 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM11 7h1v1h-1zM14 7h1v1h-1zM17 7h1v1h-1zM19 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h3v1h-3zM15 8h2v1h-2zM18 8h1v1h-1zM21 8h1v1h-1zM23 8h1v1h-1zM0 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM11 9h2v1h-2zM14 9h2v1h-2zM20 9h3v1h-3zM25 9h1v1h-1zM28 9h1v1h-1zM2 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM16 10h2v1h-2zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h4v1h-4zM1 11h1v1h-1zM3 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM14 11h2v1h-2zM18 11h2v1h-2zM23 11h1v1h-1zM26 11h2v1h-2zM0 12h1v1h-1zM2 12h2v1h-2zM5 12h2v1h-2zM8 12h1v1h-1zM10 12h1v1h-1zM17 12h1v1h-1zM20 12h4v1h-4zM25 12h1v1h-1zM27 12h2v1h-2zM3 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM12 13h1v1h-1zM16 13h5v1h-5zM2 14h1v1h-1zM5 14h2v1h-2zM8 14h1v1h-1zM11 14h1v1h-1zM16 14h3v1h-3zM22 14h1v1h-1zM25 14h4v1h-4zM1 15h2v1h-2zM8 15h1v1h-1zM11 15h5v1h-5zM17 15h1v1h-1zM19 15h5v1h-5zM25 15h1v1h-1zM27 15h1v1h-1zM1 16h6v1h-6zM8 16h3v1h-3zM13 16h2v1h-2zM16 16h4v1h-4zM21 16h1v1h-1zM23 16h1v1h-1zM27 16h1v1h-1zM1 17h4v1h-4zM7 17h3v1h-3zM11 17h1v1h-1zM17 17h1v1h-1zM22 17h2v1h-2zM25 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM2 18h2v1h-2zM5 18h3v1h-3zM10 18h1v1h-1zM12 18h2v1h-2zM16 18h2v1h-2zM20 18h1v1h-1zM22 18h3v1h-3zM27 18h2v1h-2zM2 19h2v1h-2zM7 19h4v1h-4zM12 19h2v1h-2zM15 19h9v1h-9zM27 19h2v1h-2zM0 20h1v1h-1zM3 20h2v1h-2zM6 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM14 20h1v1h-1zM17 20h1v1h-1zM19 20h6v1h-6zM26 20h1v1h-1zM8 21h2v1h-2zM13 21h1v1h-1zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h3v1h-3zM0 22h7v1h-7zM10 22h1v1h-1zM13 22h2v1h-2zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM27 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM11 23h3v1h-3zM15 23h1v1h-1zM18 23h3v1h-3zM24 23h5v1h-5zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h2v1h-2zM12 24h1v1h-1zM14 24h1v1h-1zM20 24h5v1h-5zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM14 25h1v1h-1zM16 25h3v1h-3zM22 25h6v1h-6zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM9 26h1v1h-1zM17 26h3v1h-3zM24 26h3v1h-3zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM11 27h1v1h-1zM13 27h1v1h-1zM15 27h3v1h-3zM20 27h1v1h-1zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h5v1h-5zM15 28h1v1h-1zM17 28h2v1h-2zM20 28h2v1h-2zM23 28h1v1h-1zM25 28h1v1h-1zM27 28h1v1h-1z" fill="#111"/></svg></div><div class="scanline"></div></div>
+          <div class="toast"><span style="font-size:22px">🐾</span><div><b>masterpet.tec.br</b>Abrir o perfil da Flora</div></div></div>
+        <div class="scr s-chat"><div class="chat-top"><div class="av">MP</div><div><b>Família da Flora</b><div style="font-size:11px;opacity:.7">online</div></div></div>
+          <div class="bubbles"><div class="bub me">Olá! Encontrei a Flora perto da praça. Estou entrando em contato pela MasterPET 🐾</div><div class="bub them">Meu Deus, muito obrigada!! Estou indo agora 🙏</div><div class="bub me">Fico aqui com ela te esperando 💚</div></div></div>
+      </div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODO PERDIDO (demo) ============ -->
+<section id="perdido" class="lost-sec">
+  <div class="wrap lost-grid" id="lostGrid">
+    <div>
+      <div class="rv"><span class="eyebrow">Modo Perdido</span><h2 style="margin:18px 0 16px">Se ele sumir,<br>você não está sozinho.</h2>
+      <p class="lead">Com um toque, o perfil vira um alerta. Quem vê o pet registra onde e quando, e você acompanha tudo no mapa.</p></div>
+      <div class="switch rv d1" id="lostSwitch" role="switch" aria-checked="false" tabindex="0"><span class="tr"></span><div><b>Experimente: ativar Modo Perdido</b><small>Veja o perfil do pet mudar</small></div></div>
+      <ul class="feats rv d2">
+        <li><span class="ck">✓</span><div><b>Alerta com mensagem e recompensa</b>O perfil mostra “PERDIDA” e o que a família quer dizer.</div></li>
+        <li><span class="ck">✓</span><div><b>Aviso por e-mail a cada leitura</b>Você sabe na hora quando alguém abre o perfil.</div></li>
+        <li><span class="ck">✓</span><div><b>Mapa de avistamentos</b>Quem viu marca onde e quando, mesmo sem conseguir segurar o pet.</div></li>
+        <li><span class="ck">✓</span><div><b>Cartaz “Procura-se” em 1 clique</b>Pronto para imprimir e compartilhar nos grupos do bairro.</div></li>
+      </ul>
+    </div>
+    <div class="lost-visual rv d1">
+      <div class="phone"><div class="screen"><div class="scr on" id="demoProfile">
+        <div class="pv-hero"><div class="pv-logo">MASTER<b>PET</b></div><div class="pv-avatar">🐶</div><div class="pv-name">Flora</div><div class="pv-sub">Yorkshire Terrier • Fêmea</div></div>
+        <div class="pv-body">
+          <div class="pv-status" id="demoStatus"><b>Flora está identificada</b>Este pet possui uma identificação MasterPET ativa.</div>
+          <div class="reward">💰 Recompensa: R$ 300</div>
+          <div class="pv-btn pv-wa">💬 Falar com a família</div>
+          <div class="pv-btn pv-call">📞 Ligar para a família</div>
+          <div class="pv-card"><div class="pv-row"><span>Raça</span><b>Yorkshire</b></div><div class="pv-row"><span>ID da tag</span><b>MP-0001</b></div><div class="pv-row"><span>Alergias</span><b>Dipirona</b></div></div>
+        </div>
+      </div></div></div>
+      <div class="mail"><small>📧 MasterPET · agora</small><br><b>🚨 O perfil da Flora acabou de ser aberto</b><br><small>Fique atento ao WhatsApp: quem encontrou pode chamar a qualquer momento.</small></div>
+      <div class="mapcard"><div class="map"><span class="pin p1"></span><span class="pin p2"></span><span class="pin p3"></span></div><div class="cap"><b>3 avistamentos hoje</b><small>O mais recente há 12 min</small></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RECURSOS (bento) ============ -->
+<section id="recursos">
+  <div class="wrap">
+    <div class="sechead center rv"><span class="eyebrow">Recursos</span><h2>Pensada em cada detalhe.</h2><p class="lead">Tudo o que uma tag deveria fazer — e o que nenhuma plaquinha comum faz.</p></div>
+    <div class="bento">
+      <div class="bx b1 rv"><div class="art"><div class="laserbox"></div></div><h3>Gravação a laser em aço</h3><p>O QR fica no metal: não descasca, não desbota, aguenta banho e chuva.</p></div>
+      <div class="bx b2 rv d1"><div class="art"><div class="lock">🔒</div></div><h3>Contato protegido</h3><p>Prefere não expor seu número? Quem encontrar manda mensagem pelo site e você recebe por e-mail.</p></div>
+      <div class="bx b3 rv"><div class="art"><div class="poster"><div class="ph">PROCURA-SE</div><div class="im"></div><div class="ln"></div><div class="ln" style="margin:5px 22px"></div></div></div><h3>Cartaz em 1 clique</h3><p>Foto, mensagem, WhatsApp e QR, pronto em A4.</p></div>
+      <div class="bx b4 rv d1"><div class="art"><div class="vac"><div>V10 <em>em dia</em></div><div>Antirrábica <em>em 7 dias</em></div><div>Alergia <em>dipirona</em></div></div></div><h3>Ficha de saúde</h3><p>Lembrete de vacina por e-mail e RG Animal / microchip no perfil.</p></div>
+      <div class="bx b5 rv d2"><div class="art"><span class="chip">✈️ Hotelzinho Patas · até 20/12</span></div><h3>Modo viagem</h3><p>Deixou o pet com alguém? O contato de quem cuida aparece primeiro.</p></div>
+      <div class="bx b6 rv"><div><h3>Sem mensalidade. De verdade.</h3><p>Você paga uma vez pela tag. Perfil, alertas, mapa e atualizações continuam funcionando.</p></div><div class="nofee"><s>R$/mês</s> <span class="lime">R$ 0</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARAÇÃO ============ -->
+<section id="porque" style="padding-top:0">
+  <div class="wrap">
+    <div class="sechead center rv"><span class="eyebrow">Por que MasterPET</span><h2>Feita para trazer seu pet de volta.</h2><p class="lead">Identificar é só o começo. A MasterPET ajuda quem encontrou a falar com você e ajuda você a encontrar seu pet.</p></div>
+    <div class="cmpwrap rv"><table class="cmp"><thead><tr><th></th><th>Plaquinha<br>comum</th><th>Tag QR<br>comum</th><th class="mp">MASTER<b>PET</b></th></tr></thead><tbody>
+      <tr><td>Atualiza seus dados sem trocar a peça</td><td><span class="n">—</span></td><td><span class="y">✔</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Gravada a laser em metal (não desbota)</td><td><span class="y">✔</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Modo Perdido com alerta e cartaz "Procura-se"</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Quem vê o pet avisa e marca no mapa</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Opção de esconder seu telefone</td><td><span class="n">—</span></td><td><span class="n">—</span></td><td class="mp"><span class="y">✔</span></td></tr>
+      <tr><td>Sem bateria e sem mensalidade</td><td><span class="y">✔</span></td><td><span class="y">✔</span></td><td class="mp"><span class="y">✔</span></td></tr>
+    </tbody></table></div>
+    <p class="center gpsnote rv">📡 <b>Já usa GPS?</b> Use os dois: o GPS mostra onde o pet está, enquanto tiver bateria. A MasterPET faz quem o encontrar falar com você, sempre.</p>
+    <p class="center cmpfoot">Comparação geral. Algumas marcas têm parte desses recursos. Compatível com o RG Animal do SinPatinhas.</p>
+  </div>
+</section>
+
+<!-- ============ MONTE A SUA ============ -->
+<section id="monte" style="padding-top:0">
+  <div class="wrap build">
+    <div class="rv">
+      <span class="eyebrow">Monte a sua</span><h2 style="margin:18px 0 16px">Veja como fica<br>a do seu pet.</h2>
+      <p class="lead" style="margin-bottom:30px">Digite o nome e veja a prévia do perfil que aparece quando alguém escaneia a tag.</p>
+      <div class="panel">
+        <label class="field"><span>Nome do pet</span><input id="mNome" maxlength="24" placeholder="Ex.: Flora" oninput="mUpdate()" autocomplete="off"></label>
+        <label class="field"><span>Espécie</span><select id="mEsp" onchange="mUpdate()"><option>Cachorro</option><option>Gato</option><option>Outro</option></select></label>
+        <label class="field"><span>Sua cidade</span><input id="mCidade" maxlength="40" placeholder="Ex.: Cascavel - PR" oninput="mUpdate()" autocomplete="off"></label>
+        <a class="btn btn-primary" id="mWa" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero a MasterPET do meu pet <span class="arr">→</span></a>
+        <p class="hint">Você fala direto com a MasterPET no WhatsApp, com a mensagem já pronta.</p>
+      </div>
+    </div>
+    <div class="rv d1"><div class="phone"><div class="screen"><div class="scr on">
+      <div class="pv-hero"><div class="pv-logo">MASTER<b>PET</b></div><div class="pv-avatar" id="mEmoji">🐶</div><div class="pv-name" id="mNomeP">Seu pet</div><div class="pv-sub" id="mMeta">Cachorro • Perfil MasterPET</div></div>
+      <div class="pv-body"><div class="pv-status"><b id="mStatus">Seu pet está identificado</b>Este pet possui uma identificação MasterPET ativa.</div><div class="pv-btn pv-wa">💬 Falar com a família</div><div class="pv-btn pv-call">📞 Ligar para a família</div></div>
+    </div></div></div></div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="duvidas" style="padding-top:0">
+  <div class="wrap">
+    <div class="sechead center rv"><span class="eyebrow">Dúvidas frequentes</span><h2>Tudo o que você precisa saber.</h2></div>
+    <div class="faqs rv">
+      <details class="faq"><summary>Precisa instalar algum aplicativo?</summary><p>Não. Quem encontra o pet só aponta a câmera do celular para o QR Code da tag e o perfil abre no navegador. O tutor também usa a Área do Tutor pelo navegador e, se quiser, pode instalá-la como app na tela inicial.</p></details>
+      <details class="faq"><summary>O que aparece quando alguém escaneia a tag?</summary><p>O perfil do pet: foto, nome, espécie, raça, sexo e botões para chamar a família no WhatsApp ou ligar. Seu e-mail, sua senha e seu endereço nunca aparecem.</p></details>
+      <details class="faq"><summary>E se meu pet se perder?</summary><p>Na Área do Tutor, ative o Modo Perdido. O perfil passa a mostrar um alerta vermelho com a sua mensagem, você recebe um e-mail quando alguém abre o perfil e pode gerar um cartaz "Procura-se" com QR Code ou compartilhar o alerta em grupos.</p></details>
+      <details class="faq"><summary>Posso mudar a foto, os dados ou o telefone depois?</summary><p>Sim, quantas vezes quiser, pela Área do Tutor. A tag física continua a mesma: o QR Code sempre mostra os dados atualizados.</p></details>
+      <details class="faq"><summary>Como ativo minha tag?</summary><p>Escaneie a tag ou acesse <a href="/ativar/">masterpet.tec.br/ativar</a>, informe o ID da tag e o código de ativação que acompanha a peça e crie sua conta. Em seguida você já entra na Área do Tutor.</p></details>
+      <details class="faq"><summary>Tenho mais de um pet. Preciso de outra conta?</summary><p>Não. Ative cada tag com o mesmo e-mail e a mesma senha: todos os pets aparecem juntos na sua Área do Tutor.</p></details>
+      <details class="faq"><summary>A tag precisa de bateria ou internet?</summary><p>A tag não precisa de bateria nem de carga. Só o celular de quem escaneia precisa estar com internet.</p></details>
+      <details class="faq"><summary>Perdi a tag física. E agora?</summary><p>Fale com a MasterPET pelo WhatsApp. A tag antiga pode ser desativada para que ninguém a use, e o perfil do seu pet continua guardado na sua conta.</p></details>
+      <details class="faq"><summary>Esqueci minha senha.</summary><p>Na Área do Tutor, toque em "Esqueci minha senha". Enviamos um código de 6 dígitos para o seu e-mail para você criar uma senha nova.</p></details>
+    </div>
+    <p class="center" style="color:var(--muted);margin-top:28px">Ficou alguma dúvida? <a class="lime" href="https://wa.me/554599893990" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p>
+  </div>
+</section>
+
+<!-- ============ CTA FINAL ============ -->
+<section id="ativar" style="padding-top:0">
+  <div class="wrap">
+    <div class="final rv">
+      <div><span class="eyebrow">Comece agora</span><h2>Seu pet merece<br>uma MasterPET.</h2><p class="lead">Você recebe a tag gravada a laser, ativa em 2 minutos e o perfil do seu pet já fica no ar.</p>
+        <div class="actions"><a class="btn btn-primary" href="https://wa.me/554599893990" target="_blank" rel="noopener">Quero minha MasterPET <span class="arr">→</span></a><a class="btn btn-ghost" href="/ativar/">Já tenho: ativar minha tag</a></div></div>
+      <div class="minitag" aria-hidden="true"><svg viewBox="-1 -1 31 31" shape-rendering="crispEdges"><path d="M0 0h7v1h-7zM9 0h1v1h-1zM11 0h1v1h-1zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h2v1h-2zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM13 1h3v1h-3zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM13 2h1v1h-1zM16 2h5v1h-5zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h2v1h-2zM13 3h3v1h-3zM18 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM12 4h3v1h-3zM16 4h1v1h-1zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h1v1h-1zM13 5h2v1h-2zM17 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM11 7h1v1h-1zM14 7h1v1h-1zM17 7h1v1h-1zM19 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h3v1h-3zM15 8h2v1h-2zM18 8h1v1h-1zM21 8h1v1h-1zM23 8h1v1h-1zM0 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM11 9h2v1h-2zM14 9h2v1h-2zM20 9h3v1h-3zM25 9h1v1h-1zM28 9h1v1h-1zM2 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM16 10h2v1h-2zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h4v1h-4zM1 11h1v1h-1zM3 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM14 11h2v1h-2zM18 11h2v1h-2zM23 11h1v1h-1zM26 11h2v1h-2zM0 12h1v1h-1zM2 12h2v1h-2zM5 12h2v1h-2zM8 12h1v1h-1zM10 12h1v1h-1zM17 12h1v1h-1zM20 12h4v1h-4zM25 12h1v1h-1zM27 12h2v1h-2zM3 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM12 13h1v1h-1zM16 13h5v1h-5zM2 14h1v1h-1zM5 14h2v1h-2zM8 14h1v1h-1zM11 14h1v1h-1zM16 14h3v1h-3zM22 14h1v1h-1zM25 14h4v1h-4zM1 15h2v1h-2zM8 15h1v1h-1zM11 15h5v1h-5zM17 15h1v1h-1zM19 15h5v1h-5zM25 15h1v1h-1zM27 15h1v1h-1zM1 16h6v1h-6zM8 16h3v1h-3zM13 16h2v1h-2zM16 16h4v1h-4zM21 16h1v1h-1zM23 16h1v1h-1zM27 16h1v1h-1zM1 17h4v1h-4zM7 17h3v1h-3zM11 17h1v1h-1zM17 17h1v1h-1zM22 17h2v1h-2zM25 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM2 18h2v1h-2zM5 18h3v1h-3zM10 18h1v1h-1zM12 18h2v1h-2zM16 18h2v1h-2zM20 18h1v1h-1zM22 18h3v1h-3zM27 18h2v1h-2zM2 19h2v1h-2zM7 19h4v1h-4zM12 19h2v1h-2zM15 19h9v1h-9zM27 19h2v1h-2zM0 20h1v1h-1zM3 20h2v1h-2zM6 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM14 20h1v1h-1zM17 20h1v1h-1zM19 20h6v1h-6zM26 20h1v1h-1zM8 21h2v1h-2zM13 21h1v1h-1zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h3v1h-3zM0 22h7v1h-7zM10 22h1v1h-1zM13 22h2v1h-2zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM27 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM11 23h3v1h-3zM15 23h1v1h-1zM18 23h3v1h-3zM24 23h5v1h-5zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h2v1h-2zM12 24h1v1h-1zM14 24h1v1h-1zM20 24h5v1h-5zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM14 25h1v1h-1zM16 25h3v1h-3zM22 25h6v1h-6zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM9 26h1v1h-1zM17 26h3v1h-3zM24 26h3v1h-3zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM11 27h1v1h-1zM13 27h1v1h-1zM15 27h3v1h-3zM20 27h1v1h-1zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h5v1h-5zM15 28h1v1h-1zM17 28h2v1h-2zM20 28h2v1h-2zM23 28h1v1h-1zM25 28h1v1h-1zM27 28h1v1h-1z" fill="#151815"/></svg></div>
+    </div>
+    <div class="tutorline rv" id="tutor-area"><div><b>Já é cliente?</b><p>Atualize foto e contatos, acompanhe os acessos e ative o Modo Perdido.</p></div><a class="btn btn-ghost" href="/tutor/">Entrar na Área do Tutor <span class="arr">→</span></a></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><div><span class="logo" style="font-size:18px">MASTER<b>PET</b></span><div style="margin-top:6px">© 2026 · Uma solução da MasterTech</div></div>
+<nav aria-label="Rodapé"><a href="/perdidos/">Pets perdidos</a><a href="/ativar/">Ativar tag</a><a href="/tutor/">Área do Tutor</a><a href="https://wa.me/554599893990" target="_blank" rel="noopener">WhatsApp</a></nav></div></footer>
+
 <script>
-// Campanha dos fogos: aparece sozinha de 1º/dez a 10/jan.
-(function(){const d=new Date(),m=d.getMonth(),day=d.getDate();if(m===11||(m===0&&day<=10)){const b=document.getElementById('fogos');if(b)b.hidden=false;}})();
+(function(){
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Campanha dos fogos: aparece sozinha de 1º/dez a 10/jan.
+  const d=new Date(),m=d.getMonth(),day=d.getDate();if(m===11||(m===0&&day<=10)){const b=document.getElementById('fogos');if(b)b.hidden=false;}
+  // Nav com vidro ao rolar + menu móvel
+  const nav=document.getElementById('nav'),burger=document.getElementById('burger'),sheet=document.getElementById('sheet');
+  const onScroll=()=>nav.classList.toggle('scrolled',window.scrollY>10);onScroll();addEventListener('scroll',onScroll,{passive:true});
+  burger.addEventListener('click',()=>{const o=sheet.classList.toggle('open');burger.setAttribute('aria-expanded',o);});
+  sheet.addEventListener('click',e=>{if(e.target.tagName==='A'){sheet.classList.remove('open');burger.setAttribute('aria-expanded','false');}});
+  // Revelar ao rolar
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+  // Tag 3D: inclina com o mouse/toque, brilho segue o cursor
+  const stage=document.getElementById('stage'),tag=document.getElementById('tag3d'),face=document.getElementById('tagface');
+  if(stage&&!reduce){
+    let raf=0;const set=(x,y)=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{tag.style.transform='rotateY('+(x*22)+'deg) rotateX('+(-y*22)+'deg)';face.style.setProperty('--gx',(50+x*60)+'%');face.style.setProperty('--gy',(40+y*60)+'%');});};
+    stage.addEventListener('pointermove',e=>{const r=stage.getBoundingClientRect();set((e.clientX-r.left)/r.width-.5,(e.clientY-r.top)/r.height-.5);});
+    stage.addEventListener('pointerleave',()=>set(0,0));
+    let t0=performance.now(),idle=true;stage.addEventListener('pointerenter',()=>idle=false);stage.addEventListener('pointerleave',()=>idle=true);
+    (function loop(t){if(idle){const a=(t-t0)/1000;set(Math.sin(a*.6)*.35,Math.cos(a*.5)*.18);}requestAnimationFrame(loop);})(t0);
+  }
+  // Como funciona: passos com avanço automático
+  const steps=[...document.querySelectorAll('.stepbtn')],scrs=[...document.querySelectorAll('#howScreen .scr')];let cur=0,timer=null;const DUR=5200;
+  const go=i=>{cur=i;steps.forEach((s,k)=>{s.classList.toggle('on',k===i);s.setAttribute('aria-selected',k===i);const bar=s.querySelector('.bar i');bar.style.animation='none';bar.offsetWidth;bar.style.animation='';s.style.setProperty('--dur',DUR+'ms');});scrs.forEach((s,k)=>s.classList.toggle('on',k===i));};
+  const auto=()=>{clearInterval(timer);if(!reduce)timer=setInterval(()=>go((cur+1)%steps.length),DUR);};
+  steps.forEach((s,i)=>s.addEventListener('click',()=>{go(i);auto();}));
+  const howIo=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){go(cur);auto();}else clearInterval(timer);}),{threshold:.3});howIo.observe(document.getElementById('steps'));
+  // Demo do Modo Perdido
+  const sw=document.getElementById('lostSwitch'),grid=document.getElementById('lostGrid'),prof=document.getElementById('demoProfile'),st=document.getElementById('demoStatus');
+  const toggle=()=>{const on=sw.getAttribute('aria-checked')!=='true';sw.setAttribute('aria-checked',on);grid.classList.toggle('lostmode-on',on);prof.classList.toggle('lostmode',on);
+    st.innerHTML=on?'<b>🚨 Flora está PERDIDA</b>Ela é dócil, mas tem medo de barulho. Se você a viu, fale com a família.':'<b>Flora está identificada</b>Este pet possui uma identificação MasterPET ativa.';
+    sw.querySelector('b').textContent=on?'Modo Perdido ativado':'Experimente: ativar Modo Perdido';};
+  sw.addEventListener('click',toggle);sw.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();}});
+  // Brilho que segue o mouse nos cartões
+  document.querySelectorAll('.bx').forEach(b=>b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',(e.clientX-r.left)+'px');b.style.setProperty('--my',(e.clientY-r.top)+'px');}));
+})();
 // Prévia + WhatsApp com mensagem pronta
 function mUpdate(){
   const n=document.getElementById('mNome').value.trim(), e=document.getElementById('mEsp').value, c=document.getElementById('mCidade').value.trim();
   document.getElementById('mNomeP').textContent=n||'Seu pet';
+  document.getElementById('mStatus').textContent=(n||'Seu pet')+' está identificado';
   document.getElementById('mMeta').textContent=e+' • Perfil MasterPET';
   document.getElementById('mEmoji').textContent=e==='Gato'?'🐱':e==='Cachorro'?'🐶':'🐾';
   const msg='Olá! Quero uma MasterPET'+(n?' para o '+(e==='Outro'?'meu pet':'meu '+e.toLowerCase())+' '+n:'')+(c?'. Sou de '+c:'')+'.';
@@ -195,4 +608,5 @@ const MIN_PETS=20, MIN_REENC=3;
   setTimeout(()=>{ document.body.appendChild(s); },1500);
 })();
 </script>
-</body></html>
+</body>
+</html>
