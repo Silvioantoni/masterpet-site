@@ -109,13 +109,14 @@ function render(data, tagId){
   document.title = "MasterPET — "+name;
   document.getElementById("petname").textContent=name;
   document.getElementById("breed").textContent=(p.raca||p.especie||"Pet")+" • Perfil MasterPET";
+  const temp=contacts[0]&&String(contacts[0].principal).toUpperCase()==='TEMP';
   if(p.foto){
     document.getElementById("petpic").innerHTML='<img src="'+esc(p.foto)+'" alt="'+esc(name)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
   }
 
   const content=document.getElementById("content");
   let buttons="";
-  if(wnum) buttons += '<a class="btn whats" target="_blank" href="https://wa.me/'+wnum+'?text='+encodeURIComponent("Olá! Encontrei "+art+" "+name+". Estou entrando em contato pela MasterPET.")+'">💬 Falar com a família</a>';
+  if(wnum) buttons += '<a class="btn whats" target="_blank" href="https://wa.me/'+wnum+'?text='+encodeURIComponent("Olá! Encontrei "+art+" "+name+". Estou entrando em contato pela MasterPET.")+'">💬 '+(temp?'Falar com quem está cuidando':'Falar com a família')+'</a>';
   if(pnum) buttons += '<a class="btn phone" href="tel:+'+pnum+'">📞 Ligar para a família</a>';
 
   const isLost = status === "PERDIDO" || status === "PET PERDIDO" || status === "LOST";
@@ -123,12 +124,15 @@ function render(data, tagId){
     ? '<div class="status" style="border-color:#ff5364;background:#fff0f2"><span class="dot" style="background:#ff3048"></span><strong style="color:#c9142c">🚨 '+esc(name)+' está '+(female?'PERDIDA':'PERDIDO')+'</strong><div style="margin-top:6px;color:#8a3a43;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você '+(female?'a':'o')+' encontrou, entre em contato com a família.</div>'+(p.mensagemPerdido?'<div style="margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #ffc7cf;color:#5a1f27;font-size:14px;line-height:1.45"><b>Mensagem da família:</b><br>'+esc(p.mensagemPerdido)+'</div>':'')+'</div>'
     : '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está '+(female?'identificada':'identificado')+'</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>';
 
+  const rewardHtml = isLost && p.recompensa ? '<div class="status" style="border-color:#f2c94c;background:#fff9e6"><strong style="color:#8a6200">💰 Recompensa: '+esc(p.recompensa)+'</strong><div style="margin-top:4px;color:#7a6a3a;font-size:13px">Oferecida pela família para quem ajudar no reencontro.</div></div>' : '';
+  const careHtml = (p.cuidador && p.cuidador.nome) ? '<div class="info" style="margin-bottom:12px">🏨 No momento, '+esc(name)+' está aos cuidados de <b>'+esc(p.cuidador.nome)+'</b> até '+esc(String(p.cuidador.ate).split('-').reverse().join('/'))+'. O primeiro contato abaixo é de quem está cuidando.</div>' : '';
   content.innerHTML =
-    statusHtml+
+    statusHtml+rewardHtml+careHtml+
     buttons+
     (isLost?'<button class="btn cta" type="button" id="locBtn" onclick="sendLocation()">📍 Enviar minha localização para a família</button><div class="note" style="font-size:12px;text-align:center;margin-top:-4px">Só é enviada se você tocar no botão e permitir.</div>':'')+
     (isLost?'<button class="btn ghost" type="button" onclick="shareProfile()">📤 Compartilhar este alerta</button>':'')+
     healthHtml(p.saude)+
+    galleryHtml(p.fotos)+
     '<section class="card"><h2>🐾 Sobre o pet</h2>'+
       '<div class="row"><span class="label">Nome</span><span class="value">'+esc(p.nome)+'</span></div>'+
       '<div class="row"><span class="label">Raça</span><span class="value">'+esc(p.raca||"-")+'</span></div>'+
@@ -136,10 +140,14 @@ function render(data, tagId){
       '<div class="row"><span class="label">Sexo</span><span class="value">'+esc(p.sexo||"-")+'</span></div>'+
       '<div class="row"><span class="label">ID da tag</span><span class="value">'+esc(p.tag||tagId)+'</span></div>'+
     '</section>'+
-    '<section class="card"><h2>❤️ Ajude a família</h2><p class="note">Se você encontrou este pet, entre em contato pelos canais disponíveis acima. A MasterPET protege os dados privados da família.</p></section>';
+    '<section class="card"><h2>❤️ Ajude a família</h2><p class="note">Se você encontrou este pet, entre em contato pelos canais disponíveis acima. A MasterPET protege os dados privados da família.</p>'+(isLost?'<p class="note" style="margin-bottom:0"><a href="/perdidos/" style="color:#1a7f00;font-weight:700">Ver outros pets perdidos →</a></p>':'')+'</section>';
 }
 
 
+function galleryHtml(list){
+  if(!list||!list.length) return '';
+  return '<section class="card"><h2>📷 Mais fotos</h2><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+list.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener"><img src="'+esc(u)+'" alt="Foto do pet" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px"></a>').join('')+'</div></section>';
+}
 function healthHtml(sd){
   if(!sd||!(sd.alergias||sd.medicamentos||sd.veterinario)) return '';
   const row=(l,v)=>v?'<div class="row"><span class="label">'+l+'</span><span class="value">'+esc(v)+'</span></div>':'';

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>MasterPET — Carteirinha do pet</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#070909;color:#f5f7f5;font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+.bar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #283030}
+.bar button,.bar a{border:0;border-radius:10px;padding:11px 15px;font-weight:900;cursor:pointer;font-size:14px;text-decoration:none}
+.primary{background:#b7ff00;color:#0b0d0d}.ghost{background:#151b1b;color:#fff;border:1px solid #283030!important}
+.msg{text-align:center;color:#96a19d;padding:40px 16px}
+.wrap{display:flex;flex-direction:column;align-items:center;gap:18px;padding:22px 16px 40px}
+.card{width:min(380px,100%);border-radius:22px;overflow:hidden;background:linear-gradient(150deg,#121a10,#0b0f0d 55%,#141b14);border:1px solid #2d3a2f;box-shadow:0 20px 60px #000a}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #263126}
+.brand{font-weight:900;letter-spacing:-.5px}.brand span{color:#b7ff00}.tagid{font-size:12px;color:#b7ff00;font-weight:900;letter-spacing:1px}
+.main{display:flex;gap:14px;padding:18px;align-items:center}
+.photo{width:104px;height:104px;border-radius:18px;background:#1b241c;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:46px;border:2px solid #b7ff00}
+.photo img{width:100%;height:100%;object-fit:cover}
+.name{font-size:25px;font-weight:900;margin:0;line-height:1.1}.meta{color:#a5afa7;font-size:13px;margin-top:6px;line-height:1.5}
+.rows{padding:0 18px 6px}.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #222c24;font-size:13px}.row span{color:#8f9a95}.row b{text-align:right}
+.foot{display:flex;gap:14px;align-items:center;padding:14px 18px 18px}
+.qr{background:#fff;padding:6px;border-radius:10px;width:96px;height:96px;flex:none}.qr img,.qr canvas{width:84px!important;height:84px!important}
+.foot p{margin:0;color:#a5afa7;font-size:12px;line-height:1.5}
+.hint{color:#7d8a83;font-size:12px;text-align:center;max-width:380px;line-height:1.5}
+@media print{body{background:#fff}.bar,.hint{display:none}.card{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="bar"><button class="primary" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button><a class="ghost" href="/tutor/">← Voltar</a></div>
+<div id="msg" class="msg">Carregando...</div>
+<div class="wrap" id="wrap" style="display:none">
+  <div class="card" id="card">
+    <div class="top"><div class="brand">MASTER<span>PET</span> · Carteirinha</div><div class="tagid" id="tag">—</div></div>
+    <div class="main"><div class="photo" id="photo">🐾</div><div><h1 class="name" id="name">—</h1><div class="meta" id="meta">—</div></div></div>
+    <div class="rows" id="rows"></div>
+    <div class="foot"><div class="qr" id="qr"></div><p>Escaneie para ver o perfil e falar com a família.<br><b id="url" style="color:#f5f7f5"></b></p></div>
+  </div>
+  <div class="hint">Dica: tire um print desta tela e deixe nos favoritos da galeria. Serve no veterinário, no hotelzinho, em viagens e se o pet se perder.</div>
+</div>
+<script>
+const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const br=v=>{const m=String(v||'').match(/(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(v||'');};
+function jsonp(action,params){return new Promise((res,rej)=>{const cb='mpCard_'+Date.now(),s=document.createElement('script');let done=false;
+  const fin=(f,v)=>{if(done)return;done=true;clearTimeout(t);window[cb]=function(){};s.remove();f(v)};const t=setTimeout(()=>fin(rej,new Error('TIMEOUT')),35000);
+  window[cb]=d=>fin(res,d);s.onerror=()=>fin(rej,new Error('NET'));s.src=API+'?action='+action+'&callback='+cb+Object.entries(params).map(([k,v])=>'&'+k+'='+encodeURIComponent(v)).join('');document.body.appendChild(s);});}
+(async function(){
+  const token=localStorage.getItem('masterpet_token'); if(!token){location.href='/tutor/';return;}
+  const want=new URLSearchParams(location.search).get('pet')||'';
+  let p;
+  try{ const r=await jsonp('tutorpets',{token}); if(!r||!r.ok){document.getElementById('msg').innerHTML='Sessão expirada. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.';return;} p=(r.pets||[]).find(x=>x.id===want)||(r.pets||[])[0]; }
+  catch(e){ document.getElementById('msg').textContent='Não foi possível carregar. Verifique a internet e recarregue.'; return; }
+  if(!p){ document.getElementById('msg').textContent='Nenhum pet nesta conta.'; return; }
+  const url='https://masterpet.tec.br/p/'+encodeURIComponent(p.tag);
+  document.getElementById('tag').textContent=p.tag||'';
+  document.getElementById('name').textContent=p.nome||'Pet';
+  document.getElementById('meta').innerHTML=esc([p.especie,p.raca,p.sexo].filter(x=>x&&x!=='NAO_INFORMADO').join(' · '))+(p.dataNascimento?'<br>Nascimento: '+esc(br(p.dataNascimento)):'')+(p.cidade?'<br>📍 '+esc(p.cidade):'');
+  if(p.foto){const i=new Image();i.src=p.foto;i.alt=p.nome;const ph=document.getElementById('photo');ph.textContent='';ph.appendChild(i);}
+  else document.getElementById('photo').textContent=/^gat/i.test(p.especie||'')?'🐱':'🐶';
+  const sd=p.saude||{}, rows=[['Vacinas',sd.vacinas],['Próxima vacina',sd.proximaVacina?br(sd.proximaVacina):''],['Alergias',sd.alergias],['Medicamentos',sd.medicamentos],['Veterinário',sd.veterinario]].filter(r=>r[1]);
+  document.getElementById('rows').innerHTML=rows.length?rows.map(r=>'<div class="row"><span>'+r[0]+'</span><b>'+esc(r[1])+'</b></div>').join(''):'<div class="row"><span>Saúde</span><b>Preencha em Meu Pet → Saúde</b></div>';
+  document.getElementById('url').textContent=url.replace('https://','');
+  if(window.QRCode) new QRCode(document.getElementById('qr'),{text:url,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+  document.title='Carteirinha — '+(p.nome||'Pet');
+  document.getElementById('msg').style.display='none'; document.getElementById('wrap').style.display='flex';
+})();
+</script>
+</body>
+</html>

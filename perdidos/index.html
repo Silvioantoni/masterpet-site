@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pets perdidos — MasterPET</title>
+<meta name="description" content="Pets protegidos pela MasterPET que estão perdidos agora. Viu algum? Abra o perfil e fale com a família.">
+<meta property="og:title" content="Pets perdidos — MasterPET"><meta property="og:description" content="Viu algum destes pets? Abra o perfil e fale com a família na hora."><meta property="og:image" content="https://masterpet.tec.br/og.png">
+<meta name="theme-color" content="#070909">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://script.google.com">
+<style>
+:root{--bg:#070908;--panel:#0f1411;--line:#242b26;--muted:#a5afa7;--green:#b7ff00}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font-family:Arial,Helvetica,sans-serif}
+a{color:inherit;text-decoration:none}.wrap{max-width:1100px;margin:auto;padding:0 18px}
+header{border-bottom:1px solid var(--line);padding:18px 0}.head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-size:23px;font-weight:900;letter-spacing:-1px}.logo b{color:var(--green)}
+h1{font-size:clamp(30px,5vw,46px);letter-spacing:-2px;margin:34px 0 8px}.sub{color:var(--muted);line-height:1.6;margin:0 0 20px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.bar input,.bar select{background:#0b0f0d;border:1px solid var(--line);color:#fff;border-radius:10px;padding:12px 14px;font-size:15px;min-width:220px;flex:1}
+.bar input:focus,.bar select:focus{outline:none;border-color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.pet{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.pet .ph{aspect-ratio:1;background:#151c17;display:flex;align-items:center;justify-content:center;font-size:64px;position:relative}
+.pet .ph img{width:100%;height:100%;object-fit:cover}
+.pet .lost{position:absolute;left:10px;top:10px;background:#d6142c;color:#fff;font-weight:900;font-size:11px;padding:6px 9px;border-radius:999px;letter-spacing:.3px}
+.pet .rw{position:absolute;right:10px;top:10px;background:#f2c94c;color:#3a2a00;font-weight:900;font-size:11px;padding:6px 9px;border-radius:999px}
+.pet .bd{padding:14px;display:flex;flex-direction:column;gap:4px;flex:1}
+.pet h3{margin:0;font-size:20px}.pet .m{color:var(--muted);font-size:13px;line-height:1.45}
+.pet .go{margin-top:10px;background:var(--green);color:#081006;text-align:center;font-weight:900;padding:11px;border-radius:10px}
+.empty,.load{color:var(--muted);text-align:center;padding:50px 10px;border:1px dashed var(--line);border-radius:16px}
+footer{color:#7d8a83;font-size:13px;text-align:center;padding:40px 0}
+.cta{margin-top:30px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.btn{background:var(--green);color:#081006;font-weight:900;padding:12px 16px;border-radius:10px;display:inline-block}
+</style>
+</head>
+<body>
+<header><div class="wrap head"><a class="logo" href="/">MASTER<b>PET</b></a><a class="btn" href="/tutor/">Área do Tutor</a></div></header>
+<main class="wrap">
+  <h1>🚨 Pets perdidos agora</h1>
+  <p class="sub">Estes pets usam MasterPET e a família pediu ajuda. Viu algum? Abra o perfil e fale com a família na hora. Os contatos aparecem só dentro do perfil.</p>
+  <div class="bar"><input id="city" list="cities" placeholder="Filtrar por cidade (ex.: Cascavel)" oninput="filterCity()"><datalist id="cities"></datalist></div>
+  <div id="list" class="grid"><div class="load" style="grid-column:1/-1">Carregando pets perdidos...</div></div>
+  <div class="cta"><div><b>Perdeu seu pet e ele usa MasterPET?</b><div class="sub" style="margin:4px 0 0">Ative o Modo Perdido na Área do Tutor e marque "Mostrar na lista pública".</div></div><a class="btn" href="/tutor/">Ativar Modo Perdido</a></div>
+</main>
+<footer>MasterPET · A identidade inteligente do seu pet · <a href="/" style="color:var(--green)">masterpet.tec.br</a></footer>
+<script>
+const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
+let ALL=[];
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const norm=v=>String(v||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function since(iso){
+  const d=new Date(iso); if(!iso||isNaN(d)) return '';
+  const days=Math.floor((Date.now()-d.getTime())/86400000);
+  return days<=0?'perdido hoje':days===1?'perdido há 1 dia':'perdido há '+days+' dias';
+}
+function render(list){
+  const el=document.getElementById('list');
+  if(!list.length){ el.innerHTML='<div class="empty" style="grid-column:1/-1">'+(ALL.length?'Nenhum pet perdido nesta cidade. 🎉':'Nenhum pet perdido no momento. 🎉')+'</div>'; return; }
+  el.innerHTML=list.map(p=>{
+    const emo=/^gat/i.test(p.especie)?'🐱':/^c/i.test(p.especie)?'🐶':'🐾';
+    return '<a class="pet" href="/p/'+encodeURIComponent(p.tag)+'"><div class="ph">'+(p.foto?'<img src="'+esc(p.foto)+'" alt="'+esc(p.nome)+'" loading="lazy">':emo)+'<span class="lost">PERDIDO</span>'+(p.recompensa?'<span class="rw">💰 '+esc(p.recompensa)+'</span>':'')+'</div>'+
+      '<div class="bd"><h3>'+esc(p.nome)+'</h3><div class="m">'+esc([p.especie,p.raca,p.sexo].filter(x=>x&&x!=='NAO_INFORMADO').join(' · '))+'</div>'+
+      '<div class="m">📍 '+esc(p.cidade||'Cidade não informada')+(p.desde?' · '+since(p.desde):'')+'</div><span class="go">Ver perfil e ajudar</span></div></a>';
+  }).join('');
+}
+function filterCity(){ const c=norm(document.getElementById('city').value.trim()); render(c?ALL.filter(p=>norm(p.cidade).includes(c)):ALL); }
+(function(){
+  const cb='mpLost_'+Date.now(), s=document.createElement('script');
+  const t=setTimeout(()=>{ document.getElementById('list').innerHTML='<div class="empty" style="grid-column:1/-1">Não foi possível carregar agora. <a href="" style="color:var(--green)">Tentar de novo</a></div>'; },40000);
+  window[cb]=d=>{ clearTimeout(t); delete window[cb]; s.remove();
+    if(!d||!d.ok){ document.getElementById('list').innerHTML='<div class="empty" style="grid-column:1/-1">Lista indisponível no momento.</div>'; return; }
+    ALL=d.pets||[]; document.getElementById('cities').innerHTML=(d.cidades||[]).map(c=>'<option value="'+esc(c)+'">').join('');
+    const q=new URLSearchParams(location.search).get('cidade'); if(q){ document.getElementById('city').value=q; filterCity(); } else render(ALL);
+  };
+  s.onerror=()=>{ clearTimeout(t); document.getElementById('list').innerHTML='<div class="empty" style="grid-column:1/-1">Não foi possível conectar.</div>'; };
+  s.src=API+'?action=lostlist&callback='+cb; document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>
