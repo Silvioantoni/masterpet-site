@@ -156,14 +156,20 @@ function load(){
   // onde chamadas cross-origin ao Apps Script podem ficar presas no carregamento.
   const callbackName = "masterPetCallback_" + Date.now();
   const script = document.createElement("script");
+  // O servidor às vezes demora. Aos 10 s avisamos que está lento, mas continuamos esperando a resposta até 45 s.
+  const slow = setTimeout(() => {
+    const l=document.getElementById("loading");
+    if(l) l.textContent="A conexão está lenta, ainda buscando o perfil do pet...";
+  }, 10000);
   const timeout = setTimeout(() => {
+    clearTimeout(slow);
     script.remove();
-    delete window[callbackName];
+    window[callbackName] = function(){ delete window[callbackName]; };
     showLoadError("Tempo esgotado ao carregar o perfil.");
-  }, 12000);
+  }, 45000);
 
   window[callbackName] = function(data){
-    clearTimeout(timeout);
+    clearTimeout(timeout); clearTimeout(slow);
     script.remove();
     delete window[callbackName];
     try {
@@ -177,7 +183,7 @@ function load(){
   };
 
   script.onerror = function(){
-    clearTimeout(timeout);
+    clearTimeout(timeout); clearTimeout(slow);
     script.remove();
     delete window[callbackName];
     showLoadError("Não foi possível conectar ao servidor.");
