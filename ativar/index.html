@@ -20,7 +20,7 @@ h1{font-size:34px;line-height:1.08;margin:18px 0 8px}.sub{margin:0 0 20px;color:
 <main class="wrap"><section class="card">
 <div class="badge">🐾 ATIVAÇÃO DA TAG</div>
 <h1>Ative sua MasterPET</h1>
-<p class="sub">Cadastre sua conta e vincule a tag ao seu pet.</p>
+<p class="sub">Cadastre sua conta e vincule a tag ao seu pet. O ID e o código de ativação estão no cartão que acompanha a tag.</p>
 <div id="status" class="status"></div>
 <div class="grid">
 <div class="field"><label for="tagId">ID da tag</label><input id="tagId" placeholder="Ex.: MP-0003" autocomplete="off"></div>
@@ -40,97 +40,114 @@ h1{font-size:34px;line-height:1.08;margin:18px 0 8px}.sub{margin:0 0 20px;color:
 <div class="login">Já tenho cadastro → <a href="/tutor/">Entrar</a></div>
 </section></main>
 <script>
+// MASTERPET Ativação V4
+// - Preenche o ID da tag a partir da URL (/ativar/?tagId=MP-0005), vindo do QR de tag ainda não ativada.
+// - Antes de enviar, verifica se a tag já está ativa (evita falso "ativada com sucesso").
+// - Depois de enviar, confirma pelo LOGIN do novo tutor + lista de pets (prova que tutor, pet e tag foram criados),
+//   e já entra na Área do Tutor. Se o login não confirmar, usa o perfil público com conferência do nome do pet.
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
 const $=id=>document.getElementById(id);
-function show(msg,ok){const e=$('status');e.className='status '+(ok?'ok':'err');e.textContent=msg;}
+function show(msg,ok){const e=$('status');e.className='status '+(ok?'ok':'err');e.textContent=msg;e.scrollIntoView({behavior:'smooth',block:'center'});}
 function val(id){return $(id).value.trim();}
-function activateTag(){
- const tagId=val('tagId').toUpperCase(), code=val('code').toUpperCase();
- const name=val('name'), wa=val('wa'), email=val('email').toLowerCase(), pass=val('pass'), pass2=val('pass2');
+const norm=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function jsonp(params,timeoutMs=15000){
+  return new Promise((resolve,reject)=>{
+    const cb='mpAct_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const s=document.createElement('script');
+    let done=false;
+    const finish=(fn,v)=>{if(done)return;done=true;clearTimeout(t);delete window[cb];s.remove();fn(v);};
+    const t=setTimeout(()=>finish(reject,new Error('TIMEOUT')),timeoutMs);
+    window[cb]=d=>finish(resolve,d);
+    s.onerror=()=>finish(reject,new Error('NETWORK'));
+    s.src=API+'?'+Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v??'')).join('&')+'&callback='+cb+'&_='+Date.now();
+    document.body.appendChild(s);
+  });
+}
+
+(function prefill(){
+  const q=new URLSearchParams(location.search);
+  const t=(q.get('tagId')||q.get('tag')||'').trim().toUpperCase();
+  if(t){$('tagId').value=t;$('code').focus();}
+  document.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')activateTag();}));
+})();
+
+let busy=false;
+async function activateTag(){
+ if(busy) return;
+ const tagId=val('tagId').toUpperCase().replace(/\s+/g,''), code=val('code').toUpperCase().replace(/\s+/g,'');
+ const name=val('name'), wa=val('wa').replace(/\D/g,''), email=val('email').toLowerCase(), pass=$('pass').value, pass2=$('pass2').value;
  const petName=val('petName'), species=val('species'), sex=val('sex'), breed=val('breed');
  if(!/^MP-[A-Z0-9-]+$/.test(tagId)) return show('Informe um ID de tag válido, como MP-0003.',false);
  if(!code) return show('Informe o código de ativação da tag.',false);
  if(!name||!email||!wa) return show('Preencha seus dados de contato.',false);
+ if(wa.length<10||wa.length>13) return show('Informe o WhatsApp com DDD, somente números. Ex.: 45999999999.',false);
  if(!/^\S+@\S+\.\S+$/.test(email)) return show('Informe um e-mail válido.',false);
  if(pass.length<8) return show('A senha precisa ter pelo menos 8 caracteres.',false);
  if(pass!==pass2) return show('As senhas não conferem.',false);
  if(!petName) return show('Informe o nome do seu pet.',false);
- const btn=$('activateBtn');btn.disabled=true;btn.textContent='ATIVANDO SUA MASTERPET...';show('Ativando sua MasterPET...',true);
+
+ const btn=$('activateBtn');
+ busy=true;btn.disabled=true;btn.textContent='VERIFICANDO A TAG...';show('Verificando a tag '+tagId+'...',true);
+
+ // 1) Pré-checagem: tag já ativa não pode ser ativada de novo.
+ try{
+   const pre=await jsonp({action:'publicpet',tagId});
+   if(pre&&pre.ok&&pre.pet){
+     return fail('A tag '+tagId+' já está ativa. Se ela é sua, entre na Área do Tutor. Se recebeu esta tag agora, fale com a MasterPET pelo WhatsApp.');
+   }
+ }catch(e){ /* sem conexão na pré-checagem: seguimos, o backend valida de qualquer forma */ }
+
+ // 2) Envio por POST (formulário oculto em iframe, como na V3).
+ btn.textContent='ATIVANDO SUA MASTERPET...';show('Ativando sua MasterPET... isso pode levar alguns segundos.',true);
  const frame=document.createElement('iframe');frame.name='mpActFrame_'+Date.now();frame.style.display='none';document.body.appendChild(frame);
  const form=document.createElement('form');form.target=frame.name;form.method='POST';form.action=API;
  const data={action:'activatetag',tagId,code,nomeTutor:name,whatsapp:wa,email,senha:pass,nomePet:petName,especie:species,sexo:sex,raca:breed};
  Object.entries(data).forEach(([n,v])=>{const i=document.createElement('input');i.type='hidden';i.name=n;i.value=v;form.appendChild(i);});
  document.body.appendChild(form);form.submit();form.remove();
- setTimeout(()=>confirmActivation(tagId,email,btn,frame),1800);
-}
-function confirmActivation(tagId,email,btn,frame){
- const cbBase='mpActCheck_'+Date.now();
- let attempts=0;
- const maxAttempts=6;
- let finished=false;
+ setTimeout(()=>{try{frame.remove()}catch(e){}},30000);
 
- function finishWithRedirect(){
-   if(finished) return;
-   finished=true;
-   localStorage.setItem('masterpet_activation_message','Tag '+tagId+' ativada com sucesso. Faça login para acessar seu perfil.');
-   show('✅ Sua MasterPET foi ativada! Redirecionando para a Área do Tutor...',true);
+ // 3) Confirmação real.
+ await sleep(2500);
+ let publicMatch=false, publicOther=false;
+ for(let attempt=1;attempt<=7;attempt++){
+   try{
+     const lg=await jsonp({action:'login',email,password:pass});
+     if(lg&&lg.ok&&lg.token){
+       const pets=await jsonp({action:'tutorpets',token:lg.token});
+       const has=pets&&pets.ok&&(pets.pets||[]).some(p=>String(p.tag||'').toUpperCase()===tagId);
+       if(has){
+         localStorage.setItem('masterpet_token',lg.token);
+         localStorage.setItem('masterpet_tutor',JSON.stringify(pets.tutor||lg.tutor||{}));
+         return success(true);
+       }
+     }
+   }catch(e){}
+   try{
+     const pub=await jsonp({action:'publicpet',tagId});
+     if(pub&&pub.ok&&pub.pet){
+       if(norm(pub.pet.nome)===norm(petName)) publicMatch=true; else publicOther=true;
+     }
+   }catch(e){}
+   if(publicOther) break;
+   if(publicMatch && attempt>=3) break;
+   btn.textContent='CONFIRMANDO ('+attempt+'/7)...';
+   await sleep(1500);
+ }
+ if(publicMatch) return success(false);
+ if(publicOther) return fail('A tag '+tagId+' foi ativada, mas com outro cadastro. Fale com a MasterPET pelo WhatsApp antes de tentar novamente.');
+ fail('Não foi possível ativar a tag '+tagId+'. Confira se o código de ativação foi digitado exatamente como está no cartão da tag e tente novamente. Se o erro continuar, fale com a MasterPET.');
+
+ function success(loggedIn){
+   localStorage.setItem('masterpet_activation_message','✅ Tag '+tagId+' ativada com sucesso!'+(loggedIn?'':' Faça login para acessar o perfil do seu pet.'));
+   show('✅ Sua MasterPET foi ativada! Abrindo a Área do Tutor...',true);
+   btn.textContent='ATIVADA ✓';
    setTimeout(()=>{location.href='/tutor/?activated=1&email='+encodeURIComponent(email)},900);
  }
-
- function fail(msg){
-   if(finished) return;
-   finished=true;
-   show(msg,false);
-   reset(btn,frame);
- }
-
- function verify(){
-   if(finished) return;
-   attempts++;
-   const cb=cbBase+'_'+attempts;
-   window[cb]=(data)=>{
-     try{
-       if(data&&data.ok&&data.pet){
-         finishWithRedirect();
-         return;
-       }
-       if(data&&data.error==='TAG_NOT_FOUND' && attempts<maxAttempts){
-         setTimeout(verify,1200);
-         return;
-       }
-       if(data&&data.error==='TAG_CODE_INVALID'){
-         fail('Código de ativação inválido para esta tag.');
-         return;
-       }
-       if(data&&data.error==='TAG_ALREADY_ACTIVE'){
-         // A tag já ficou ativa; tentar mais uma vez pode ser apenas atraso de sincronização.
-         if(attempts<maxAttempts){ setTimeout(verify,1200); return; }
-         fail('Essa tag já está ativa.');
-         return;
-       }
-       if(attempts<maxAttempts){
-         setTimeout(verify,1200);
-         return;
-       }
-       fail('Não foi possível confirmar a ativação. Acesse a Área do Tutor e verifique seu cadastro.');
-     }finally{
-       delete window[cb];
-     }
-   };
-
-   const s=document.createElement('script');
-   s.src=API+'?action=publicpet&tagId='+encodeURIComponent(tagId)+'&callback='+cb+'&_='+Date.now();
-   s.onerror=()=>{
-     delete window[cb];
-     if(attempts<maxAttempts) setTimeout(verify,1200);
-     else fail('Não foi possível confirmar a ativação. Acesse a Área do Tutor e verifique seu cadastro.');
-   };
-   document.body.appendChild(s);
-   setTimeout(()=>{try{s.remove()}catch(e){}},10000);
- }
-
- // Dá alguns segundos para o Apps Script concluir a gravação antes da primeira verificação.
- setTimeout(verify,1600);
 }
-function reset(btn,frame){btn.disabled=false;btn.textContent='ATIVAR MINHA MASTERPET';setTimeout(()=>frame.remove(),500);}
+function fail(msg){
+ busy=false;show(msg,false);
+ const btn=$('activateBtn');btn.disabled=false;btn.textContent='ATIVAR MINHA MASTERPET';
+}
 </script></body></html>

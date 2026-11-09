@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#090b0c">
 <title>MasterPET</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f2f4f5;font-family:Arial,Helvetica,sans-serif;color:#111}
@@ -20,7 +22,9 @@
 .card{border:1px solid #e0e4e6;border-radius:14px;padding:15px;margin-top:12px}.card h2{font-size:17px;margin:0 0 12px}
 .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #edf0f1;font-size:14px}.row:last-child{border-bottom:0}.label{color:#6e777b}.value{font-weight:700;text-align:right}
 .note{font-size:14px;line-height:1.5;color:#444}.footer{text-align:center;color:#92999c;font-size:11px;padding:25px}
-.loading{text-align:center;padding:50px 20px;color:#555}.error{padding:18px;border:1px solid #f0caca;background:#fff5f5;border-radius:14px}
+.loading{text-align:center;padding:50px 20px;color:#555}
+.cta{background:#39ff00;color:#071000}.ghost{background:#fff;color:#171a1b;border:1px solid #d5dadc}
+.info{padding:18px;border:1px solid #e0e4e6;background:#f8fafb;border-radius:14px;line-height:1.5;font-size:14px;color:#333}.error{padding:18px;border:1px solid #f0caca;background:#fff5f5;border-radius:14px}
 </style>
 </head>
 <body>
@@ -41,12 +45,13 @@
 
 <iframe name="mpAccessFrame" id="mpAccessFrame" style="display:none"></iframe>
 <script>
-// MASTERPET: roteador das URLs /p/ID_TAG e /ID_TAG no GitHub Pages.
+// MASTERPET 404 V6: roteador das URLs /p/ID_TAG e /ID_TAG no GitHub Pages.
 const API = "https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec";
 
-// IMPORTANTE: se abrir sem ?tagId=..., usamos esta tag como padrão para o teste.
-// Depois, no QR de cada animal, o identificador será o da própria tag.
-const DEFAULT_TAG = "MP-0001";
+// V6: NÃO existe mais tag padrão. Antes, qualquer URL sem ID válido (erro de digitação,
+// /p/ vazio, link quebrado) abria o perfil da Flora (MP-0001) e registrava um acesso falso.
+// Agora, sem ID reconhecido, mostramos "página não encontrada".
+// Para testes sem gravar acesso no histórico, adicione ?noscan=1 à URL.
 
 function getTagId(){
   // Produção principal: /p/MP-0001
@@ -61,8 +66,10 @@ function getTagId(){
   // Testes e compatibilidade: ?tagId=MP-0001 ou ?tag=MP-0001
   const p = new URLSearchParams(window.location.search);
   const q = (p.get("tagId") || p.get("tag") || "").trim();
-  return (q || DEFAULT_TAG).toUpperCase();
+  return q.toUpperCase();
 }
+
+function isValidTagId(t){ return /^[A-Z]{2,5}-[A-Z0-9-]{1,20}$/.test(t); }
 
 function esc(v){
   return String(v ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -91,6 +98,8 @@ function render(data, tagId){
   const pnum=normalizePhone(phone?.valor);
   const name=p.nome || "Pet";
   const status=String(p.status||"ATIVO").toUpperCase();
+  const female=/^F/i.test(String(p.sexo||""));
+  const art=female?"a":"o";
 
   document.title = "MasterPET — "+name;
   document.getElementById("petname").textContent=name;
@@ -101,13 +110,13 @@ function render(data, tagId){
 
   const content=document.getElementById("content");
   let buttons="";
-  if(wnum) buttons += '<a class="btn whats" target="_blank" href="https://wa.me/'+wnum+'?text='+encodeURIComponent("Olá! Encontrei a "+name+". Estou entrando em contato pela MasterPET.")+'">💬 Falar com a família</a>';
+  if(wnum) buttons += '<a class="btn whats" target="_blank" href="https://wa.me/'+wnum+'?text='+encodeURIComponent("Olá! Encontrei "+art+" "+name+". Estou entrando em contato pela MasterPET.")+'">💬 Falar com a família</a>';
   if(pnum) buttons += '<a class="btn phone" href="tel:+'+pnum+'">📞 Ligar para a família</a>';
 
   const isLost = status === "PERDIDO" || status === "PET PERDIDO" || status === "LOST";
   const statusHtml = isLost
-    ? '<div class="status" style="border-color:#ff5364;background:#fff0f2"><span class="dot" style="background:#ff3048"></span><strong style="color:#c9142c">🚨 '+esc(name)+' está PERDIDO</strong><div style="margin-top:6px;color:#8a3a43;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você encontrou, entre em contato com a família.</div></div>'
-    : '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está identificado</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>';
+    ? '<div class="status" style="border-color:#ff5364;background:#fff0f2"><span class="dot" style="background:#ff3048"></span><strong style="color:#c9142c">🚨 '+esc(name)+' está '+(female?'PERDIDA':'PERDIDO')+'</strong><div style="margin-top:6px;color:#8a3a43;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você '+(female?'a':'o')+' encontrou, entre em contato com a família.</div></div>'
+    : '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está '+(female?'identificada':'identificado')+'</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>';
 
   content.innerHTML =
     statusHtml+
@@ -139,6 +148,9 @@ function registrarAcesso(tagId){
 
 function load(){
   const tagId=getTagId();
+  if(!tagId || !isValidTagId(tagId)){ showNotFoundPage(); return; }
+  const noScan=new URLSearchParams(window.location.search).get("noscan")==="1";
+  document.getElementById("content").innerHTML='<div class="loading" id="loading">Buscando o perfil do pet...</div>';
 
   // JSONP é usado primeiro para funcionar de forma consistente no Safari/iPhone,
   // onde chamadas cross-origin ao Apps Script podem ficar presas no carregamento.
@@ -155,9 +167,10 @@ function load(){
     script.remove();
     delete window[callbackName];
     try {
+      if(data && data.error==="TAG_NOT_FOUND"){ showNotActivated(tagId); return; }
       if(!data || !data.ok) throw new Error(data?.error || "Não foi possível carregar a tag.");
       render(data,tagId);
-      registrarAcesso(tagId);
+      if(!noScan) registrarAcesso(tagId);
     } catch(e) {
       showLoadError(e.message);
     }
@@ -177,8 +190,33 @@ function load(){
 function showLoadError(message){
   const tagId=getTagId();
   document.getElementById("petname").textContent="MasterPET";
-  document.getElementById("breed").textContent="Perfil não encontrado";
-  document.getElementById("content").innerHTML='<div class="error"><strong>Não conseguimos carregar esta tag.</strong><p style="margin-bottom:0">Tag consultada: <b>'+esc(tagId)+'</b><br><br>'+esc(message)+'</p></div>';
+  document.getElementById("breed").textContent="Não foi possível carregar";
+  document.getElementById("content").innerHTML='<div class="error"><strong>Não conseguimos carregar esta tag agora.</strong><p style="margin-bottom:0">Tag consultada: <b>'+esc(tagId)+'</b><br><br>'+esc(message)+'<br>Verifique sua conexão com a internet e tente novamente.</p></div>'+
+    '<button class="btn whats" type="button" onclick="load()">🔄 Tentar novamente</button>';
+}
+
+// Tag existe fisicamente mas ainda não foi ativada (ou o ID não existe).
+// O backend responde TAG_NOT_FOUND nos dois casos. Quem acabou de comprar a tag
+// e escaneou o QR cai aqui e é levado direto para a ativação.
+function showNotActivated(tagId){
+  document.title="MasterPET — Ativar "+tagId;
+  document.getElementById("petname").textContent=tagId;
+  document.getElementById("breed").textContent="Tag ainda não ativada";
+  document.getElementById("content").innerHTML=
+    '<div class="info"><strong>Esta tag MasterPET ainda não está ativa.</strong><br>Se você acabou de receber sua tag, ative agora para criar o perfil do seu pet. Tenha em mãos o <b>código de ativação</b> que acompanha a tag.</div>'+
+    '<a class="btn cta" href="/ativar/?tagId='+encodeURIComponent(tagId)+'">🐾 Ativar minha MasterPET</a>'+
+    '<a class="btn ghost" href="/">Conhecer a MasterPET</a>'+
+    '<p class="note" style="text-align:center;font-size:12px;color:#8a9295">Encontrou um pet com esta tag? A família ainda não concluiu o cadastro.</p>';
+}
+
+function showNotFoundPage(){
+  document.title="MasterPET — Página não encontrada";
+  document.getElementById("petname").textContent="Página não encontrada";
+  document.getElementById("breed").textContent="Verifique o endereço digitado";
+  document.getElementById("content").innerHTML=
+    '<div class="info">O endereço acessado não corresponde a nenhuma página ou tag MasterPET. Os perfis de pets têm o formato <b>masterpet.tec.br/p/MP-0000</b>.</div>'+
+    '<a class="btn cta" href="/">Ir para a página inicial</a>'+
+    '<a class="btn phone" href="/tutor/">Área do Tutor</a>';
 }
 
 
