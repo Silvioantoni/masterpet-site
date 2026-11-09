@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MasterPET — Área do Tutor</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#070909">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MasterPET">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23090b0c%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2226%22 text-anchor=%22middle%22 fill=%22%2339ff00%22%3EMP%3C/text%3E%3C/svg%3E">
 <style>
@@ -54,7 +59,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
 </div>
 <div id="app" class="app hidden">
 <aside class="sidebar"><div class="brand">MASTER<span>PET</span></div><div class="sub">TECNOLOGIA PARA O SEU PET</div><nav class="nav">
-<button class="active" onclick="page('inicio',this)">🏠 Início</button><button onclick="page('pet',this)">🐾 Meu Pet</button><button onclick="page('perdido',this)">🚨 Pet Perdido</button><button onclick="page('acessos',this)">📱 Acessos</button><button onclick="page('tag',this)">🏷️ Minha Tag</button><button id="themeBtn" onclick="toggleTheme()">☀️ Modo claro</button>
+<button class="active" onclick="page('inicio',this)">🏠 Início</button><button onclick="page('pet',this)">🐾 Meu Pet</button><button onclick="page('perdido',this)">🚨 Pet Perdido</button><button onclick="page('acessos',this)">📱 Acessos</button><button onclick="page('tag',this)">🏷️ Minha Tag</button><button id="installBtn" class="hidden" onclick="installApp()">📲 Instalar app</button><button id="themeBtn" onclick="toggleTheme()">☀️ Modo claro</button>
 </nav><div class="bottom"><div class="userbox">Logado como<br><b style="color:#fff" id="tutorEmail">—</b></div><button class="nav" style="color:#89938f" onclick="logout()">↪ Sair</button></div></aside>
 <main class="main"><header class="top"><div class="hello"><h1 id="heading">Olá, <span id="tutorName">Tutor</span> 👋</h1><p>Gerencie a segurança do <span id="tutorPetName">seu pet</span>.</p></div><select id="petSelect" class="petselect hidden" onchange="selectPet(this.value)" aria-label="Escolher pet"></select><div class="avatar" id="tutorAvatar">T</div></header>
 <section id="inicio" class="page active">
@@ -627,6 +632,18 @@ function downloadTagQr(){
   setTimeout(()=>{const c=h.querySelector('canvas'); if(c){const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='MasterPET_'+p.tag+'_QR.png';a.click();} h.remove();},50);
 }
 function openPublicProfile(){ const p=currentPet(); if(p&&p.tag) window.open('https://masterpet.tec.br/p/'+encodeURIComponent(p.tag),'_blank'); }
+// ===== Instalar como app =====
+let installEvt=null;
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(!isStandalone())document.getElementById('installBtn').classList.remove('hidden');});
+window.addEventListener('appinstalled',()=>{installEvt=null;document.getElementById('installBtn').classList.add('hidden');toast('✅ MasterPET instalado na tela inicial!');});
+if(isIOS()&&!isStandalone()) document.getElementById('installBtn').classList.remove('hidden');
+async function installApp(){
+  if(installEvt){ installEvt.prompt(); try{await installEvt.userChoice;}catch(e){} installEvt=null; return; }
+  if(isIOS()) alert('Para instalar no iPhone:\n\n1. Toque no botão Compartilhar (quadrado com seta) do Safari.\n2. Escolha "Adicionar à Tela de Início".\n3. Toque em Adicionar.');
+  else alert('No menu do navegador (⋮), escolha "Instalar app" ou "Adicionar à tela inicial".');
+}
 let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add('hidden'),3500)}
 (async function(){
   try{ MP_PET_INDEX=Number(localStorage.getItem('masterpet_pet_index'))||0; }catch(e){}
