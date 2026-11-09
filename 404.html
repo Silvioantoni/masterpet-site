@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://script.google.com https://script.googleusercontent.com; form-action 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://script.google.com">
@@ -159,7 +161,7 @@ function sightingFormHtml(isLost,prot,name){
     '<textarea id="sgNota" maxlength="400" placeholder="Ex.: Vi agora há pouco perto da padaria da Rua X, indo em direção à praça." style="width:100%;min-height:90px;border:1px solid #d5dadc;border-radius:10px;padding:10px;font:inherit"></textarea>'+
     '<input id="sgContato" maxlength="80" placeholder="Seu nome e WhatsApp (opcional)" style="width:100%;margin-top:8px;border:1px solid #d5dadc;border-radius:10px;padding:10px;font:inherit">'+
     '<label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px;color:#444"><input type="checkbox" id="sgLoc"> Incluir minha localização atual</label>'+
-    '<button class="btn cta" type="button" id="sgBtn" onclick="sendSighting()">'+(isLost?'📍 Enviar avistamento para a família':'✉️ Enviar mensagem')+'</button><div id="sgMsg" class="note" style="text-align:center"></div></section>';
+    '<div aria-hidden=\"true\" style=\"position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden\"><label>Não preencha este campo<input id=\"sgWebsite\" name=\"website\" tabindex=\"-1\" autocomplete=\"off\"></label></div>'+'<button class="btn cta" type="button" id="sgBtn" onclick="sendSighting()">'+(isLost?'📍 Enviar avistamento para a família':'✉️ Enviar mensagem')+'</button><div id="sgMsg" class="note" style="text-align:center"></div></section>';
 }
 async function sendSighting(){
   const nota=document.getElementById('sgNota').value.trim(), contato=document.getElementById('sgContato').value.trim(), wantLoc=document.getElementById('sgLoc').checked;
@@ -171,7 +173,7 @@ async function sendSighting(){
     try{ const pos=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:true,timeout:15000,maximumAge:60000})); lat=pos.coords.latitude.toFixed(6); lng=pos.coords.longitude.toFixed(6); }
     catch(e){ if(!nota){ b.disabled=false; b.textContent='Tentar de novo'; m.textContent='Não foi possível obter a localização. Escreva onde viu o pet.'; return; } }
   }
-  const payload={action:'sighting',tagId:getTagId(),nota,contato,latitude:lat,longitude:lng,locationAuthorized:lat?'true':'false'};
+  const payload={action:'sighting',website:(document.getElementById('sgWebsite')||{}).value||'',tagId:getTagId(),nota,contato,latitude:lat,longitude:lng,locationAuthorized:lat?'true':'false'};
   let r=null;
   try{ const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); r=await res.json(); }
   catch(e){ // plano B: formulário oculto (sem leitura da resposta)
