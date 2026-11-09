@@ -118,6 +118,22 @@ function jsonp(action, params={}){
 }
 
 
+
+// Envia dados sensíveis (senha) no CORPO de um POST, nunca no endereço.
+// O Apps Script responde com redirecionamento + "Access-Control-Allow-Origin: *"; texto simples não exige preflight.
+async function postApi(payload,timeoutMs=35000){
+  const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),timeoutMs);
+  try{
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:ctrl.signal,redirect:'follow'});
+    return await res.json();
+  }finally{ clearTimeout(t); }
+}
+// Usa POST; só se o navegador não conseguir (bloqueio/rede), volta ao método antigo para o login não parar.
+async function secureCall(action,params){
+  try{ return await postApi(Object.assign({action},params)); }
+  catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonp(action,params); }
+}
+
 function getTutor(){
   try { return JSON.parse(localStorage.getItem('masterpet_tutor') || '{}'); }
   catch(e){ return {}; }
@@ -224,7 +240,7 @@ async function login(){
   const btn=document.querySelector('#loginForm button[type=submit]');
   const original=btn.textContent; btn.disabled=true; btn.textContent='Entrando...';
   try{
-    const r=await jsonp('login',{email:e,password:p});
+    const r=await secureCall('login',{email:e,password:p});
     if(!r || !r.ok){
       err.textContent = r && r.error==='PASSWORD_NOT_CONFIGURED'
         ? 'Este tutor ainda não possui senha configurada. Use "Esqueci minha senha" para criar uma.'
@@ -275,7 +291,7 @@ async function saveReset(){
   if(p1!==p2) return resetMsg('As senhas não conferem.');
   const b=document.getElementById('resetSaveBtn'); b.disabled=true; b.textContent='Salvando...';
   try{
-    const r=await jsonp('resetpassword',{email,code,password:p1});
+    const r=await secureCall('resetpassword',{email,code,password:p1});
     if(r&&r.ok&&r.token){
       MP_TOKEN=r.token; localStorage.setItem('masterpet_token',MP_TOKEN);
       MP_TUTOR=r.tutor||{}; localStorage.setItem('masterpet_tutor',JSON.stringify(MP_TUTOR));
