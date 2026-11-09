@@ -84,7 +84,7 @@ body.light .loginbox{box-shadow:0 20px 70px #0002}
     <div id="photoUploadStatus" class="muted" style="margin-top:5px"></div>
   </div>
 </div>
-</div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos cadastrados</h3><div id="petContacts" class="actions"></div></div></section>
+</div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos exibidos no perfil público</h3><div id="petContacts" class="actions"></div><div class="form" style="margin-top:14px"><div><label>WhatsApp (com DDD)</label><input id="contactWa" inputmode="numeric" placeholder="45999999999"></div><div><label>Telefone para ligação (opcional)</label><input id="contactTel" inputmode="numeric" placeholder="Deixe vazio para usar o WhatsApp"></div></div><div class="row" style="margin-top:12px"><span class="muted">Quem encontrar seu pet vai usar estes números.</span><button class="btn" id="saveContactsBtn" type="button" onclick="saveContacts()">💾 Salvar contatos</button></div></div></section>
 <section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">carregando...</b>.</p></div><div id="switch" class="switch" onclick="if(!document.getElementById('lostBtn').disabled)toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" placeholder="Ex.: Ela é dócil, mas tem medo de barulho. Por favor, me chame no WhatsApp."></textarea><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()" disabled>Carregando...</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div></section>
 <section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted" id="accessSubtitle">Histórico real das tags vinculadas ao tutor.</p><div class="minigrid"><div class="card stat"><div class="label">Total</div><div class="value" id="accTotal">0</div></div><div class="card stat"><div class="label">Hoje</div><div class="value" id="accToday">0</div></div><div class="card stat"><div class="label">Último acesso</div><div class="value" style="font-size:17px" id="accLast">—</div></div></div><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody id="accessRows"><tr><td colspan="4" class="muted">Carregando...</td></tr></tbody></table></div></div></section>
 <section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div></div></section>
@@ -372,6 +372,10 @@ function renderAllData(){
     contacts.appendChild(b);
   });
   if(!contacts.children.length) contacts.innerHTML='<div class="muted">Nenhum contato cadastrado.</div>';
+  const cWa=(pet.contatos||[]).find(c=>String(c.tipo).toUpperCase()==='WHATSAPP'), cTel=(pet.contatos||[]).find(c=>String(c.tipo).toUpperCase()==='TELEFONE');
+  const wi=document.getElementById('contactWa'), ti=document.getElementById('contactTel');
+  if(document.activeElement!==wi) wi.value=cWa?String(cWa.valor).replace(/\D/g,''):'';
+  if(document.activeElement!==ti) ti.value=cTel?String(cTel.valor).replace(/\D/g,''):'';
   document.getElementById('tagId').textContent=tag;
   document.getElementById('tagPet').textContent=nome;
   document.getElementById('tagStatus').textContent=tagStatus;
@@ -481,6 +485,19 @@ function postUpdatePet(payload){
   });
 }
 
+async function saveContacts(){
+  const pet=currentPet(); if(!pet||!pet.id) return toast('Nenhum pet disponível.');
+  const wa=document.getElementById('contactWa').value.replace(/\D/g,''), tel=document.getElementById('contactTel').value.replace(/\D/g,'');
+  if(wa.length<10||wa.length>13) return toast('Informe o WhatsApp com DDD, somente números.');
+  if(tel && (tel.length<10||tel.length>13)) return toast('Telefone inválido: use DDD + número.');
+  const b=document.getElementById('saveContactsBtn'); b.disabled=true; b.textContent='Salvando...';
+  try{
+    const r=await jsonp('updatecontacts',{token:MP_TOKEN,petId:pet.id,whatsapp:wa,telefone:tel});
+    if(!r||!r.ok){ const m={INVALID_WHATSAPP:'WhatsApp inválido.',INVALID_PHONE:'Telefone inválido.',AUTH_INVALID:'Sessão expirada. Entre novamente.'}; toast(m[r&&r.error]||'Não foi possível salvar os contatos.'); if(r&&r.error==='AUTH_INVALID') logout(); return; }
+    await loadTutorData(); toast(r.changed?'✅ Contatos atualizados!':'Nenhuma alteração nos contatos.');
+  }catch(e){ try{await loadTutorData();}catch(_){} toast('Não conseguimos confirmar. Confira os contatos exibidos.'); }
+  finally{ b.disabled=false; b.textContent='💾 Salvar contatos'; }
+}
 function renderPetPhotoPreview(src,nome='Pet'){
   const box=document.getElementById('petPhotoPreview'); if(!box) return;
   if(src){
