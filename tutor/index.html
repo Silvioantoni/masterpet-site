@@ -199,6 +199,15 @@ tbody tr{transition:background .2s}tbody tr:hover{background:rgba(255,255,255,.0
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:10px}
 input,textarea{caret-color:var(--g)}
 .stat .value,td{font-variant-numeric:tabular-nums}
+
+.plan-locked{opacity:.4;pointer-events:none;filter:saturate(.4)}
+.plan-lock{grid-column:1/-1;display:flex;align-items:center;gap:14px;margin:12px 0;padding:14px 16px;border-radius:16px;border:1px solid rgba(183,255,0,.3);background:linear-gradient(180deg,rgba(183,255,0,.08),rgba(183,255,0,.03))}
+.plan-lock .pl-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(183,255,0,.12);color:var(--g);flex:none}
+.plan-lock .pl-tx{flex:1;min-width:0}.plan-lock .pl-tx b{display:block;font-size:14px}.plan-lock .pl-tx span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.plan-lock .btn{white-space:nowrap;text-decoration:none;min-height:42px;display:inline-flex;align-items:center}
+.plan-btn-locked{opacity:.55}.plan-btn-locked:after{content:" · Premium";font-weight:600}
+body.light .plan-lock{border-color:#cfe6a0;background:#f6fbe9}body.light .plan-lock .pl-ic{color:#4d7a00}
+@media(max-width:560px){.plan-lock{flex-wrap:wrap}.plan-lock .btn{width:100%;justify-content:center}}
 @media (prefers-reduced-motion:reduce){.page.active{animation:none}}
 </style>
 </head>
@@ -607,6 +616,7 @@ function renderAllData(){
   renderTagQr(tag);
   renderAccesses(accesses,tag);
   renderLostHistory(accesses,lost);
+  applyPlan();
   document.getElementById('contaInfo').textContent='Conta: '+cleanText((MP_TUTOR||{}).email,'—')+' · '+((window.MP_DATA&&window.MP_DATA.pets)||[]).length+' pet(s)';
 }
 
@@ -634,6 +644,7 @@ function setPetFieldsEditable(editing){
   document.getElementById('petForm').classList.toggle('pet-editing',editing);
   document.getElementById('petSaveActions').classList.toggle('hidden',!editing);
   document.getElementById('editPetBtn').textContent=editing?'✖ Cancelar':'✏️ Editar';
+  if(typeof applyPlan==='function') applyPlan();
 }
 function cancelPetEdit(){
   renderAllData();
@@ -871,7 +882,35 @@ async function linkNewTag(){
   }catch(e){ try{await loadTutorData();}catch(_){} toast('Não conseguimos confirmar. Confira se o novo pet apareceu.'); }
   finally{ b.disabled=false; b.textContent='Vincular nova tag'; }
 }
-function openCard(){ const p=currentPet(); if(!p) return toast('Nenhum pet disponível.'); window.open('/tutor/carteirinha/?pet='+encodeURIComponent(p.id),'_blank'); }
+
+// ===== Kits: funções extras do Premium (saúde, carteirinha, modo viagem, galeria) =====
+// Tags sem o campo "plano" (todas as já ativadas) continuam com tudo liberado.
+const PREMIUM_UPGRADE='R$ 15';
+function isEssencial(p){return String(p&&p.plano||'').toUpperCase()==='ESSENCIAL';}
+function lockBanner(id,txt){
+  const p=currentPet(),tag=cleanText(p&&p.tag,'');
+  const msg='Olá! Quero liberar o Premium na minha tag '+tag+' ('+PREMIUM_UPGRADE+').';
+  return '<div class="plan-lock" id="'+id+'"><span class="pl-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span><div class="pl-tx"><b>Recurso do Premium</b><span>'+txt+'</span></div><a class="btn" target="_blank" rel="noopener" href="https://wa.me/554599893990?text='+encodeURIComponent(msg)+'">Liberar por '+PREMIUM_UPGRADE+'</a></div>';
+}
+function setLock(on,anchor,bannerId,txt,els){
+  const old=document.getElementById(bannerId); if(old) old.remove();
+  els.filter(Boolean).forEach(el=>{el.classList.toggle('plan-locked',on);[el,...el.querySelectorAll('input,textarea,button,select')].filter(i=>/^(INPUT|TEXTAREA|BUTTON|SELECT)$/.test(i.tagName)).forEach(i=>{if(on){i.dataset.plWas=i.disabled?'1':'0';i.disabled=true;}else if(i.dataset.plWas!==undefined){i.disabled=i.dataset.plWas==='1';delete i.dataset.plWas;}});});
+  if(on&&anchor) anchor.insertAdjacentHTML('afterend',lockBanner(bannerId,txt));
+}
+function byH3(txt){return [...document.querySelectorAll('#pet h3')].find(h=>h.textContent.includes(txt));}
+function applyPlan(){
+  const lock=isEssencial(currentPet());
+  const hIds=['hAlergias','hMedicamentos','hVet','hProxVacina','hVacinas','hPublica'];
+  const hEls=hIds.map(id=>{const e=document.getElementById(id);return e&&e.closest('div');});
+  const hHead=byH3('Saúde'); setLock(lock,hHead&&hHead.closest('div'),'plHealth','Ficha de saúde com lembrete de vacina por e-mail.',hEls);
+  if(lock) hIds.forEach(id=>{const e=document.getElementById(id);if(e){e.readOnly=true;e.disabled=true;}});
+  const gHead=byH3('Mais fotos'); setLock(lock,gHead,'plGallery','Galeria com até 4 fotos extras: lados, manchas e coleira.',[document.getElementById('gallery'),document.getElementById('galleryBtn')]);
+  const tHead=byH3('Modo viagem'); const tStatus=document.getElementById('travelStatus');
+  setLock(lock,tHead&&tHead.nextElementSibling,'plTravel','Modo viagem: o contato de quem cuida aparece primeiro no perfil.',[tStatus,tStatus&&tStatus.nextElementSibling,tStatus&&tStatus.nextElementSibling&&tStatus.nextElementSibling.nextElementSibling]);
+  const cb=[...document.querySelectorAll('#tag button')].find(b=>b.textContent.includes('Carteirinha'));
+  if(cb){cb.classList.toggle('plan-btn-locked',lock);cb.title=lock?'Carteirinha digital: recurso do Premium':'';}
+}
+function openCard(){ const p=currentPet(); if(!p) return toast('Nenhum pet disponível.'); if(isEssencial(p)) return toast('🔒 A carteirinha digital faz parte do Premium. Libere por '+PREMIUM_UPGRADE+' pelo WhatsApp.'); window.open('/tutor/carteirinha/?pet='+encodeURIComponent(p.id),'_blank'); }
 function renderLostOptions(p){
   const r=document.getElementById('lostReward'), c=document.getElementById('lostCity'), pub=document.getElementById('lostPublic');
   if(document.activeElement!==r) r.value=cleanText(p.recompensa,'');
