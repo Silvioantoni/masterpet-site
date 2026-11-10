@@ -930,7 +930,7 @@ async function addGalleryPhoto(ev){
     const data=await compressPetImage(f,1000,250000);
     const r=await postApi({action:'addphoto',token:MP_TOKEN,petId:pet.id,foto:data});
     if(r&&r.ok){ await loadTutorData(); toast('✅ Foto adicionada!'); }
-    else toast({GALLERY_FULL:'A galeria já tem 4 fotos.',INVALID_PHOTO:'Foto inválida.',AUTH_INVALID:'Sessão expirada.'}[r&&r.error]||'Não foi possível enviar a foto.');
+    else toast({PREMIUM_REQUIRED:'🔒 A galeria é um recurso do Premium.',GALLERY_FULL:'A galeria já tem 4 fotos.',INVALID_PHOTO:'Foto inválida.',AUTH_INVALID:'Sessão expirada.'}[r&&r.error]||'Não foi possível enviar a foto.');
   }catch(e){ try{await loadTutorData();}catch(_){} toast('Não conseguimos confirmar o envio. Confira a galeria.'); }
   finally{ b.textContent='➕ Adicionar foto'; renderGallery(currentPet()||{}); }
 }
@@ -954,7 +954,7 @@ async function saveTravel(clear){
   try{
     const r=await jsonp('settempcontact',{token:MP_TOKEN,petId:pet.id,nome,telefone:clear?'':tel,ate});
     if(r&&r.ok){ if(clear) ['tvNome','tvTel','tvAte'].forEach(id=>document.getElementById(id).value=''); await loadTutorData(); toast(clear?'Modo viagem encerrado.':'✈️ Modo viagem ativado!'); }
-    else toast({INVALID_DATE_RANGE:'Escolha uma data entre hoje e 60 dias.',INVALID_PHONE:'WhatsApp inválido.',INVALID_DATE:'Data inválida.'}[r&&r.error]||'Não foi possível salvar.');
+    else toast({PREMIUM_REQUIRED:'🔒 O modo viagem é um recurso do Premium.',INVALID_DATE_RANGE:'Escolha uma data entre hoje e 60 dias.',INVALID_PHONE:'WhatsApp inválido.',INVALID_DATE:'Data inválida.'}[r&&r.error]||'Não foi possível salvar.');
   }catch(e){ toast('Não foi possível conectar ao servidor.'); }
   finally{ b.disabled=false; }
 }

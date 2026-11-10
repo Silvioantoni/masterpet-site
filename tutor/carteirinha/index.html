@@ -83,6 +83,7 @@ function jsonp(action,params){return new Promise((res,rej)=>{const cb='mpCard_'+
   try{ const r=await postTutorPets(token); if(!r||!r.ok){document.getElementById('msg').innerHTML='Sessão expirada. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.';return;} p=(r.pets||[]).find(x=>x.id===want)||(r.pets||[])[0]; }
   catch(e){ document.getElementById('msg').textContent='Não foi possível carregar. Verifique a internet e recarregue.'; return; }
   if(!p){ document.getElementById('msg').textContent='Nenhum pet nesta conta.'; return; }
+  if(String(p.plano||'').toUpperCase()==='ESSENCIAL'){ const m=encodeURIComponent('Olá! Quero liberar o Premium na minha tag '+(p.tag||'')+' (R$ 15).'); document.getElementById('msg').innerHTML='🔒 A carteirinha digital é um recurso do <b>Premium</b>.<br><br><a style="color:#b7ff00;font-weight:700" target="_blank" rel="noopener" href="https://wa.me/554599893990?text='+m+'">Liberar por R$ 15 pelo WhatsApp</a> · <a style="color:#b7ff00" href="/tutor/">Voltar</a>'; return; }
   const url='https://masterpet.tec.br/p/'+encodeURIComponent(p.tag);
   document.getElementById('tag').textContent=p.tag||'';
   document.getElementById('name').textContent=p.nome||'Pet';
