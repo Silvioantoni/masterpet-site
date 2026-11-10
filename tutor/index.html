@@ -890,7 +890,7 @@ function isEssencial(p){return String(p&&p.plano||'').toUpperCase()==='ESSENCIAL
 function lockBanner(id,txt){
   const p=currentPet(),tag=cleanText(p&&p.tag,'');
   const msg='Olá! Quero liberar o Premium na minha tag '+tag+' ('+PREMIUM_UPGRADE+').';
-  return '<div class="plan-lock" id="'+id+'"><span class="pl-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span><div class="pl-tx"><b>Recurso do Premium</b><span>'+txt+'</span></div><a class="btn" target="_blank" rel="noopener" href="https://wa.me/554599893990?text='+encodeURIComponent(msg)+'">Liberar por '+PREMIUM_UPGRADE+'</a></div>';
+  return '<div class="plan-lock" id="'+id+'"><span class="pl-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span><div class="pl-tx"><b>Recurso do Premium</b><span>'+txt+'</span></div><a class="btn" target="_blank" rel="noopener" href="https://wa.me/554599886355?text='+encodeURIComponent(msg)+'">Liberar por '+PREMIUM_UPGRADE+'</a></div>';
 }
 function setLock(on,anchor,bannerId,txt,els){
   const old=document.getElementById(bannerId); if(old) old.remove();
