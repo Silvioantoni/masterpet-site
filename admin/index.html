@@ -70,6 +70,8 @@ td{font-size:14px}
 tbody tr:hover{background:rgba(255,255,255,.02)}
 .status{color:var(--lime);font-weight:600}
 .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.kitpill{display:inline-block;font:600 11px/1 var(--body);padding:6px 9px;border-radius:999px;background:rgba(183,255,0,.14);color:var(--lime)}.kitpill.ess{background:rgba(255,255,255,.06);color:#c9d1ca}
+select{width:100%;min-height:48px;border-radius:14px;border:1px solid #2b342b;background:#0a0d0a;color:#fff;padding:0 15px;font:15px var(--body)}
 td a{color:var(--lime);text-decoration:none}td a:hover{text-decoration:underline}
 .bars .b i{background:linear-gradient(180deg,var(--lime),#6aa300);border-radius:5px 5px 0 0}
 .bars .b:hover i{background:var(--lime)}
@@ -104,6 +106,7 @@ td a{color:var(--lime);text-decoration:none}td a:hover{text-decoration:underline
       <div class="row">
         <div class="field small"><label>Prefixo</label><input id="prefix" value="MP"></div>
         <div class="field small"><label>Quantidade</label><input id="qty" type="number" min="1" max="500" value="10"></div>
+        <div class="field small"><label>Kit</label><select id="plano"><option value="PREMIUM">Premium / Família</option><option value="ESSENCIAL">Essencial</option></select></div>
         <button id="lotBtn">GERAR LOTE</button>
         <button class="dark" id="refreshBtn">ATUALIZAR</button>
         <button class="dark" id="zipBtn">BAIXAR QR DO LOTE</button>
@@ -144,7 +147,7 @@ td a{color:var(--lime);text-decoration:none}td a:hover{text-decoration:underline
       <div class="row" style="margin-bottom:12px"><div class="field"><label>Buscar</label><input id="search" placeholder="Tag, pet, tutor, e-mail ou status" oninput="render()"></div></div>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>TAG</th><th>STATUS</th><th>PET / TUTOR</th><th>CÓDIGO</th><th>URL</th><th>AÇÕES</th></tr></thead>
+          <thead><tr><th>TAG</th><th>KIT</th><th>STATUS</th><th>PET / TUTOR</th><th>CÓDIGO</th><th>URL</th><th>AÇÕES</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -194,7 +197,7 @@ async function postApi(payload){
   finally{ clearTimeout(t); }
 }
 function friendly(e){
- return ({TAG_NOT_ACTIVE:'Só é possível bloquear uma tag ativa.',TAG_NOT_BLOCKED:'Esta tag não está bloqueada.',TOO_MANY_ATTEMPTS:'Muitas tentativas erradas. Aguarde 15 minutos.',INVALID_PREFIX:'Prefixo inválido: use de 2 a 5 letras (ex.: MP).',BUSY_TRY_AGAIN:'Servidor ocupado, tente de novo.',ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada. No Apps Script, execute definirSenhaAdminPeloEditor com a planilha aberta.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
+ return ({INVALID_PLAN:'Kit inválido.',TAG_NOT_FOUND:'Tag não encontrada.',TAG_NOT_ACTIVE:'Só é possível bloquear uma tag ativa.',TAG_NOT_BLOCKED:'Esta tag não está bloqueada.',TOO_MANY_ATTEMPTS:'Muitas tentativas erradas. Aguarde 15 minutos.',INVALID_PREFIX:'Prefixo inválido: use de 2 a 5 letras (ex.: MP).',BUSY_TRY_AGAIN:'Servidor ocupado, tente de novo.',ADMIN_PASSWORD_NOT_CONFIGURED:'Senha administrativa ainda não configurada. No Apps Script, execute definirSenhaAdminPeloEditor com a planilha aberta.',INVALID_ADMIN_CREDENTIALS:'Senha administrativa inválida.',ADMIN_AUTH_INVALID:'Sessão expirada. Entre novamente.',INVALID_QUANTITY:'Quantidade inválida.'}[e]||e);
 }
 function showApp(){$('loginCard').classList.add('hidden');$('app').classList.remove('hidden')}
 function logout(){localStorage.removeItem('masterpet_admin_token');adminToken='';location.reload()}
@@ -216,11 +219,12 @@ $('refreshBtn').onclick=()=>{loadTags();loadStats();};
 $('lotBtn').onclick=async()=>{
  const q=Math.max(1,Math.min(500,Number($('qty').value)||0));
  const pre=($('prefix').value.trim()||'MP').toUpperCase();
- if(!confirm('Gerar '+q+' novas tags com prefixo '+pre+'? Elas serão gravadas na planilha.')) return;
+ const plano=$('plano').value;
+ if(!confirm('Gerar '+q+' novas tags '+(plano==='ESSENCIAL'?'ESSENCIAL':'PREMIUM')+' com prefixo '+pre+'? Elas serão gravadas na planilha.')) return;
  $('lotBtn').disabled=true;show($('appMsg'),'ok','Gerando lote...');
  try{
-   const d=await apiJsonp({action:'admincreatelot',adminToken:adminToken,quantidade:q,prefix:$('prefix').value.trim()||'MP'});
-   if(d.ok){show($('appMsg'),'ok',d.total+' tags criadas com sucesso'+(d.primeira?' ('+d.primeira+' a '+d.ultima+').':'.'));loadTags();}
+   const d=await apiJsonp({action:'admincreatelot',adminToken:adminToken,quantidade:q,prefix:$('prefix').value.trim()||'MP',plano:plano});
+   if(d.ok){show($('appMsg'),'ok',d.total+' tags '+(d.plano||'')+' criadas com sucesso'+(d.primeira?' ('+d.primeira+' a '+d.ultima+').':'.'));loadTags();}
    else show($('appMsg'),'err',friendly(d.error));
  }catch(e){show($('appMsg'),'err','Não foi possível gerar o lote.')}
  finally{$('lotBtn').disabled=false}
@@ -252,18 +256,28 @@ function render(){
    const status=String(t.status||'');
    tr.innerHTML='<td class="tag"></td><td class="status"></td><td></td><td class="code"></td><td></td><td></td>';
    tr.children[0].textContent=t.idTag;
-   tr.children[1].textContent=status+(String(t.petStatus).toUpperCase()==='PERDIDO'?' • 🚨 PERDIDO':'');
-   if(status.toUpperCase()==='BLOQUEADA') tr.children[1].style.color='#ff5265';
-   tr.children[2].innerHTML=t.pet?'<b></b><br><span class="muted"></span>':'<span class="muted">—</span>';
-   if(t.pet){tr.children[2].querySelector('b').textContent=t.pet;tr.children[2].querySelector('span').textContent=(t.tutor||'')+(t.tutorEmail?' • '+t.tutorEmail:'');}
-   tr.children[3].textContent=t.codigo||'—';
+   const kit=document.createElement('td');kit.innerHTML='<span class="kitpill"></span>';const essencial=String(t.plano).toUpperCase()==='ESSENCIAL';kit.firstChild.textContent=essencial?'Essencial':'Premium';kit.firstChild.classList.toggle('ess',essencial);tr.insertBefore(kit,tr.children[1]);
+   tr.children[2].textContent=status+(String(t.petStatus).toUpperCase()==='PERDIDO'?' • 🚨 PERDIDO':'');
+   if(status.toUpperCase()==='BLOQUEADA') tr.children[2].style.color='#ff5265';
+   tr.children[3].innerHTML=t.pet?'<b></b><br><span class="muted"></span>':'<span class="muted">—</span>';
+   if(t.pet){tr.children[3].querySelector('b').textContent=t.pet;tr.children[3].querySelector('span').textContent=(t.tutor||'')+(t.tutorEmail?' • '+t.tutorEmail:'');}
+   tr.children[4].textContent=t.codigo||'—';
    const a=document.createElement('a');a.href=t.qrUrl;a.target='_blank';a.textContent=t.qrUrl.replace('https://masterpet.tec.br/p/','');
-   tr.children[4].appendChild(a);
-   const b=document.createElement('button');b.className='dark';b.textContent='VER QR';b.onclick=()=>openQr(t);tr.children[5].appendChild(b);
+   tr.children[5].appendChild(a);
+   const b=document.createElement('button');b.className='dark';b.textContent='VER QR';b.onclick=()=>openQr(t);tr.children[6].appendChild(b);
+   if(essencial){const u=document.createElement('button');u.className='dark';u.style.marginLeft='6px';u.textContent='TORNAR PREMIUM';u.onclick=()=>setPlan(t,'PREMIUM');tr.children[6].appendChild(u);}
    const st=status.toUpperCase();
-   if(st==='ATIVA'||st==='BLOQUEADA'){const x=document.createElement('button');x.className='dark';x.style.marginLeft='6px';x.textContent=st==='ATIVA'?'BLOQUEAR':'DESBLOQUEAR';x.onclick=()=>setTagStatus(t,st==='ATIVA'?'BLOQUEADA':'ATIVA');tr.children[5].appendChild(x);}
+   if(st==='ATIVA'||st==='BLOQUEADA'){const x=document.createElement('button');x.className='dark';x.style.marginLeft='6px';x.textContent=st==='ATIVA'?'BLOQUEAR':'DESBLOQUEAR';x.onclick=()=>setTagStatus(t,st==='ATIVA'?'BLOQUEADA':'ATIVA');tr.children[6].appendChild(x);}
    tb.appendChild(tr);
  });
+}
+async function setPlan(t,plano){
+ if(!confirm('Liberar o Premium na tag '+t.idTag+(t.pet?' ('+t.pet+')':'')+'? Confirme antes que o upgrade foi pago.')) return;
+ try{
+   const d=await apiJsonp({action:'adminsetplan',adminToken:adminToken,tagId:t.idTag,plano:plano});
+   if(d.ok){show($('appMsg'),'ok','Tag '+t.idTag+' agora é '+d.plano+'.');loadTags();}
+   else show($('appMsg'),'err',friendly(d.error));
+ }catch(e){show($('appMsg'),'err','Não foi possível alterar o kit. Clique em ATUALIZAR para conferir.');}
 }
 async function setTagStatus(t,status){
  const msg=status==='BLOQUEADA'?'Bloquear a tag '+t.idTag+'? O perfil público passará a mostrar "tag desativada".':'Desbloquear a tag '+t.idTag+'? O perfil do pet volta a aparecer.';
