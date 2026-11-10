@@ -333,8 +333,7 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}footer nav a:hover{color:var(--t
   .navcta .btn-primary{padding:0 16px;font-size:14px;height:42px}
 }
 @media (prefers-reduced-motion:reduce){
-  *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
-  .rv{opacity:1;transform:none}
+  .rv{transform:none!important}
 }
 </style>
 </head>
@@ -562,17 +561,17 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}footer nav a:hover{color:var(--t
   document.querySelectorAll('.rv').forEach(el=>io.observe(el));
   // Tag 3D: inclina com o mouse/toque, brilho segue o cursor
   const stage=document.getElementById('stage'),tag=document.getElementById('tag3d'),face=document.getElementById('tagface');
-  if(stage&&!reduce){
+  if(stage){
     let raf=0;const set=(x,y)=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{tag.style.transform='rotateY('+(x*22)+'deg) rotateX('+(-y*22)+'deg)';face.style.setProperty('--gx',(50+x*60)+'%');face.style.setProperty('--gy',(40+y*60)+'%');});};
     stage.addEventListener('pointermove',e=>{const r=stage.getBoundingClientRect();set((e.clientX-r.left)/r.width-.5,(e.clientY-r.top)/r.height-.5);});
     stage.addEventListener('pointerleave',()=>set(0,0));
     let t0=performance.now(),idle=true;stage.addEventListener('pointerenter',()=>idle=false);stage.addEventListener('pointerleave',()=>idle=true);
-    (function loop(t){if(idle){const a=(t-t0)/1000;set(Math.sin(a*.6)*.35,Math.cos(a*.5)*.18);}requestAnimationFrame(loop);})(t0);
+    (function loop(t){if(idle){const a=(t-t0)/1000;set(Math.sin(a*.6)*(reduce?.22:.35),Math.cos(a*.5)*(reduce?.1:.18));}requestAnimationFrame(loop);})(t0);
   }
   // Como funciona: passos com avanço automático
   const steps=[...document.querySelectorAll('.stepbtn')],scrs=[...document.querySelectorAll('#howScreen .scr')];let cur=0,timer=null;const DUR=5200;
   const go=i=>{cur=i;steps.forEach((s,k)=>{s.classList.toggle('on',k===i);s.setAttribute('aria-selected',k===i);const bar=s.querySelector('.bar i');bar.style.animation='none';bar.offsetWidth;bar.style.animation='';s.style.setProperty('--dur',DUR+'ms');});scrs.forEach((s,k)=>s.classList.toggle('on',k===i));};
-  const auto=()=>{clearInterval(timer);if(!reduce)timer=setInterval(()=>go((cur+1)%steps.length),DUR);};
+  const auto=()=>{clearInterval(timer);timer=setInterval(()=>go((cur+1)%steps.length),DUR);};
   steps.forEach((s,i)=>s.addEventListener('click',()=>{go(i);auto();}));
   const howIo=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){go(cur);auto();}else clearInterval(timer);}),{threshold:.3});howIo.observe(document.getElementById('steps'));
   // Demo do Modo Perdido
