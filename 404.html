@@ -70,6 +70,10 @@ body{font-family:var(--body);-webkit-font-smoothing:antialiased;color:#0f140f;ba
 .card textarea,.card input:not([type=checkbox]):not([type=hidden]){border:1px solid #dfe5dd!important;border-radius:14px!important;padding:13px 14px!important;font:15px/1.4 var(--body)!important;background:#f8faf7;transition:border-color .2s,box-shadow .2s}
 .card textarea:focus,.card input:focus{outline:none;border-color:#8cc400!important;box-shadow:0 0 0 4px rgba(183,255,0,.25)}
 input[type=checkbox]{accent-color:#6fae00;width:18px;height:18px}
+.quick{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.qchip{border:1px solid #dfe5dd;background:#f8faf7;color:#0f140f;border-radius:999px;padding:11px 14px;font:600 14px/1.2 var(--body);cursor:pointer;transition:transform .2s var(--ease),background .2s,border-color .2s}
+.qchip:active{transform:scale(.96)}
+.qchip.on{background:#eefbd0;border-color:#8cc400}
 .footer{font:600 10px/1.6 var(--body);letter-spacing:.2em;color:#9aa49b;padding:26px 20px 30px}
 .loading{color:#6b766c}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -144,6 +148,7 @@ function render(data, tagId){
   const phone=contacts.find(x=>String(x.tipo).toUpperCase()==="TELEFONE" && String(x.valor||"").trim()) || wa;
   const wnum=normalizePhone(wa?.valor);
   window.MP_FAMILY_WA=wnum; window.MP_PET_NAME=p.nome||'Pet';
+  window.MP_PET_ART=/^F/i.test(String(p.sexo||""))?'ela':'ele';
   const pnum=normalizePhone(phone?.valor);
   const name=p.nome || "Pet";
   const status=String(p.status||"ATIVO").toUpperCase();
@@ -165,6 +170,7 @@ function render(data, tagId){
   if(pnum) buttons += '<a class="btn phone" href="tel:+'+pnum+'">📞 Ligar para a família</a>';
 
   const isLost = status === "PERDIDO" || status === "PET PERDIDO" || status === "LOST";
+  window.MP_IS_LOST=isLost;
   const statusHtml = isLost
     ? '<div class="status" style="border-color:#ff5364;background:#fff0f2"><span class="dot" style="background:#ff3048"></span><strong style="color:#c9142c">🚨 '+esc(name)+' está '+(female?'PERDIDA':'PERDIDO')+'</strong><div style="margin-top:6px;color:#8a3a43;font-size:13px">Este pet foi marcado como perdido pelo tutor. Se você '+(female?'a':'o')+' encontrou, entre em contato com a família.</div>'+(p.mensagemPerdido?'<div style="margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #ffc7cf;color:#5a1f27;font-size:14px;line-height:1.45"><b>Mensagem da família:</b><br>'+esc(p.mensagemPerdido)+'</div>':'')+'</div>'
     : '<div class="status"><span class="dot"></span><strong>'+esc(name)+' está '+(female?'identificada':'identificado')+'</strong><div style="margin-top:6px;color:#527052;font-size:13px">Este pet possui uma identificação MasterPET ativa.</div></div>';
@@ -174,7 +180,8 @@ function render(data, tagId){
   content.innerHTML =
     statusHtml+rewardHtml+careHtml+
     buttons+
-    (isLost?'<button class="btn cta" type="button" id="locBtn" onclick="sendLocation()">📍 Enviar minha localização para a família</button><div class="note" style="font-size:12px;text-align:center;margin-top:-4px">Só é enviada se você tocar no botão e permitir.</div>':'')+
+    (isLost?'<button class="btn cta" type="button" id="locBtn" onclick="sendLocation()">📍 Enviar minha localização para a família</button><div class="note" style="font-size:12px;text-align:center;margin-top:-4px">Só é enviada se você tocar no botão e permitir.</div>'
+      :(wnum?'<button class="btn ghost" type="button" id="locBtn" onclick="sendLocation()">📍 Mandar minha localização pelo WhatsApp</button><div class="note" style="font-size:12px;text-align:center;margin-top:-4px">Encontrou '+esc(name)+' na rua? A família recebe o mapa de onde você está. Só com o seu toque e a sua permissão.</div>':''))+
     (isLost?'<button class="btn ghost" type="button" onclick="shareProfile()">📤 Compartilhar este alerta</button>':'')+
     healthHtml(p.saude)+
     galleryHtml(p.fotos)+
@@ -200,10 +207,18 @@ function sightingFormHtml(isLost,prot,name){
   const title=isLost?'👀 Viu '+esc(name)+'?':'✉️ Mensagem para a família';
   const help=isLost?'Conte onde e quando viu. Cada avistamento ajuda a família a refazer o caminho do pet, mesmo que você não consiga segurá-lo.':'Encontrou este pet? Escreva aqui. A família recebe sua mensagem na hora.';
   return '<section class="card" id="sighting"><h2>'+title+'</h2><p class="note">'+help+'</p>'+
+    (isLost?'<div class="quick">'+[['🤝','Estou com '+name+' agora, em segurança.','Estou com '+(window.MP_PET_ART||'ele')],['👀','Vi '+name+' agora há pouco, mas não consegui segurar.','Vi passando'],['🩹',name+' parece estar machucad'+(window.MP_PET_ART==='ela'?'a':'o')+' e precisa de ajuda.','Parece machucad'+(window.MP_PET_ART==='ela'?'a':'o')]].map(q=>'<button type="button" class="qchip" data-msg="'+esc(q[1])+'" onclick="quickNote(this)">'+q[0]+' '+esc(q[2])+'</button>').join('')+'</div>':'')+
     '<textarea id="sgNota" maxlength="400" placeholder="Ex.: Vi agora há pouco perto da padaria da Rua X, indo em direção à praça." style="width:100%;min-height:90px;border:1px solid #d5dadc;border-radius:10px;padding:10px;font:inherit"></textarea>'+
     '<input id="sgContato" maxlength="80" placeholder="Seu nome e WhatsApp (opcional)" style="width:100%;margin-top:8px;border:1px solid #d5dadc;border-radius:10px;padding:10px;font:inherit">'+
     '<label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px;color:#444"><input type="checkbox" id="sgLoc"> Incluir minha localização atual</label>'+
     '<div aria-hidden=\"true\" style=\"position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden\"><label>Não preencha este campo<input id=\"sgWebsite\" name=\"website\" tabindex=\"-1\" autocomplete=\"off\"></label></div>'+'<button class="btn cta" type="button" id="sgBtn" onclick="sendSighting()">'+(isLost?'📍 Enviar avistamento para a família':'✉️ Enviar mensagem')+'</button><div id="sgMsg" class="note" style="text-align:center"></div></section>';
+}
+// Resposta de um toque: preenche a mensagem e já marca a localização (o navegador ainda pede permissão no envio).
+function quickNote(btn){
+  const t=document.getElementById('sgNota'), loc=document.getElementById('sgLoc');
+  t.value=btn.dataset.msg; if(loc) loc.checked=true;
+  document.querySelectorAll('.qchip').forEach(c=>c.classList.toggle('on',c===btn));
+  const m=document.getElementById('sgMsg'); if(m) m.textContent='Mensagem pronta. Ajuste se quiser e toque em enviar.';
 }
 async function sendSighting(){
   const nota=document.getElementById('sgNota').value.trim(), contato=document.getElementById('sgContato').value.trim(), wantLoc=document.getElementById('sgLoc').checked;
@@ -242,10 +257,10 @@ function sendLocation(){
       Object.keys(f).forEach(k=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=f[k];form.appendChild(i);});
       document.body.appendChild(form); form.submit(); setTimeout(()=>form.remove(),2500);
     }catch(e){}
-    b.textContent='✅ Localização enviada para a família';
+    b.textContent=window.MP_IS_LOST?'✅ Localização enviada para a família':'✅ Mapa pronto no WhatsApp';
     if(window.MP_FAMILY_WA) window.open('https://wa.me/'+window.MP_FAMILY_WA+'?text='+encodeURIComponent('Olá! Encontrei '+window.MP_PET_NAME+' pela MasterPET. Estou aqui: '+maps),'_blank');
   },err=>{
-    b.disabled=false; b.textContent='📍 Enviar minha localização para a família';
+    b.disabled=false; b.textContent=window.MP_IS_LOST?'📍 Enviar minha localização para a família':'📍 Mandar minha localização pelo WhatsApp';
     alert(err.code===1?'Você não permitiu a localização. Tudo bem: use o botão do WhatsApp para falar com a família.':'Não foi possível obter a localização agora. Tente de novo ou use o WhatsApp.');
   },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
 }

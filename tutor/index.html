@@ -162,6 +162,17 @@ tbody tr{transition:background .2s}tbody tr:hover{background:rgba(255,255,255,.0
 .photo-upload-row{border-radius:18px;background:rgba(255,255,255,.02);padding:16px}
 .photo-preview{border-radius:20px;border:1px solid var(--line2)}
 .leaflet-container{border-radius:18px}
+.trailsum{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.trailsum .chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--field);font:600 13px/1.2 var(--body);color:var(--txt)}
+.trailsum .chip.hot{border-color:rgba(255,48,72,.5);color:#ff6b7c}
+body.light .trailsum .chip.hot{color:#c9142c}
+.trailsum a.chip{text-decoration:none;color:var(--g);border-color:rgba(183,255,0,.35)}
+body.light .trailsum a.chip{color:#3d7a00;border-color:#b9dc7c}
+.trailpin{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#b7ff00;color:#0b1000;border:2px solid #0b1000;font:700 12px/1 var(--body);box-shadow:0 2px 6px rgba(0,0,0,.45)}
+.trailpin.last{width:32px;height:32px;background:#ff3048;color:#fff;border-color:#fff;font-size:13px;animation:trailPulse 1.8s ease-out infinite}
+@keyframes trailPulse{0%{box-shadow:0 0 0 0 rgba(255,48,72,.55)}100%{box-shadow:0 0 0 16px rgba(255,48,72,0)}}
+.trailnum{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:var(--g);color:#0b1000;font:700 11px/1 var(--body);margin-right:6px;border:0;cursor:pointer}
+.trailnum.last{background:#ff3048;color:#fff}
 
 /* Tablet: barra lateral compacta */
 @media(max-width:1100px) and (min-width:851px){.main{padding:32px}}
@@ -262,7 +273,7 @@ body.light .plan-lock{border-color:#cfe6a0;background:#f6fbe9}body.light .plan-l
   </div>
 </div>
 </div><div><label>Cidade</label><input id="petCidade" readonly placeholder="Ex.: Cascavel - PR"></div><div></div><div><label>Nº do RG Animal (SinPatinhas)</label><input id="petRg" readonly placeholder="Opcional"></div><div><label>Nº do microchip</label><input id="petChip" readonly inputmode="numeric" placeholder="Opcional"></div><div class="full"><label>Informações importantes</label><textarea id="petObs" readonly></textarea></div><div class="full" style="margin-top:6px"><h3 style="margin:6px 0 0">🩺 Saúde</h3><p class="muted" style="margin:4px 0 0">Ajuda quem encontrar seu pet e gera lembretes de vacina por e-mail.</p></div><div><label>Alergias</label><input id="hAlergias" readonly placeholder="Ex.: dipirona, frango"></div><div><label>Medicamentos de uso contínuo</label><input id="hMedicamentos" readonly placeholder="Ex.: insulina 2x ao dia"></div><div><label>Veterinário (nome e telefone)</label><input id="hVet" readonly placeholder="Ex.: Clínica X (45) 3222-0000"></div><div><label>Próxima vacina</label><input id="hProxVacina" type="date" readonly></div><div class="full"><label>Vacinas tomadas (só você vê)</label><textarea id="hVacinas" readonly placeholder="Ex.: V10 em 03/2026, antirrábica em 05/2026" style="min-height:70px"></textarea></div><div class="full"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input id="hPublica" type="checkbox" disabled style="width:auto"> Mostrar alergias, medicamentos e veterinário no perfil público (recomendado se o pet precisa de cuidado especial)</label></div></div><div id="petSaveActions" class="row hidden" style="margin-top:18px"><span class="muted">As alterações serão salvas no sistema MasterPET.</span><div style="display:flex;gap:10px;align-items:center"><button class="btn" type="button" onclick="cancelPetEdit()" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Cancelar</button><button class="btn" id="savePetBtn" type="button" onclick="savePet()">💾 Salvar alterações</button></div></div><h3>📞 Contatos exibidos no perfil público</h3><div id="petContacts" class="actions"></div><div class="form" style="margin-top:14px"><div><label>WhatsApp (com DDD)</label><input id="contactWa" inputmode="numeric" placeholder="45999999999"></div><div><label>Telefone para ligação (opcional)</label><input id="contactTel" inputmode="numeric" placeholder="Deixe vazio para usar o WhatsApp"></div></div><div class="row" style="margin-top:12px"><span class="muted"><label style="display:flex;gap:8px;align-items:center;cursor:pointer;color:var(--txt)"><input type="checkbox" id="contactHidden" style="width:auto" onchange="saveHidden(this.checked)"> 🔒 Contato protegido: esconder meus números do perfil (quem encontrar manda mensagem pelo site e eu recebo por e-mail)</label></span><button class="btn" id="saveContactsBtn" type="button" onclick="saveContacts()">💾 Salvar contatos</button></div><h3>📷 Mais fotos <span class="muted" style="font-size:13px;font-weight:400">(até 4: lados, manchas, coleira)</span></h3><div id="gallery" style="display:flex;gap:10px;flex-wrap:wrap"></div><input id="galleryFile" type="file" accept="image/*" style="display:none" onchange="addGalleryPhoto(event)"><button class="btn" id="galleryBtn" type="button" style="margin-top:10px" onclick="document.getElementById('galleryFile').click()">➕ Adicionar foto</button><h3>✈️ Modo viagem / hotel</h3><p class="muted" style="margin-top:-6px">Vai viajar ou deixar o pet no hotelzinho? Coloque o contato de quem vai cuidar. Ele aparece primeiro no perfil até a data escolhida e depois sai sozinho.</p><div id="travelStatus" class="muted" style="margin-bottom:8px"></div><div class="form" style="margin-top:0"><div><label>Quem vai cuidar</label><input id="tvNome" maxlength="60" placeholder="Ex.: Hotelzinho Patas"></div><div><label>WhatsApp de quem cuida</label><input id="tvTel" inputmode="numeric" placeholder="45999999999"></div><div><label>Até quando</label><input id="tvAte" type="date"></div></div><div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="btn" id="tvBtn" type="button" onclick="saveTravel(false)">💾 Ativar modo viagem</button><button class="btn" type="button" id="tvClear" onclick="saveTravel(true)" style="background:transparent;border:1px solid var(--line);color:var(--txt)">Encerrar</button></div></div></section>
-<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">carregando...</b>.</p></div><div id="switch" class="switch" onclick="if(!document.getElementById('lostBtn').disabled)toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" placeholder="Ex.: Ela é dócil, mas tem medo de barulho. Por favor, me chame no WhatsApp."></textarea><div class="form" style="margin-top:12px"><div><label>💰 Recompensa (opcional)</label><input id="lostReward" maxlength="40" placeholder="Ex.: R$ 300"></div><div><label>Cidade onde ele se perdeu</label><input id="lostCity" maxlength="60" placeholder="Ex.: Cascavel - PR"></div><div class="full"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input id="lostPublic" type="checkbox" checked style="width:auto;flex:none"> <span>Mostrar na lista pública <a href="/perdidos/" target="_blank" style="color:var(--g)">Pets perdidos</a> (foto, nome e cidade; seus contatos não aparecem)</span></label></div></div><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()" disabled>Carregando...</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div><div id="sightBox" class="card" style="margin-top:15px"><h2 class="title">👀 Avistamentos</h2><p class="muted">Quem vê seu pet pode registrar onde e quando. Você recebe por e-mail e acompanha aqui.</p><div id="sightMap" style="height:260px;border-radius:12px;overflow:hidden;display:none;margin-bottom:12px"></div><div id="sightList" class="muted">Carregando...</div></div><div id="lostHistory" class="card hidden" style="margin-top:15px"></div><div class="card" style="margin-top:15px"><h2 class="title">📣 Espalhe o alerta</h2><p class="muted">Quanto mais gente souber, mais rápido seu pet volta. Ative o modo perdido antes de compartilhar.</p><div class="actions"><button class="action" onclick="openPoster()"><strong>📄 Cartaz para imprimir</strong><span>Foto, mensagem, WhatsApp e QR Code. Imprima ou salve em PDF.</span></button><button class="action" onclick="shareAlert()"><strong>📤 Compartilhar alerta</strong><span>Envie o link do perfil para grupos do bairro, amigos e redes sociais.</span></button></div></div></section>
+<section id="perdido" class="page"><div class="warning"><strong>🚨 Modo Perdido</strong><br><span class="muted">O status exibido abaixo vem do cadastro do seu pet.</span></div><div class="card"><div class="row"><div><h2 class="title">Status atual</h2><p class="muted">Modo perdido está <b id="lostText">carregando...</b>.</p></div><div id="switch" class="switch" onclick="if(!document.getElementById('lostBtn').disabled)toggleLost()"><i></i></div></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><label class="muted">Mensagem para quem encontrar seu pet</label><textarea id="lostMessage" style="width:100%;min-height:100px;margin-top:7px;background:#0b0f0f;color:white;border:1px solid var(--line);border-radius:10px;padding:12px" placeholder="Ex.: Ela é dócil, mas tem medo de barulho. Por favor, me chame no WhatsApp."></textarea><div class="form" style="margin-top:12px"><div><label>💰 Recompensa (opcional)</label><input id="lostReward" maxlength="40" placeholder="Ex.: R$ 300"></div><div><label>Cidade onde ele se perdeu</label><input id="lostCity" maxlength="60" placeholder="Ex.: Cascavel - PR"></div><div class="full"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input id="lostPublic" type="checkbox" checked style="width:auto;flex:none"> <span>Mostrar na lista pública <a href="/perdidos/" target="_blank" style="color:var(--g)">Pets perdidos</a> (foto, nome e cidade; seus contatos não aparecem)</span></label></div></div><br><button id="lostBtn" class="btn" style="margin-top:15px;background:var(--red);color:#fff" onclick="toggleLost()" disabled>Carregando...</button><div class="muted" style="margin-top:12px">Ao ativar, o status é gravado no MasterPET e o perfil público passa a informar que o pet está perdido.</div></div><div id="sightBox" class="card" style="margin-top:15px"><h2 class="title">🗺️ Rota do reencontro</h2><p class="muted">Avistamentos e localizações enviadas por quem escaneou a tag aparecem no mapa em ordem, formando o caminho do seu pet. Você também recebe cada aviso por e-mail.</p><div id="trailSummary" class="trailsum hidden"></div><div id="sightMap" style="height:300px;border-radius:12px;overflow:hidden;display:none;margin-bottom:12px"></div><div id="sightList" class="muted">Carregando...</div></div><div id="lostHistory" class="card hidden" style="margin-top:15px"></div><div class="card" style="margin-top:15px"><h2 class="title">📣 Espalhe o alerta</h2><p class="muted">Quanto mais gente souber, mais rápido seu pet volta. Ative o modo perdido antes de compartilhar.</p><div class="actions"><button class="action" onclick="openPoster()"><strong>📄 Cartaz para imprimir</strong><span>Foto, mensagem, WhatsApp e QR Code. Imprima ou salve em PDF.</span></button><button class="action" onclick="shareAlert()"><strong>📤 Compartilhar alerta</strong><span>Envie o link do perfil para grupos do bairro, amigos e redes sociais.</span></button></div></div></section>
 <section id="acessos" class="page"><div class="card"><h2 class="title">📱 Acessos ao QR</h2><p class="muted" id="accessSubtitle">Histórico real das tags vinculadas ao tutor.</p><div class="minigrid"><div class="card stat"><div class="label">Total</div><div class="value" id="accTotal">0</div></div><div class="card stat"><div class="label">Hoje</div><div class="value" id="accToday">0</div></div><div class="card stat"><div class="label">Último acesso</div><div class="value" style="font-size:17px" id="accLast">—</div></div></div><div class="tablewrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Ação</th><th>Localização</th></tr></thead><tbody id="accessRows"><tr><td colspan="4" class="muted">Carregando...</td></tr></tbody></table></div></div></section>
 <section id="tag" class="page"><div class="card"><h2 class="title">🏷️ Minha Tag</h2><p class="muted">Dados reais da tag vinculada ao seu pet.</p><div class="grid" style="margin-top:20px"><div class="card"><div class="muted">ID</div><div class="petname" style="font-size:22px" id="tagId">—</div></div><div class="card"><div class="muted">Pet</div><div class="petname" style="font-size:22px" id="tagPet">—</div></div><div class="card"><div class="muted">Status</div><div class="petname ok" style="font-size:22px" id="tagStatus">—</div></div><div class="card"><div class="muted">Cadastro</div><div class="petname" style="font-size:18px" id="tagDate">—</div></div></div><div style="margin-top:22px;border:1px dashed #3a4441;padding:17px;border-radius:13px"><b>🔗 Perfil público</b><p class="muted" id="tagUrl">—</p><button class="btn" onclick="openPublicProfile()">Abrir perfil</button></div><div style="margin-top:16px;border:1px dashed #3a4441;padding:17px;border-radius:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap"><div id="tagQr" style="background:#fff;padding:10px;border-radius:10px;width:160px;height:160px"></div><div style="flex:1;min-width:200px"><b>🔳 QR Code da sua tag</b><p class="muted">Leva ao mesmo perfil da tag de metal. Use para um adesivo reserva na coleira, na caixa de transporte ou no cartão de vacina.</p><button class="btn" onclick="downloadTagQr()">⬇️ Baixar QR Code</button> <button class="btn" style="margin-top:8px" onclick="openCard()">🪪 Carteirinha do pet</button></div></div></div>
 <div class="card" style="margin-top:15px"><h2 class="title">➕ Adicionar outro pet</h2><p class="muted">Recebeu uma nova tag MasterPET? Vincule aqui, sem criar outra conta. O WhatsApp da sua conta será usado como contato.</p>
@@ -616,6 +627,7 @@ function renderAllData(){
   renderTagQr(tag);
   renderAccesses(accesses,tag);
   renderLostHistory(accesses,lost);
+  renderSightings();
   applyPlan();
   document.getElementById('contaInfo').textContent='Conta: '+cleanText((MP_TUTOR||{}).email,'—')+' · '+((window.MP_DATA&&window.MP_DATA.pets)||[]).length+' pet(s)';
 }
@@ -969,20 +981,76 @@ async function loadSightings(){
   try{ const r=await jsonp('tutorsightings',{token:MP_TOKEN}); MP_SIGHT=(r&&r.ok)?r.avistamentos:[]; }catch(e){ MP_SIGHT=MP_SIGHT||[]; }
   renderSightings();
 }
+function trailTs(v){const d=new Date(v);return isNaN(d)?0:d.getTime();}
+function trailAgo(t){
+  const m=Math.round((Date.now()-t)/60000); if(!t||m<0) return '';
+  if(m<1) return 'agora mesmo'; if(m<60) return 'há '+m+' min';
+  const h=Math.round(m/60); if(h<24) return 'há '+h+' h';
+  const d=Math.round(h/24); return 'há '+d+(d===1?' dia':' dias');
+}
+function trailKm(a,b){
+  const R=6371,r=x=>x*Math.PI/180,dLa=r(b.lat-a.lat),dLo=r(b.lng-a.lng);
+  const h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+function trailCoord(la,lo){
+  if(la===''||lo===''||la==null||lo==null) return null;
+  const lat=+String(la).replace(',','.'), lng=+String(lo).replace(',','.');
+  if(!isFinite(lat)||!isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180||(lat===0&&lng===0)) return null;
+  return {lat,lng};
+}
+// Junta avistamentos e localizações enviadas por quem escaneou a tag, em ordem cronológica.
+function trailEvents(){
+  const p=currentPet(); if(!p) return [];
+  const evs=(MP_SIGHT||[]).filter(s=>s.petId===p.id).map(s=>({t:trailTs(s.dataHora),when:s.dataHora,kind:'sight',nota:s.nota||'',contato:s.contato||'',pos:trailCoord(s.latitude,s.longitude)}));
+  const all=(window.MP_DATA&&window.MP_DATA.accesses)||[], ptag=String(p.tag||'').toUpperCase();
+  const acc=(all.some(a=>accTag(a))&&ptag)?all.filter(a=>accTag(a)===ptag):all;
+  acc.forEach(a=>{
+    if(['','FALSE','NAO','NÃO','0'].includes(String(a.locationAuthorized??'').trim().toUpperCase())) return;
+    const pos=trailCoord(a.latitude,a.longitude); if(!pos) return;
+    const t=trailTs(a.dataHora);
+    // Um avistamento com localização pode também constar nos acessos: não repete o mesmo ponto.
+    if(evs.some(e=>e.pos&&Math.abs(e.t-t)<180000&&trailKm(e.pos,pos)<.1)) return;
+    evs.push({t,when:a.dataHora,kind:'scan',nota:'',contato:'',pos});
+  });
+  evs.sort((x,y)=>x.t-y.t);
+  let n=0; evs.forEach(e=>{ e.n=e.pos?++n:0; });
+  return evs;
+}
+let trailMarkers=[];
+function focusTrail(n){
+  const m=trailMarkers[n-1]; if(!m||!sightMapObj) return;
+  document.getElementById('sightMap').scrollIntoView({behavior:'smooth',block:'center'});
+  sightMapObj.setView(m.getLatLng(),Math.max(sightMapObj.getZoom(),16)); m.openPopup();
+}
 function renderSightings(){
-  const p=currentPet(), list=document.getElementById('sightList'), mapEl=document.getElementById('sightMap'); if(!list||!MP_SIGHT) return;
-  const mine=MP_SIGHT.filter(s=>!p||s.petId===p.id);
-  if(!mine.length){ list.textContent='Nenhum avistamento registrado ainda.'; mapEl.style.display='none'; return; }
-  list.innerHTML='<div class="tablewrap" style="margin-top:0"><table><tbody>'+mine.map(s=>{const d=fmtDateTime(s.dataHora);const map=(s.latitude&&s.longitude)?' <a target="_blank" style="color:var(--g)" href="https://www.google.com/maps?q='+encodeURIComponent(s.latitude+','+s.longitude)+'">📍 mapa</a>':'';
-    return '<tr><td style="white-space:nowrap">'+esc(d.date)+' '+esc(d.time)+'</td><td style="white-space:normal">'+esc(s.nota||'(sem mensagem)')+(s.contato?'<br><span class="muted">Contato: '+esc(s.contato)+'</span>':'')+map+'</td></tr>';}).join('')+'</tbody></table></div>';
-  const pts=mine.filter(s=>s.latitude&&s.longitude);
-  if(pts.length&&window.L){
+  const list=document.getElementById('sightList'), mapEl=document.getElementById('sightMap'), sum=document.getElementById('trailSummary'); if(!list||!MP_SIGHT) return;
+  const evs=trailEvents(), pts=evs.filter(e=>e.pos), total=pts.length;
+  const label=e=>e.kind==='scan'?'📍 Localização enviada por quem escaneou a tag':(e.nota||'(sem mensagem)');
+  if(!evs.length){ list.textContent='Nenhum avistamento registrado ainda.'; mapEl.style.display='none'; sum.classList.add('hidden'); return; }
+  list.innerHTML='<div class="tablewrap" style="margin-top:0"><table><tbody>'+evs.slice().reverse().map(e=>{const d=fmtDateTime(e.when);
+    const num=e.n?'<button type="button" class="trailnum'+(e.n===total?' last':'')+'" onclick="focusTrail('+e.n+')" aria-label="Ver ponto '+e.n+' no mapa">'+e.n+'</button>':'';
+    const map=e.pos?' <a target="_blank" rel="noopener" style="color:var(--g)" href="https://www.google.com/maps?q='+e.pos.lat+','+e.pos.lng+'">📍 mapa</a>':'';
+    return '<tr><td style="white-space:nowrap">'+num+esc(d.date)+' '+esc(d.time)+'</td><td style="white-space:normal">'+esc(label(e))+(e.contato?'<br><span class="muted">Contato: '+esc(e.contato)+'</span>':'')+map+'</td></tr>';}).join('')+'</tbody></table></div>';
+  if(total&&window.L){
+    const lastP=pts[total-1]; let km=0; for(let i=1;i<total;i++) km+=trailKm(pts[i-1].pos,pts[i].pos);
+    const ago=trailAgo(lastP.t);
+    sum.innerHTML=(ago?'<span class="chip hot">🔴 Último sinal '+esc(ago)+'</span>':'')+
+      '<span class="chip">'+total+(total===1?' ponto':' pontos')+' no mapa</span>'+
+      (total>1?'<span class="chip">'+(km<1?Math.round(km*1000)+' m':km.toFixed(1).replace('.',',')+' km')+' entre os pontos</span>':'')+
+      '<a class="chip" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination='+lastP.pos.lat+','+lastP.pos.lng+'">🧭 Ir até o último ponto</a>';
+    sum.classList.remove('hidden');
     mapEl.style.display='block';
     if(!sightMapObj){ sightMapObj=L.map(mapEl); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(sightMapObj); }
     if(sightMapObj._mpLayer) sightMapObj.removeLayer(sightMapObj._mpLayer);
-    const g=L.featureGroup(pts.map((s,i)=>{const d=fmtDateTime(s.dataHora);return L.circleMarker([+s.latitude,+s.longitude],{radius:i===0?10:7,color:'#111',weight:2,fillColor:i===0?'#ff3048':'#b7ff00',fillOpacity:.95}).bindPopup('<b>'+esc(d.date+' '+d.time)+'</b><br>'+esc(s.nota||''));}));
-    g.addTo(sightMapObj); sightMapObj._mpLayer=g; sightMapObj.fitBounds(g.getBounds(),{maxZoom:16,padding:[20,20]}); setTimeout(()=>sightMapObj.invalidateSize(),50);
-  } else mapEl.style.display='none';
+    trailMarkers=pts.map(e=>{const d=fmtDateTime(e.when), isLast=e.n===total, sz=isLast?32:26;
+      return L.marker([e.pos.lat,e.pos.lng],{zIndexOffset:isLast?1000:e.n,icon:L.divIcon({className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],popupAnchor:[0,-sz/2],html:'<span class="trailpin'+(isLast?' last':'')+'">'+e.n+'</span>'})})
+        .bindPopup('<b>'+e.n+'. '+esc(d.date+' '+d.time)+'</b><br>'+esc(label(e))+(e.contato?'<br>Contato: '+esc(e.contato):'')+'<br><a target="_blank" rel="noopener" href="https://www.google.com/maps?q='+e.pos.lat+','+e.pos.lng+'">Abrir no Google Maps</a>');});
+    const layers=trailMarkers.slice();
+    if(total>1) layers.unshift(L.polyline(pts.map(e=>[e.pos.lat,e.pos.lng]),{color:'#6fae00',weight:3,opacity:.9,dashArray:'6 8'}));
+    const g=L.featureGroup(layers);
+    g.addTo(sightMapObj); sightMapObj._mpLayer=g; sightMapObj.fitBounds(g.getBounds(),{maxZoom:16,padding:[28,28]}); setTimeout(()=>sightMapObj.invalidateSize(),50);
+  } else { mapEl.style.display='none'; sum.classList.add('hidden'); }
 }
 function petIsLost(p){return ['PERDIDO','PERDIDA','LOST'].includes(String(p&&p.status||'').toUpperCase());}
 function openPoster(){ const p=currentPet(); if(!p) return toast('Nenhum pet disponível.'); window.open('/tutor/cartaz/?pet='+encodeURIComponent(p.id),'_blank'); }
