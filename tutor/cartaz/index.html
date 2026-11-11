@@ -63,12 +63,27 @@ body{font-family:var(--body);background:radial-gradient(800px 400px at 50% -10%,
 .contact .phone{letter-spacing:0}
 .foot b span{color:#5e9600}
 @media print{body{background:#fff}.bar,.msg{display:none!important}.sheet{box-shadow:none}}
+.artmodal{position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:14px}
+.artmodal[hidden]{display:none}
+.artbox{width:min(420px,100%);max-height:100%;display:flex;flex-direction:column;gap:12px;background:#0e110e;border:1px solid #2b342b;border-radius:24px;padding:16px;color:#f3f6f2;font-family:var(--body)}
+.arthead{display:flex;justify-content:space-between;align-items:center;font:600 16px var(--display)}
+.artx{background:none;border:0;color:#9aa59b;font-size:18px;cursor:pointer;padding:6px 8px}
+.artstage{flex:1;min-height:0;display:flex;justify-content:center}
+.artstage img{max-width:100%;max-height:56vh;border-radius:16px;border:1px solid #2b342b}
+.artwait{padding:80px 0;color:#9aa59b}
+.artnote{font-size:13px;line-height:1.45;color:#ffd866}
+.artnote:empty{display:none}
+.artacts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.artacts button,.artacts label{border:0;border-radius:999px;padding:11px 16px;font:600 14px var(--body);cursor:pointer}
+.artacts button:disabled{opacity:.5;cursor:default}
+@media print{.artmodal{display:none!important}}
 </style>
 </head>
 <body>
 <div class="bar">
   <div class="brand">MASTER<span>PET</span> · Cartaz</div>
   <button class="primary" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  <button class="ghost" id="artBtn" onclick="openArt()">📱 Arte para Stories</button>
   <button class="ghost" id="shareBtn" onclick="shareAlert()">📤 Compartilhar alerta</button>
   <a class="ghost" href="/tutor/">← Voltar</a>
 </div>
@@ -88,6 +103,18 @@ body{font-family:var(--body);background:radial-gradient(800px 400px at 50% -10%,
     <div class="qr"><div id="qrcode"></div><div id="tagId">—</div></div>
   </div>
   <div class="foot"><b>MASTER<span>PET</span></b> · A identidade inteligente do seu pet · masterpet.tec.br</div>
+</div>
+<div id="artModal" class="artmodal" hidden>
+  <div class="artbox" role="dialog" aria-modal="true" aria-label="Arte para Stories e status">
+    <div class="arthead"><b>Arte para Stories e status</b><button type="button" class="artx" onclick="closeArt()" aria-label="Fechar">✕</button></div>
+    <div id="artStage" class="artstage"><div class="artwait">Gerando a arte...</div></div>
+    <div id="artNote" class="artnote"></div>
+    <div class="artacts">
+      <button type="button" class="primary" id="artShare" onclick="shareArt()" disabled>📤 Compartilhar</button>
+      <button type="button" class="ghost" id="artSave" onclick="saveArt()" disabled>⬇️ Baixar imagem</button>
+      <label class="ghost artpick">🖼️ Trocar foto<input type="file" accept="image/*" onchange="pickArtPhoto(this)" hidden></label>
+    </div>
+  </div>
 </div>
 <script>
 const API='https://script.google.com/macros/s/AKfycbzSvScdkpr10U80-imp1zNI-72dN6RvB2eOlMUL40efJdd9eJrDrpwJfV6hCe4SB5w2Zg/exec';
@@ -129,6 +156,95 @@ function shareAlert(){
   if(navigator.share){ navigator.share({title:'MasterPET — '+PET.nome,text,url:profileUrl()}).catch(()=>{}); }
   else window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
+// ===== Arte vertical (1080 x 1920) para Stories e status do WhatsApp =====
+let artBlob=null, artPhoto=null, artPhotoTried=false;
+function loadImg(src,cors){ return new Promise((ok,no)=>{ const i=new Image(); if(cors) i.crossOrigin='anonymous'; i.onload=()=>ok(i); i.onerror=()=>no(new Error('IMG')); i.src=src; }); }
+// A foto fica no Google Drive. Para desenhar no canvas ela precisa vir com permissão de uso entre sites;
+// tenta o endereço direto de imagem e, se não der, o endereço original. Sem sucesso, o tutor escolhe a foto do aparelho.
+async function petPhotoForCanvas(){
+  if(!PET.foto) return null;
+  const m=String(PET.foto).match(/[?&]id=([\w-]+)/)||String(PET.foto).match(/\/d\/([\w-]+)/);
+  const tries=(m?['https://lh3.googleusercontent.com/d/'+m[1]+'=w1000']:[]).concat([PET.foto]);
+  for(const u of tries){ try{ const i=await loadImg(u,true); const c=document.createElement('canvas'); c.width=c.height=2; c.getContext('2d').drawImage(i,0,0,2,2); c.toDataURL(); return i; }catch(e){} }
+  return null;
+}
+function rrect(x,X,Y,W,H,R){ x.beginPath(); x.moveTo(X+R,Y); x.arcTo(X+W,Y,X+W,Y+H,R); x.arcTo(X+W,Y+H,X,Y+H,R); x.arcTo(X,Y+H,X,Y,R); x.arcTo(X,Y,X+W,Y,R); x.closePath(); }
+function wrapLines(x,text,maxW,maxLines){
+  const words=String(text).split(/\s+/).filter(Boolean), lines=[]; let cur='';
+  for(const w of words){ const t=cur?cur+' '+w:w; if(x.measureText(t).width<=maxW||!cur) cur=t; else { lines.push(cur); cur=w; } }
+  if(cur) lines.push(cur);
+  if(lines.length>maxLines){ lines.length=maxLines; let l=lines[maxLines-1]; while(l&&x.measureText(l+'…').width>maxW) l=l.slice(0,-1); lines[maxLines-1]=l.trimEnd()+'…'; }
+  return lines;
+}
+function fitFont(x,text,weight,size,family,maxW,min){ do{ x.font=weight+' '+size+'px '+family; if(x.measureText(text).width<=maxW) break; size-=4; }while(size>min); return size; }
+async function drawArt(){
+  const W=1080,H=1920,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  const D='"Space Grotesk",Arial,sans-serif', B='"Inter",Arial,sans-serif';
+  try{ await Promise.all([document.fonts.load('700 100px "Space Grotesk"'),document.fonts.load('600 40px "Inter"'),document.fonts.load('400 40px "Inter"')]); }catch(e){}
+  const lost=String(PET.status||'').toUpperCase()==='PERDIDO', name=PET.nome||'Pet';
+  // fundo
+  x.fillStyle='#0a0d0a'; x.fillRect(0,0,W,H);
+  const g=x.createRadialGradient(W/2,260,40,W/2,260,900); g.addColorStop(0,lost?'rgba(214,20,44,.34)':'rgba(183,255,0,.20)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.textAlign='center'; x.textBaseline='alphabetic';
+  // faixa do título (abaixo da área que o Instagram cobre no topo)
+  x.fillStyle=lost?'#d6142c':'#b7ff00'; rrect(x,70,190,W-140,180,44); x.fill();
+  x.fillStyle=lost?'#fff':'#0b1000';
+  x.font='700 104px '+D; x.fillText(lost?'PROCURA-SE':'MASTERPET',W/2,290);
+  x.font='600 34px '+B; x.fillText(document.getElementById('subtitle').textContent,W/2,345);
+  // foto
+  const PS=580,PX=(W-PS)/2,PY=400;
+  x.save(); rrect(x,PX,PY,PS,PS,56); x.clip(); x.fillStyle='#1a1f1a'; x.fillRect(PX,PY,PS,PS);
+  if(artPhoto){ const iw=artPhoto.naturalWidth||artPhoto.width, ih=artPhoto.naturalHeight||artPhoto.height, sc=Math.max(PS/iw,PS/ih); x.drawImage(artPhoto,PX+(PS-iw*sc)/2,PY+(PS-ih*sc)/2,iw*sc,ih*sc); }
+  else { x.fillStyle='#5c665d'; x.font='600 44px '+B; x.fillText('Toque em "Trocar foto"',W/2,PY+PS/2-10); x.fillText('para incluir a foto do pet',W/2,PY+PS/2+50); }
+  x.restore();
+  x.lineWidth=10; x.strokeStyle=lost?'#ff3048':'#b7ff00'; rrect(x,PX,PY,PS,PS,56); x.stroke();
+  // nome e dados
+  x.fillStyle='#fff'; const ns=fitFont(x,name,'700',110,D,W-140,64); x.fillText(name,W/2,PY+PS+50+ns*0.8);
+  let y=PY+PS+50+ns*0.8+58;
+  const meta=[PET.especie,PET.raca,PET.sexo].filter(v=>v&&v!=='NAO_INFORMADO').join(' · ')+(PET.cidade?(' · '+PET.cidade):'');
+  x.fillStyle='#b3bdb4'; fitFont(x,meta,'500',40,B,W-140,26); x.fillText(meta,W/2,y);
+  y+=30;
+  const rec=lost?String(PET.recompensa||'').trim():'';
+  if(rec){ const t='Recompensa: '+rec; x.font='700 38px '+B; const tw=Math.min(x.measureText(t).width,W-220)+70; x.fillStyle='#ffd23f'; rrect(x,(W-tw)/2,y,tw,70,35); x.fill(); x.fillStyle='#3b2a00'; x.fillText(t,W/2,y+48,W-220); y+=92; }
+  const note=String(PET.mensagemPerdido||'').trim();
+  if(note){ x.font='400 36px '+B; x.fillStyle='#e7ece6'; const ls=wrapLines(x,note,W-180,rec?2:3); ls.forEach((l,i)=>x.fillText(l,W/2,y+44+i*48)); }
+  // cartão de contato (acima da área que o Instagram cobre embaixo)
+  const CY=1440,CH=220; x.fillStyle='#fff'; rrect(x,70,CY,W-140,CH,40); x.fill();
+  const qc=document.querySelector('#qrcode canvas'), qi=document.querySelector('#qrcode img'), QS=180; let tx=W/2, tw=W-220;
+  const q=(qc&&qc.width)?qc:(qi&&qi.complete&&qi.naturalWidth?qi:null);
+  if(q){ x.drawImage(q,W-70-20-QS,CY+20,QS,QS); tx=70+(W-140-QS-40)/2+10; tw=W-140-QS-90; }
+  const wa=document.getElementById('phone').textContent, hasWa=/\d/.test(wa);
+  x.fillStyle='#3d463e'; x.font='600 32px '+B; x.fillText(lost?('Viu '+name+'? Chame no WhatsApp:'):'Fale com a família:',tx,CY+62,tw);
+  x.fillStyle='#0b0e0b'; fitFont(x,hasWa?wa:'Aponte a câmera',hasWa?'700':'700',hasWa?76:60,D,tw,40); x.fillText(hasWa?wa:'Aponte a câmera',tx,CY+146);
+  x.fillStyle='#5a655b'; x.font='500 28px '+B; x.fillText(q?'ou aponte a câmera para o QR Code':profileUrl().replace('https://',''),tx,CY+196,tw);
+  // marca
+  x.font='700 34px '+D; const a='MASTER',b2='PET',t2='  ·  masterpet.tec.br'; x.textAlign='left';
+  const wa1=x.measureText(a).width, wb=x.measureText(b2).width; x.font='500 30px '+B; const wt=x.measureText(t2).width; let bx=(W-wa1-wb-wt)/2;
+  x.font='700 34px '+D; x.fillStyle='#fff'; x.fillText(a,bx,1735); x.fillStyle='#b7ff00'; x.fillText(b2,bx+wa1,1735); x.font='500 30px '+B; x.fillStyle='#8f9a90'; x.fillText(t2,bx+wa1+wb,1735);
+  return new Promise(ok=>c.toBlob(ok,'image/png'));
+}
+function artFile(){ return new File([artBlob],'MasterPET_'+String(PET.nome||'pet').replace(/[^\wÀ-ÿ-]+/g,'_')+'_stories.png',{type:'image/png'}); }
+async function renderArt(){
+  const st=document.getElementById('artStage'), sh=document.getElementById('artShare'), sv=document.getElementById('artSave'), nt=document.getElementById('artNote');
+  sh.disabled=sv.disabled=true; st.innerHTML='<div class="artwait">Gerando a arte...</div>';
+  try{
+    if(!artPhoto&&!artPhotoTried){ artPhotoTried=true; artPhoto=await petPhotoForCanvas(); }
+    artBlob=await drawArt();
+    const img=new Image(); img.alt='Arte para Stories de '+(PET.nome||'pet'); img.src=URL.createObjectURL(artBlob); st.innerHTML=''; st.appendChild(img);
+    nt.textContent=artPhoto?'':(PET.foto?'Não conseguimos puxar a foto do cadastro para a arte. Toque em "Trocar foto" e escolha a foto do pet no seu aparelho.':'Este pet ainda não tem foto. Toque em "Trocar foto" para escolher uma do seu aparelho.');
+    sv.disabled=false; sh.disabled=false;
+    sh.style.display=(navigator.canShare&&navigator.canShare({files:[artFile()]}))?'':'none';
+  }catch(e){ st.innerHTML='<div class="artwait">Não foi possível gerar a arte neste navegador.</div>'; }
+}
+function openArt(){ if(!PET) return; document.getElementById('artModal').hidden=false; renderArt(); }
+function closeArt(){ document.getElementById('artModal').hidden=true; }
+async function pickArtPhoto(inp){ const f=inp.files&&inp.files[0]; inp.value=''; if(!f) return; try{ artPhoto=await loadImg(URL.createObjectURL(f)); renderArt(); }catch(e){} }
+function shareArt(){
+  if(!artBlob) return; const lost=String(PET.status||'').toUpperCase()==='PERDIDO';
+  navigator.share({files:[artFile()],text:(lost?'🚨 PET PERDIDO: ':'🐾 ')+PET.nome+'. '+(lost?'Se você viu, fale com a família: ':'Perfil MasterPET: ')+profileUrl()}).catch(()=>{});
+}
+function saveArt(){ if(!artBlob) return; const a=document.createElement('a'); a.href=URL.createObjectURL(artBlob); a.download=artFile().name; document.body.appendChild(a); a.click(); a.remove(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeArt(); });
 (async function(){
   const token=localStorage.getItem('masterpet_token');
   if(!token){ location.href='/tutor/'; return; }
@@ -159,6 +275,7 @@ function shareAlert(){
   document.getElementById('msg').style.display='none';
   document.getElementById('sheet').style.display='flex';
   fitSheet(); window.addEventListener('resize',fitSheet);
+  if(new URLSearchParams(location.search).get('arte')==='1') openArt();
 })();
 </script>
 </body>

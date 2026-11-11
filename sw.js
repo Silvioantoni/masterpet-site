@@ -53,7 +53,8 @@ async function staleWhileRevalidate(req,cacheName,max){
     if(res.ok||res.type==='opaque'){ await c.put(req,res.clone()); if(max){ const ks=await c.keys(); for(const k of ks.slice(0,Math.max(0,ks.length-max))) await c.delete(k); } }
     return res;
   });
-  if(hit){ net.catch(()=>{}); return hit; }
+  // Uma cópia "opaca" não serve para quem pediu a imagem com permissão entre sites (arte do cartaz): vai à rede.
+  if(hit&&!(req.mode==='cors'&&hit.type==='opaque')){ net.catch(()=>{}); return hit; }
   return net;
 }
 
