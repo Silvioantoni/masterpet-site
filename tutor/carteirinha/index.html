@@ -76,12 +76,19 @@ async function postTutorPets(token){
 function jsonp(action,params){return new Promise((res,rej)=>{const cb='mpCard_'+Date.now(),s=document.createElement('script');let done=false;
   const fin=(f,v)=>{if(done)return;done=true;clearTimeout(t);window[cb]=function(){};s.remove();f(v)};const t=setTimeout(()=>fin(rej,new Error('TIMEOUT')),35000);
   window[cb]=d=>fin(res,d);s.onerror=()=>fin(rej,new Error('NET'));s.src=API+'?action='+action+'&callback='+cb+Object.entries(params).map(([k,v])=>'&'+k+'='+encodeURIComponent(v)).join('');document.body.appendChild(s);});}
+if('serviceWorker' in navigator) window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});
 (async function(){
   const token=localStorage.getItem('masterpet_token'); if(!token){location.href='/tutor/';return;}
   const want=new URLSearchParams(location.search).get('pet')||'';
   let p;
   try{ const r=await postTutorPets(token); if(!r||!r.ok){document.getElementById('msg').innerHTML='Sessão expirada. <a style="color:#b7ff00" href="/tutor/">Entre novamente</a>.';return;} p=(r.pets||[]).find(x=>x.id===want)||(r.pets||[])[0]; }
-  catch(e){ document.getElementById('msg').textContent='Não foi possível carregar. Verifique a internet e recarregue.'; return; }
+  catch(e){
+    // Sem internet: usa a cópia salva pelo painel neste aparelho.
+    let snap=null; try{ snap=JSON.parse(localStorage.getItem('masterpet_data')||'null'); }catch(_){}
+    const ps=(snap&&Array.isArray(snap.pets))?snap.pets:[]; p=ps.find(x=>x.id===want)||ps[0];
+    if(!p){ document.getElementById('msg').textContent='Não foi possível carregar. Verifique a internet e recarregue.'; return; }
+    document.querySelector('.hint').insertAdjacentHTML('beforebegin','<div class="hint" style="color:#ffd866">📶 Sem conexão. Mostrando a carteirinha salva neste aparelho.</div>');
+  }
   if(!p){ document.getElementById('msg').textContent='Nenhum pet nesta conta.'; return; }
   if(String(p.plano||'').toUpperCase()==='ESSENCIAL'){ const m=encodeURIComponent('Olá! Quero liberar o Premium na minha tag '+(p.tag||'')+' (R$ 15).'); document.getElementById('msg').innerHTML='🔒 A carteirinha digital é um recurso do <b>Premium</b>.<br><br><a style="color:#b7ff00;font-weight:700" target="_blank" rel="noopener" href="https://wa.me/554599886355?text='+m+'">Liberar por R$ 15 pelo WhatsApp</a> · <a style="color:#b7ff00" href="/tutor/">Voltar</a>'; return; }
   const url='https://masterpet.tec.br/p/'+encodeURIComponent(p.tag);
