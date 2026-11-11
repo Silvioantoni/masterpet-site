@@ -527,6 +527,7 @@ async function loadTutorData(){
   if(!pets || !pets.ok){ logout(); throw new Error('AUTH_INVALID'); }
   if(accesses && !accesses.ok && accesses.error==='AUTH_INVALID'){ logout(); throw new Error('AUTH_INVALID'); }
   window.MP_DATA={pets:pets.pets||[],accesses:accesses&&accesses.ok?accesses.accesses||[]:[]};
+  liveLast=Date.now();
   if(pets.tutor){ MP_TUTOR=pets.tutor; localStorage.setItem('masterpet_tutor',JSON.stringify(MP_TUTOR)); }
   if(MP_PET_INDEX>=window.MP_DATA.pets.length) MP_PET_INDEX=0;
   renderPetSelect();
@@ -1052,6 +1053,40 @@ function renderSightings(){
     g.addTo(sightMapObj); sightMapObj._mpLayer=g; sightMapObj.fitBounds(g.getBounds(),{maxZoom:16,padding:[28,28]}); setTimeout(()=>sightMapObj.invalidateSize(),50);
   } else { mapEl.style.display='none'; sum.classList.add('hidden'); }
 }
+// ===== Atualização automática: novos escaneamentos, localizações e avistamentos aparecem sem recarregar =====
+let liveBusy=false, liveLast=0;
+function liveSig(acc,sight){ const mx=l=>l.reduce((m,x)=>Math.max(m,trailTs(x.dataHora)),0); return acc.length+'|'+mx(acc)+'|'+sight.length+'|'+mx(sight); }
+async function refreshLive(){
+  if(liveBusy||!MP_TOKEN||!window.MP_DATA||document.hidden) return;
+  liveBusy=true; liveLast=Date.now();
+  try{
+    const [a,sg]=await Promise.all([jsonp('tutoraccesses',{token:MP_TOKEN}),jsonp('tutorsightings',{token:MP_TOKEN})]);
+    if(!a||!a.ok||!window.MP_DATA) return; // sessão expirada ou falha: a próxima ação do tutor trata disso
+    const acc=a.accesses||[], sight=(sg&&sg.ok)?sg.avistamentos||[]:(MP_SIGHT||[]);
+    if(MP_SIGHT===null) MP_SIGHT=sight; // primeira carga dos avistamentos: não conta como novidade
+    if(liveSig(acc,sight)===liveSig(window.MP_DATA.accesses||[],MP_SIGHT)) return;
+    const before=trailEvents().length;
+    window.MP_DATA.accesses=acc; MP_SIGHT=sight;
+    const pet=currentPet(); if(!pet) return;
+    const ptag=String(pet.tag||'').toUpperCase();
+    const mine=(acc.some(x=>accTag(x))&&ptag)?acc.filter(x=>accTag(x)===ptag):acc;
+    document.getElementById('homeAccessCount').textContent=mine.filter(x=>!/^MODO_PERDIDO/.test(String(x.acao||''))).length;
+    const now=new Date();
+    document.getElementById('homeAccessMonth').textContent='+'+mine.filter(x=>{const d=new Date(x.dataHora);return !isNaN(d)&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()}).length+' este mês';
+    renderAccesses(mine,cleanText(pet.tag,'—'));
+    renderLostHistory(mine,petIsLost(pet));
+    renderSightings();
+    const after=trailEvents().length;
+    if(after>before) toast('📍 Novo sinal de '+cleanText(pet.nome,'seu pet')+' na Rota do reencontro.');
+    else toast('📱 Novo acesso à tag registrado.');
+  }catch(e){} finally{ liveBusy=false; }
+}
+// A cada 20 s nas telas de acompanhamento (ou com o pet perdido); a cada 60 s nas demais. Pausa com a aba em segundo plano.
+setInterval(()=>{
+  const pg=(document.querySelector('.page.active')||{}).id, fast=pg==='perdido'||pg==='acessos'||petIsLost(currentPet());
+  if(Date.now()-liveLast>=(fast?20000:60000)) refreshLive();
+},5000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&Date.now()-liveLast>5000) refreshLive(); });
 function petIsLost(p){return ['PERDIDO','PERDIDA','LOST'].includes(String(p&&p.status||'').toUpperCase());}
 function openPoster(){ const p=currentPet(); if(!p) return toast('Nenhum pet disponível.'); window.open('/tutor/cartaz/?pet='+encodeURIComponent(p.id),'_blank'); }
 function shareAlert(){
