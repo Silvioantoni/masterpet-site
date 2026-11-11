@@ -305,11 +305,21 @@ function accTag(a){return String(a.tag||a.idTag||a.tagId||a.ID_TAG||'').toUpperC
 // V20: ações com token/senha vão por POST (nada sensível no endereço). Se o POST falhar
 // por bloqueio do navegador, cai para o método antigo (JSONP) para o painel não parar.
 const POST_ACTIONS=new Set(['tutorsightings','login','tutorpets','tutoraccesses','setpetstatus','updatepet','updatecontacts','exportdata','linktag','settempcontact','removephoto','addphoto','deleteaccount','requestreset','resetpassword']);
+// Leituras de rotina não contam como ação do tutor; as demais seguram a atualização automática
+// para não disputar o servidor com o que o tutor acabou de pedir.
+const READ_ACTIONS=new Set(['tutorpets','tutoraccesses','tutorsightings']);
+let MP_BUSY=0, MP_LAST_ACTION=0;
 async function jsonp(action, params={}){
-  if(!POST_ACTIONS.has(action)) return jsonpRaw(action,params);
-  try{ return await postApi(Object.assign({action},params)); }
-  catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonpRaw(action,params); }
+  const act=!READ_ACTIONS.has(action); if(act) MP_BUSY++;
+  try{
+    if(!POST_ACTIONS.has(action)) return await jsonpRaw(action,params);
+    try{ return await postApi(Object.assign({action},params)); }
+    catch(e){ if(e&&e.name==='AbortError') throw new Error('TIMEOUT'); return await jsonpRaw(action,params); }
+  }finally{ if(act){ MP_BUSY--; MP_LAST_ACTION=Date.now(); } }
 }
+const isEditingPet=()=>{ const a=document.getElementById('petSaveActions'); return !!a&&!a.classList.contains('hidden'); };
+// Recarrega os dados em segundo plano, sem travar a tela. Usado depois de salvar algo.
+function refreshBg(delay=900){ setTimeout(()=>{ loadTutorData({bg:true}).catch(()=>{}); },delay); }
 function jsonpRaw(action, params={}){
   return new Promise((resolve,reject)=>{
     const cb='mp_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
@@ -393,7 +403,7 @@ async function toggleLost(){
   const btn=document.getElementById('lostBtn');
   if(btn.disabled) return;
   btn.disabled=true;
-  btn.textContent='Atualizando...';
+  btn.textContent=on?'Desativando...':'Ativando...';
   try{
     // Ao desativar: pergunta se o pet foi encontrado (conta como reencontro nas estatísticas).
     const found=newStatus==='ATIVO' && confirm('Que bom! '+cleanText(pet.nome,'Seu pet')+' foi encontrado? 🎉\n\nOK = sim, voltou para casa\nCancelar = só desativar o alerta');
@@ -403,8 +413,11 @@ async function toggleLost(){
     if(newStatus==='PERDIDO' && lc && lc!==cleanText(pet.cidade,'')){ try{ await postApi({action:'updatepet',token:MP_TOKEN,petId:pet.id,CIDADE:lc}); }catch(e){} }
     const r=await jsonp('setpetstatus',Object.assign({token:MP_TOKEN,petId:pet.id,status:newStatus,mensagem:document.getElementById('lostMessage')?.value||'',encontrado:found?'1':''},extra));
     if(!r||!r.ok) throw new Error(r?.error||'STATUS_UPDATE_FAILED');
-    await new Promise(res=>setTimeout(res,700));
-    await loadTutorData();
+    // O servidor confirmou: mostra o novo estado na hora e confere os dados em segundo plano.
+    pet.status=newStatus; pet.mensagemPerdido=document.getElementById('lostMessage')?.value||'';
+    if(newStatus==='PERDIDO'){ pet.recompensa=extra.recompensa; pet.perdidoPublico=extra.publico==='SIM'; if(lc) pet.cidade=lc; }
+    if(!isEditingPet()) renderAllData();
+    saveSnapshot(); refreshBg();
     toast(newStatus==='PERDIDO'?'🚨 Modo perdido ativado!':(found?'🎉 Que alegria! Bem-vindo de volta, '+cleanText(pet.nome,'pet')+'!':'✅ Modo perdido desativado.'));
   }catch(e){
     console.error(e);
@@ -521,8 +534,9 @@ async function saveReset(){
   }catch(e){ resetMsg('Não foi possível conectar ao servidor. Tente novamente.'); }
   finally{ b.disabled=false; b.textContent='Salvar nova senha'; }
 }
-async function loadTutorData(){
+async function loadTutorData(opts){
   if(!MP_TOKEN) return;
+  const bg=!!(opts&&opts.bg);
   let pets, accesses;
   try{
     [pets, accesses] = await Promise.all([
@@ -531,6 +545,7 @@ async function loadTutorData(){
     ]);
   }catch(e){
     // Sem conexão: mostra a última cópia salva neste aparelho (só leitura).
+    if(bg&&window.MP_DATA) throw e; // em segundo plano, mantém o que já está na tela
     const snap=readSnapshot(); if(!snap) throw e;
     window.MP_DATA={pets:snap.pets||[],accesses:snap.accesses||[]};
     if(MP_PET_INDEX>=window.MP_DATA.pets.length) MP_PET_INDEX=0;
@@ -546,8 +561,10 @@ async function loadTutorData(){
   if(pets.tutor){ MP_TUTOR=pets.tutor; localStorage.setItem('masterpet_tutor',JSON.stringify(MP_TUTOR)); }
   if(MP_PET_INDEX>=window.MP_DATA.pets.length) MP_PET_INDEX=0;
   renderPetSelect();
+  if(bg&&isEditingPet()) return; // o tutor está editando: não mexe nos campos
   renderAllData();
   setPetFieldsEditable(false);
+  if(bg) renderTutorUI();
 }
 // ===== Cópia dos dados neste aparelho, para o painel abrir sem internet =====
 function saveSnapshot(){ try{ localStorage.setItem('masterpet_data',JSON.stringify({t:Date.now(),pets:window.MP_DATA.pets,accesses:(window.MP_DATA.accesses||[]).slice(-300)})); }catch(e){} }
@@ -738,7 +755,7 @@ async function savePet(){
     // que fazia o salvamento falhar quando a foto era convertida em base64.
     await postUpdatePet(payload);
     // Damos um pequeno tempo para o Apps Script gravar na planilha.
-    await new Promise(r=>setTimeout(r,1600));
+    await new Promise(r=>setTimeout(r,700));
     await loadTutorData();
     setPetFieldsEditable(false);
     // O POST via iframe não devolve a resposta; conferimos se o nome realmente foi gravado.
@@ -780,7 +797,8 @@ async function saveContacts(){
   try{
     const r=await jsonp('updatecontacts',{token:MP_TOKEN,petId:pet.id,whatsapp:wa,telefone:tel});
     if(!r||!r.ok){ const m={INVALID_WHATSAPP:'WhatsApp inválido.',INVALID_PHONE:'Telefone inválido.',AUTH_INVALID:'Sessão expirada. Entre novamente.'}; toast(m[r&&r.error]||'Não foi possível salvar os contatos.'); if(r&&r.error==='AUTH_INVALID') logout(); return; }
-    await loadTutorData(); toast(r.changed?'✅ Contatos atualizados!':'Nenhuma alteração nos contatos.');
+    if(r.changed){ const set=(tipo,v)=>{ const cs=pet.contatos=pet.contatos||[]; const c=cs.find(x=>String(x.tipo).toUpperCase()===tipo); if(c) c.valor=v; else if(v) cs.push({tipo,valor:v}); }; set('WHATSAPP',wa); set('TELEFONE',tel); refreshBg(); }
+    toast(r.changed?'✅ Contatos atualizados!':'Nenhuma alteração nos contatos.');
   }catch(e){ try{await loadTutorData();}catch(_){} toast('Não conseguimos confirmar. Confira os contatos exibidos.'); }
   finally{ b.disabled=false; b.textContent='💾 Salvar contatos'; }
 }
@@ -977,7 +995,7 @@ async function addGalleryPhoto(ev){
 }
 async function removeGalleryPhoto(url){
   const pet=currentPet(); if(!pet||!confirm('Remover esta foto?')) return;
-  try{ const r=await jsonp('removephoto',{token:MP_TOKEN,petId:pet.id,url}); if(r&&r.ok){ await loadTutorData(); toast('Foto removida.'); } else toast('Não foi possível remover.'); }
+  try{ const r=await jsonp('removephoto',{token:MP_TOKEN,petId:pet.id,url}); if(r&&r.ok){ pet.fotos=(pet.fotos||[]).filter(u=>u!==url); renderGallery(pet); refreshBg(); toast('Foto removida.'); } else toast('Não foi possível remover.'); }
   catch(e){ toast('Não foi possível conectar ao servidor.'); }
 }
 function renderTravel(p){
@@ -994,14 +1012,14 @@ async function saveTravel(clear){
   const b=document.getElementById(clear?'tvClear':'tvBtn'); b.disabled=true;
   try{
     const r=await jsonp('settempcontact',{token:MP_TOKEN,petId:pet.id,nome,telefone:clear?'':tel,ate});
-    if(r&&r.ok){ if(clear) ['tvNome','tvTel','tvAte'].forEach(id=>document.getElementById(id).value=''); await loadTutorData(); toast(clear?'Modo viagem encerrado.':'✈️ Modo viagem ativado!'); }
+    if(r&&r.ok){ if(clear) ['tvNome','tvTel','tvAte'].forEach(id=>document.getElementById(id).value=''); refreshBg(); toast(clear?'Modo viagem encerrado.':'✈️ Modo viagem ativado!'); }
     else toast({PREMIUM_REQUIRED:'🔒 O modo viagem é um recurso do Premium.',INVALID_DATE_RANGE:'Escolha uma data entre hoje e 60 dias.',INVALID_PHONE:'WhatsApp inválido.',INVALID_DATE:'Data inválida.'}[r&&r.error]||'Não foi possível salvar.');
   }catch(e){ toast('Não foi possível conectar ao servidor.'); }
   finally{ b.disabled=false; }
 }
 async function saveHidden(on){
   const pet=currentPet(); if(!pet) return;
-  try{ const r=await jsonp('updatepet',{token:MP_TOKEN,petId:pet.id,CONTATO_OCULTO:on?'SIM':'NAO'}); if(r&&r.ok){ await loadTutorData(); toast(on?'🔒 Contato protegido ativado.':'Seus números voltaram a aparecer no perfil.'); } else toast('Não foi possível salvar.'); }
+  try{ const r=await jsonp('updatepet',{token:MP_TOKEN,petId:pet.id,CONTATO_OCULTO:on?'SIM':'NAO'}); if(r&&r.ok){ refreshBg(); toast(on?'🔒 Contato protegido ativado.':'Seus números voltaram a aparecer no perfil.'); } else toast('Não foi possível salvar.'); }
   catch(e){ toast('Não foi possível conectar ao servidor.'); }
 }
 let MP_SIGHT=null, sightMapObj=null;
@@ -1086,16 +1104,19 @@ let liveBusy=false, liveLast=0;
 function liveSig(acc,sight){ const mx=l=>l.reduce((m,x)=>Math.max(m,trailTs(x.dataHora)),0); return acc.length+'|'+mx(acc)+'|'+sight.length+'|'+mx(sight); }
 async function refreshLive(){
   if(liveBusy||!MP_TOKEN||!window.MP_DATA||document.hidden) return;
+  if(MP_BUSY>0||Date.now()-MP_LAST_ACTION<8000) return; // o tutor acabou de pedir algo: não disputa o servidor
   if(window.MP_OFFLINE){ liveLast=Date.now(); if(navigator.onLine!==false){ liveBusy=true; try{ await loadTutorData(); if(!window.MP_OFFLINE) renderTutorUI(); }catch(e){} finally{ liveBusy=false; } } return; }
   liveBusy=true; liveLast=Date.now();
   try{
-    const [a,sg]=await Promise.all([jsonp('tutoraccesses',{token:MP_TOKEN}),jsonp('tutorsightings',{token:MP_TOKEN})]);
+    // Avistamentos só interessam na tela Pet Perdido ou com o pet perdido; nas demais, uma chamada só.
+    const wantSight=((document.querySelector('.page.active')||{}).id==='perdido')||petIsLost(currentPet());
+    const [a,sg]=await Promise.all([jsonp('tutoraccesses',{token:MP_TOKEN}),wantSight?jsonp('tutorsightings',{token:MP_TOKEN}):Promise.resolve(null)]);
     if(!a||!a.ok||!window.MP_DATA) return; // sessão expirada ou falha: a próxima ação do tutor trata disso
     const acc=a.accesses||[], sight=(sg&&sg.ok)?sg.avistamentos||[]:(MP_SIGHT||[]);
-    if(MP_SIGHT===null) MP_SIGHT=sight; // primeira carga dos avistamentos: não conta como novidade
-    if(liveSig(acc,sight)===liveSig(window.MP_DATA.accesses||[],MP_SIGHT)) return;
+    if(MP_SIGHT===null&&sg&&sg.ok) MP_SIGHT=sight; // primeira carga dos avistamentos: não conta como novidade
+    if(liveSig(acc,sight)===liveSig(window.MP_DATA.accesses||[],MP_SIGHT||[])) return;
     const before=trailEvents().length;
-    window.MP_DATA.accesses=acc; MP_SIGHT=sight; saveSnapshot();
+    window.MP_DATA.accesses=acc; if(sg&&sg.ok) MP_SIGHT=sight; saveSnapshot();
     const pet=currentPet(); if(!pet) return;
     const ptag=String(pet.tag||'').toUpperCase();
     const mine=(acc.some(x=>accTag(x))&&ptag)?acc.filter(x=>accTag(x)===ptag):acc;
@@ -1172,11 +1193,20 @@ let toastTimer;function toast(msg){const t=document.getElementById('toast');t.te
     try{
       document.getElementById('login').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden');
-      await loadTutorData();
-      renderTutorUI();
+      const snap=readSnapshot();
+      if(snap){
+        window.MP_DATA={pets:snap.pets||[],accesses:snap.accesses||[]};
+        if(MP_PET_INDEX>=window.MP_DATA.pets.length) MP_PET_INDEX=0;
+        renderPetSelect(); renderAllData(); setPetFieldsEditable(false); renderTutorUI();
+        await loadTutorData({bg:true});
+      } else {
+        await loadTutorData();
+        renderTutorUI();
+      }
     }catch(e){
       // Sessão inválida já foi encerrada em loadTutorData. Falha de rede não derruba a sessão.
-      if(MP_TOKEN){ renderTutorUI(); setOffline(true); document.getElementById('offlineBar').textContent='📶 Sem conexão com o servidor. Verifique a internet e recarregue a página.'; }
+      if(MP_TOKEN&&window.MP_DATA){ const sn=readSnapshot(); setOffline(true,sn&&sn.t); renderTutorUI(); }
+      else if(MP_TOKEN){ renderTutorUI(); setOffline(true); document.getElementById('offlineBar').textContent='📶 Sem conexão com o servidor. Verifique a internet e recarregue a página.'; }
     }
   }
 })();
